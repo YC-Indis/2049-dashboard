@@ -9,6 +9,7 @@
   "scripts": {
     "dev": "vite --open",
     "import:excel": "node scripts/import-excel.mjs",
+    "gen:imported": "node scripts/gen-imported.mjs",
     "import:ads": "node scripts/import-ads.mjs",
     "import:projects": "node scripts/import-projects.mjs",
     "import:history": "node scripts/import-history-csv.mjs",

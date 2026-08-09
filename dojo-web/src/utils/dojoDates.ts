@@ -1,3 +1,9 @@
+/**
+ * 全站「今天」基准。历史数据截止到这一天，改这里即可整体对齐，
+ * 不要再在页面里各写一份 todayKey。
+ */
+export const DOJO_TODAY = '2026-08-07'
+
 /** Excel 序列日（如 46091）→ YYYY-MM-DD */
 export function excelSerialToIso(serial: number): string {
   // Excel 以 1899-12-30 为 0（含 1900 闰年兼容）
@@ -22,4 +28,16 @@ export function normalizeDateString(raw: string | number | null | undefined): st
 export function formatDateDisplay(raw: string | number | null | undefined): string {
   const iso = normalizeDateString(raw)
   return iso || '—'
+}
+
+/** 两个 ISO 日期相差的天数（b - a） */
+export function daysBetween(a: string, b: string): number {
+  const ms = new Date(`${b}T00:00:00`).getTime() - new Date(`${a}T00:00:00`).getTime()
+  return Math.round(ms / 86400000)
+}
+
+/** 2026-08-04 → 8月4日 */
+export function formatMonthDay(iso: string): string {
+  const [, m, d] = iso.split('-')
+  return `${Number(m)}月${Number(d)}日`
 }

@@ -1,20 +1,19 @@
 {
-  "importedAt": "2026-08-07T17:07:58.565Z",
-  "scriptFile": "dojo 脚本.xlsx",
-  "dataFile": "dojo数据.xlsx",
+  "recoveredFrom": "dojo-web-release.tar.gz / dist/assets/index-D_9QqzGF.js (线上 2026-08-09 构建)",
+  "generatedBy": "scripts/gen-imported.mjs",
   "counts": {
-    "workflowStages": 9,
-    "accountPlans": 8,
+    "workflowStages": 14,
+    "accountPlans": 5,
     "weeklyScripts": {
-      "W1": 14,
-      "W2": 12,
-      "W3": 21,
-      "W4": 47,
-      "W5": 58
+      "W1": 56,
+      "W2": 0,
+      "W3": 0,
+      "W4": 0,
+      "W5": 0
     },
-    "distributionRecords": 166,
-    "accountMonitor": 20,
-    "timelineStart": "2026-02-13",
-    "timelineEnd": "2026-03-23"
+    "distributionRecords": 34,
+    "accountMonitor": 5,
+    "timelineStart": "2026-08-04",
+    "timelineEnd": "2026-08-07"
   }
 }
