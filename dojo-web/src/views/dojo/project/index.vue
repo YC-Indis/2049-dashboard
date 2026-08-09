@@ -9,7 +9,7 @@
 
     <div class="stat-row">
       <div class="stat">
-        <span class="stat__n">{{ doneStages }}/9</span>
+        <span class="stat__n">{{ doneStages }}/{{ workflowStages.length }}</span>
         <span class="stat__l">里程碑已完成</span>
       </div>
       <div class="stat">
@@ -27,7 +27,7 @@
     </div>
 
     <section class="panel">
-      <div class="panel__title">9 个里程碑（dojo脚本 · 时间规划）</div>
+      <div class="panel__title">{{ workflowStages.length }} 个里程碑（dojo脚本 · 时间规划）</div>
       <ElTable :data="workflowStages" stripe>
         <ElTableColumn type="index" label="#" width="50" />
         <ElTableColumn prop="name" label="事项" min-width="200" />
@@ -95,9 +95,7 @@
   const doneStages = computed(() => workflowStages.filter((s) => s.status === '已完成').length)
   const scriptTotal = computed(() => scriptProgressRows.length)
   const distributionTotal = computed(() => distributionRecords.length)
-  const accountTotal = computed(() =>
-    accountPlans.reduce((n, p) => n + p.accounts.length, 0)
-  )
+  const accountTotal = computed(() => accountPlans.reduce((n, p) => n + p.accounts.length, 0))
 
   const risks = computed(() => {
     const list: { text: string; level: string }[] = []

@@ -98,27 +98,7 @@ export const demoProject = {
   risk: '内容运营细化方案确认待客户确认；脚本撰写/内容制作各 11 项进行中'
 }
 
-export const todayStats = {
-  todayTasks: 5,
-  overdue: 1,
-  pendingReview: 1,
-  blocked: 1,
-  publishedToday: 8,
-  unfinished: 2,
-  milestonesDone: 6,
-  milestonesTotal: 9,
-  scriptItems: 152,
-  distributionRows: 166
-}
-
-export const topActions = [
-  { text: '确认「内容运营细化方案」— 客户待确认', tone: 'warning' as const },
-  { text: '推进脚本撰写 11 项 + 内容制作 11 项', tone: 'danger' as const },
-  { text: 'PM 监看：166 条分发可用 RapidAPI 同步', tone: 'warning' as const }
-]
-
-export const todayAdvice =
-  'dojo脚本 9 阶段中 6 项已完成。今天优先处理「内容运营细化方案确认」，并在内容流转页同步分发指标。'
+// 今日概览指标、三个最重要动作与建议语已迁至 store/dojoOverview.ts，改为从数据推导。
 
 export const demoTasks: DojoTask[] = [
   {

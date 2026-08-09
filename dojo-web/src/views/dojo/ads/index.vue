@@ -2,7 +2,7 @@
   <div class="dojo-page">
     <header class="dojo-page__head">
       <div>
-        <h1>投放账号监控</h1>
+        <h1>投放检阅</h1>
         <p>项目进度与买量账号同屏监看</p>
       </div>
       <div class="head-ops">
