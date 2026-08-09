@@ -1,608 +1,722 @@
 <template>
-  <div class="gantt">
-    <div class="gantt__toolbar">
-      <div class="gantt__filters">
-        <div class="gantt__field">
-          <span>分组</span>
-          <ElSelect
-            v-model="groupBy"
-            size="default"
-            class="gantt__select"
-            style="width: 140px"
-            teleported
-          >
-            <ElOption v-for="g in groupOptions" :key="g.value" :label="g.label" :value="g.value" />
-          </ElSelect>
-        </div>
-        <div class="gantt__field">
-          <span>来源</span>
-          <ElSelect
-            v-model="sourceFilter"
-            size="default"
-            class="gantt__select"
-            clearable
-            placeholder="全部"
-            style="width: 140px"
-            teleported
-          >
-            <ElOption label="全部" value="" />
-            <ElOption v-for="s in sources" :key="s" :label="s" :value="s" />
-          </ElSelect>
-        </div>
-        <div class="gantt__field">
-          <span>状态</span>
-          <ElSelect
-            v-model="statusFilter"
-            size="default"
-            class="gantt__select"
-            clearable
-            placeholder="全部"
-            style="width: 140px"
-            teleported
-          >
-            <ElOption label="全部" value="" />
-            <ElOption v-for="s in statuses" :key="s" :label="s" :value="s" />
-          </ElSelect>
-        </div>
-        <ElInput v-model="keyword" placeholder="搜索项目 / 地区 / 产品" clearable style="width: 200px" />
+  <div class="tl">
+    <div class="tl__chrome">
+      <div class="tl__zoom">
+        <button
+          v-for="z in zooms"
+          :key="z.value"
+          type="button"
+          class="tl__zoom-btn"
+          :class="{ active: scale === z.value }"
+          @click="scale = z.value"
+        >
+          {{ z.label }}
+        </button>
       </div>
-      <div class="gantt__actions">
-        <ElRadioGroup v-model="interactMode" size="default">
-          <ElRadioButton value="pan">浏览平移</ElRadioButton>
-          <ElRadioButton value="box">框选排期</ElRadioButton>
-        </ElRadioGroup>
-        <span class="gantt__hint">
-          {{
-            interactMode === 'box'
-              ? '在任意轨道行上按住拖拽，松手即可按所选日期添加任务'
-              : '按住轨道空白处拖动平移；Shift+滚轮横向滚动'
-          }}
-        </span>
-        <ElButton size="default" @click="scrollToContent">看全部条</ElButton>
-        <ElButton size="default" @click="scrollToToday">回到今天</ElButton>
+      <div class="tl__chrome-right">
+        <span class="tl__meta">{{ projectCount }} projects</span>
+        <button type="button" class="tl__today-btn" @click="scrollToToday">Today</button>
       </div>
     </div>
 
-    <div class="gantt__legend">
-      <span v-for="l in legend" :key="l.key" class="gantt__legend-item">
-        <i :style="{ background: l.color }" />{{ l.label }}
-      </span>
-      <span class="gantt__legend-item">
-        <i style="background: #a78bfa" />自建排期
-      </span>
-      <span class="gantt__legend-count">
-        {{ trackRowCount }} 条轨道 · {{ rangeStart }} → {{ rangeEnd }}
-      </span>
+    <div v-if="dragPreview" class="tl__drag-hud">
+      <strong>{{ dragPreview.name }}</strong>
+      <span>{{ dragPreview.startLabel }} → {{ dragPreview.endLabel }}</span>
+      <em>{{ dragPreview.days }} 天</em>
     </div>
+    <div v-else-if="cursorDate" class="tl__cursor-hud">{{ formatHudDate(cursorDate) }}</div>
 
-    <div class="gantt__viewport">
-      <div class="gantt__sticky-head">
-        <div class="gantt__names-head">类目 / 项目</div>
-        <div ref="headScroller" class="gantt__head-track">
-          <div class="gantt__head" :style="canvasStyle">
-            <div class="gantt__months">
+    <div class="tl__viewport" :class="{ 'is-dragging': !!drag }">
+      <aside class="tl__list">
+        <div class="tl__list-head">Project / Phase</div>
+        <div
+          v-for="row in rows"
+          :key="`n-${row.id}`"
+          class="tl__list-row"
+          :class="{
+            active: activeId === row.id || activeId === row.projectId,
+            'is-phase': row.kind === 'phase',
+            'is-project': row.kind === 'project'
+          }"
+          @click="onListClick(row)"
+        >
+          <template v-if="row.kind === 'project'">
+            <button
+              type="button"
+              class="tl__expand"
+              :class="{ open: !!expanded[row.projectId] }"
+              aria-label="展开细项"
+              @click.stop="toggleExpand(row.projectId)"
+            >
+              <span class="tl__expand-chevron" />
+            </button>
+            <i class="tl__status" :style="{ background: row.phaseColor }" />
+            <div class="tl__list-text">
+              <strong>{{ row.name }}</strong>
+              <span>
+                <em v-if="row.overdue">Overdue · </em>{{ row.phaseLabel }} · {{ row.progressPct }}%
+                <template v-if="row.childCount"> · {{ row.childCount }} 细项</template>
+              </span>
+            </div>
+            <button
+              type="button"
+              class="tl__add"
+              title="加细项时间条"
+              @click.stop="openAdd(row.projectId)"
+            >
+              +
+            </button>
+          </template>
+          <template v-else>
+            <span class="tl__indent" />
+            <i class="tl__status" :style="{ background: row.phaseColor }" />
+            <div class="tl__list-text">
+              <strong>{{ row.name }}</strong>
+              <span>{{ md(row.start) }} → {{ md(row.end) }}</span>
+            </div>
+            <button
+              type="button"
+              class="tl__del"
+              title="删除细项"
+              @click.stop="removePhase(row)"
+            >
+              ×
+            </button>
+          </template>
+        </div>
+        <p v-if="!rows.length" class="tl__empty-side">No projects with cycle dates</p>
+      </aside>
+
+      <div class="tl__board">
+        <div ref="headScroller" class="tl__chrono">
+          <div class="tl__chrono-inner" :style="canvasStyle">
+            <div
+              v-for="m in monthBands"
+              :key="m.key"
+              class="tl__band"
+              :style="{ left: `${m.left}px`, width: `${m.width}px` }"
+            >
+              {{ m.label }}
+            </div>
+            <div class="tl__ticks">
               <div
-                v-for="m in months"
-                :key="m.key"
-                class="gantt__month"
-                :style="{ left: `${m.left}px`, width: `${m.width}px` }"
+                v-for="t in tickLabels"
+                :key="t.key"
+                class="tl__tick"
+                :class="{ today: t.key === todayKey }"
+                :style="{ left: `${t.left + pxPerDay / 2}px` }"
               >
-                {{ m.label }}
+                {{ t.label }}
               </div>
             </div>
-            <div class="gantt__days">
+          </div>
+        </div>
+
+        <div
+          ref="scroller"
+          class="tl__scroll"
+          :class="{ panning }"
+          @pointerdown="startPan"
+          @pointermove="onBoardHover"
+          @pointerleave="cursorX = null"
+          @wheel="onWheel"
+          @scroll="onScroll"
+        >
+          <div class="tl__sheet" :style="sheetStyle">
+            <div
+              v-if="todayLeft != null"
+              class="tl__today"
+              :style="{ left: `${todayLeft}px` }"
+            />
+            <div
+              v-if="cursorX != null && !drag"
+              class="tl__cursor"
+              :style="{ left: `${cursorX}px` }"
+            />
+            <!-- 吸附日高亮：拖拽时对准「哪一天」 -->
+            <div
+              v-if="snapDayLeft != null"
+              class="tl__day-snap"
+              :style="{ left: `${snapDayLeft}px`, width: `${pxPerDay}px` }"
+            />
+
+            <div
+              v-for="row in rows"
+              :key="row.id"
+              class="tl__row"
+              :class="{
+                active: activeId === row.id || activeId === row.projectId,
+                'is-phase': row.kind === 'phase'
+              }"
+              @click="activeId = row.id"
+            >
               <div
-                v-for="d in days"
-                :key="d.key"
-                class="gantt__day"
-                :class="{ weekend: d.weekend, today: d.key === todayKey }"
-                :style="{ width: `${PX}px` }"
+                class="tl__bar"
+                :class="{
+                  dragging: drag?.id === row.id,
+                  overdue: row.overdue,
+                  done: row.phaseKey === 'done',
+                  'is-phase': row.kind === 'phase',
+                  'is-light': row.phaseKey === 'ads' || row.phaseKey === 'approve'
+                }"
+                :style="barStyle(row)"
+                :title="row.tip"
+                @pointerdown.stop="onBarDown($event, row, 'move')"
               >
-                {{ d.dom }}
+                <i
+                  class="tl__handle tl__handle--l"
+                  @pointerdown.stop="onBarDown($event, row, 'start')"
+                />
+                <div class="tl__progress" :style="{ width: `${row.progressPct}%` }" />
+                <div class="tl__bar-label">
+                  <span class="tl__bar-name">
+                    {{
+                      drag?.id === row.id && dragPreview
+                        ? `${dragPreview.startLabel} → ${dragPreview.endLabel}`
+                        : row.name
+                    }}
+                  </span>
+                  <span v-if="row.kind === 'project' && !(drag?.id === row.id)" class="tl__bar-pct">
+                    {{ row.progressPct }}%
+                  </span>
+                  <span v-else-if="drag?.id === row.id && dragPreview" class="tl__bar-pct">
+                    {{ dragPreview.days }}d
+                  </span>
+                </div>
+                <i
+                  class="tl__handle tl__handle--r"
+                  @pointerdown.stop="onBarDown($event, row, 'end')"
+                />
               </div>
             </div>
           </div>
         </div>
       </div>
-
-      <div
-        ref="scroller"
-        class="gantt__sheet-scroll"
-        :class="{ panning, 'gantt__sheet-scroll--box': interactMode === 'box' }"
-        @pointerdown="startPan"
-        @wheel="onWheel"
-        @scroll="onScroll"
-      >
-        <div class="gantt__sheet" :style="sheetStyle">
-          <div
-            v-if="todayLeft != null"
-            class="gantt__today-sheet"
-            :style="{ left: `${NAME_W + todayLeft}px` }"
-          />
-
-          <template v-for="row in displayRows" :key="`line-${row.key}`">
-            <div class="gantt__line" :class="{ 'gantt__line--group': row.type === 'group' }">
-              <div v-if="row.type === 'group'" class="gantt__name-cell gantt__name-cell--group">
-                {{ row.label }}
-                <em>{{ row.count }}</em>
-              </div>
-              <div v-else class="gantt__name-cell" :class="{ active: activeId === row.item.id }">
-                <i class="gantt__dot" :style="{ background: colorOf(row.item) }" />
-                <div class="gantt__name-text">
-                  <strong :title="row.item.name">{{ row.item.name }}</strong>
-                  <span>{{ row.item.unscheduled ? '待排期' : `${md(row.item.start)}–${md(row.item.end)}` }}</span>
-                </div>
-                <button
-                  v-if="offscreenOf(row.item)"
-                  type="button"
-                  class="gantt__name-jump"
-                  @click="jumpTo(row.item)"
-                >
-                  {{ offscreenOf(row.item) === 'left' ? '‹' : '›' }}
-                </button>
-              </div>
-
-              <div
-                v-if="row.type === 'group'"
-                class="gantt__track-cell gantt__track-cell--group"
-                :style="trackCellStyle"
-              />
-              <div
-                v-else
-                class="gantt__track-cell"
-                :style="trackCellStyle"
-                :class="{
-                  'gantt__track-cell--boxable': interactMode === 'box',
-                  'gantt__track-cell--boxing': boxSel && boxSel.itemId === row.item.id
-                }"
-                @pointerdown="onRowPointerDown($event, row.item)"
-              >
-                <div class="gantt__rail" />
-                <div
-                  v-if="boxSel && boxSel.itemId === row.item.id"
-                  class="gantt__box"
-                  :style="boxStyle"
-                >
-                  <span class="gantt__box-label">{{ boxDateLabel }}</span>
-                </div>
-                <button
-                  v-if="offscreenOf(row.item)"
-                  type="button"
-                  class="gantt__jump"
-                  :class="offscreenOf(row.item)"
-                  :style="jumpStyle(row.item)"
-                  @pointerdown.stop
-                  @click="jumpTo(row.item)"
-                >
-                  <template v-if="offscreenOf(row.item) === 'left'">
-                    ‹ {{ md(row.item.start) }}–{{ md(row.item.end) }}
-                  </template>
-                  <template v-else> {{ md(row.item.start) }}–{{ md(row.item.end) }} › </template>
-                </button>
-                <div
-                  v-if="!row.item.unscheduled && !row.item.laneOnly"
-                  class="gantt__bar"
-                  :class="{ active: activeId === row.item.id, custom: row.item.source === '自建排期' }"
-                  :style="barStyle(row.item)"
-                  :title="tooltip(row.item)"
-                  @pointerdown.stop
-                  @click="select(row.item)"
-                >
-                  <span v-if="row.item.progress != null" class="gantt__fill" :style="fillStyle(row.item)" />
-                  <span class="gantt__bar-date">{{ md(row.item.start) }}</span>
-                  <span class="gantt__bar-label">{{ row.item.name }}</span>
-                  <span class="gantt__bar-date">{{ md(row.item.end) }}</span>
-                </div>
-                <div
-                  v-else-if="row.item.unscheduled && !row.item.laneOnly"
-                  class="gantt__slot"
-                  :style="{ left: `${offsetOf(row.item.start)}px` }"
-                  title="未排期"
-                >
-                  待排期
-                </div>
-                <div v-if="row.item.laneOnly" class="gantt__lane-hint">空轨道 · 拖拽框选添加任务</div>
-                <div
-                  v-if="!row.item.unscheduled && !row.item.laneOnly"
-                  class="gantt__meta"
-                  :style="{ left: `${offsetOf(row.item.end) + PX + 10}px` }"
-                >
-                  {{ metaOf(row.item) }}
-                </div>
-              </div>
-            </div>
-          </template>
-        </div>
-      </div>
     </div>
 
-    <p v-if="!items.length" class="gantt__empty">没有符合筛选条件的项目</p>
+    <p v-if="!rows.length" class="tl__empty">暂无项目周期。请先在项目总览设置起止日期。</p>
 
-    <ElDialog v-model="taskDialog" title="在框选区间添加任务" width="480px" destroy-on-close>
-      <ElForm label-width="88px">
-        <ElFormItem label="项目">
-          <ElSelect v-model="taskForm.projectId" filterable style="width: 100%">
-            <ElOption v-for="p in activeProjects" :key="p.id" :label="p.name" :value="p.id" />
+    <ElDialog
+      v-model="addVisible"
+      title="添加细项时间条"
+      width="420px"
+      destroy-on-close
+      @closed="resetAdd"
+    >
+      <p class="add-tip">选一个步骤，落在项目周期内；不必一次加满。</p>
+      <ElForm label-width="72px">
+        <ElFormItem label="步骤">
+          <ElSelect v-model="addPhaseKey" placeholder="选择步骤" style="width: 100%">
+            <ElOption
+              v-for="p in addPhaseOptions"
+              :key="p.key"
+              :label="p.label"
+              :value="p.key"
+            >
+              <span class="opt-dot" :style="{ background: p.color }" />
+              {{ p.label }}
+              <span v-if="p.target" class="opt-meta">目标 {{ p.target }}</span>
+            </ElOption>
           </ElSelect>
         </ElFormItem>
-        <ElFormItem label="时间">
-          <span>{{ taskForm.start }} → {{ taskForm.end }}</span>
-        </ElFormItem>
-        <ElFormItem label="任务名">
-          <ElInput v-model="taskForm.title" placeholder="如：脚本拍摄 / 分发窗口" />
-        </ElFormItem>
-        <ElFormItem label="类型">
-          <ElSelect v-model="taskForm.type" style="width: 100%">
-            <ElOption label="脚本" value="script" />
-            <ElOption label="分发" value="publish" />
-            <ElOption label="投放" value="ad" />
-            <ElOption label="里程碑" value="milestone" />
-            <ElOption label="其他" value="other" />
-          </ElSelect>
-        </ElFormItem>
-        <ElFormItem label="备注">
-          <ElInput v-model="taskForm.note" type="textarea" :rows="2" />
+        <ElFormItem label="区间">
+          <ElDatePicker
+            v-model="addRange"
+            type="daterange"
+            value-format="YYYY-MM-DD"
+            start-placeholder="开始"
+            end-placeholder="结束"
+            style="width: 100%"
+          />
         </ElFormItem>
       </ElForm>
       <template #footer>
-        <ElButton @click="taskDialog = false">取消</ElButton>
-        <ElButton type="primary" :loading="aiConfirming" @click="confirmAddTask">
-          添加并由 AI 确认同步
-        </ElButton>
-      </template>
-    </ElDialog>
-
-    <ElDialog v-model="aiDialog" title="AI 二次确认 · 日历 / 时间规划" width="520px">
-      <p class="ai-confirm-text">{{ aiConfirmText }}</p>
-      <template #footer>
-        <ElButton type="primary" @click="aiDialog = false">知道了</ElButton>
+        <ElButton @click="addVisible = false">取消</ElButton>
+        <ElButton type="primary" :disabled="!addPhaseKey" @click="confirmAdd">添加</ElButton>
       </template>
     </ElDialog>
   </div>
 </template>
 
 <script setup lang="ts">
-  import { computed, nextTick, onMounted, onUnmounted, reactive, ref, watch } from 'vue'
+  import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
   import { ElMessage } from 'element-plus'
-  import { chatAgent } from '@/api/llm'
-  import { workflowStages } from '@/mock/dojo/imported'
-  import { adTimeline } from '@/mock/dojo/imported/ads'
-  import { dojoProjectStore, matchProjectText, matchesProjectIds, getProjectById } from '@/store/dojoProjectStore'
-  import { addScheduleBlock, dojoScheduleStore } from '@/store/dojoScheduleStore'
+  import { dojoProjectStore, matchesProjectIds } from '@/store/dojoProjectStore'
+  import {
+    getProjectRuntime,
+    plannedScripts,
+    projectRuntimeRevision,
+    type ProjectRuntime
+  } from '@/store/dojoProjectRuntime'
+  import {
+    addProjectPhaseBar,
+    applyPhaseDates,
+    applyProjectCycle,
+    availablePhasesToAdd,
+    listProjectPhaseBlocks,
+    overallKpiProgressPct,
+    phaseKeyFromBlockId,
+    PLAN_PHASE_META,
+    removeProjectPhaseBar,
+    type PlanPhaseKey
+  } from '@/store/dojoKpiSchedule'
+  import { dojoScheduleStore } from '@/store/dojoScheduleStore'
+  import { addDays, DOJO_TODAY, daysBetween } from '@/utils/dojoDates'
 
   defineOptions({ name: 'DojoGanttBoard' })
 
   const props = defineProps<{ projectId?: string; projectIds?: string[] }>()
 
-  /** 每天固定 30px，面板始终是大尺寸，靠横向滚动看更长的时间跨度 */
-  const PX = 30
-  const NAME_W = 240
-  const DAY = 86400000
-  const todayKey = '2026-08-07'
+  const ROW_H = 44
+  const todayKey = DOJO_TODAY
+  const DAY_MS = 86400000
+  /** 最短工期：1 天，方便精确拉到某一天 */
+  const MIN_SPAN_DAYS = 1
 
-  interface GanttItem {
+  type Scale = 'week' | 'month' | 'quarter'
+  type DragMode = 'move' | 'start' | 'end'
+
+  interface TimelineRow {
     id: string
-    name: string
-    sub: string
-    source: string
-    owner: string
-    region: string
-    product: string
-    project: string
+    kind: 'project' | 'phase'
     projectId: string
-    status: string
+    name: string
     start: string
     end: string
-    /** 0–1，投放项目为播放达成率，里程碑为阶段完成度 */
-    progress: number | null
-    metaText: string
-    /** Excel 里没有任何日期标记的节点，画在今天位置上提示要补排期 */
-    unscheduled?: boolean
-    /** 项目空轨道：只占一行供框选 */
-    laneOnly?: boolean
+    phaseKey: string
+    phaseLabel: string
+    phaseColor: string
+    progressPct: number
+    overdue: boolean
+    priority: number
+    tip: string
+    childCount?: number
+    left: number
+    width: number
   }
 
-  const interactMode = ref<'pan' | 'box'>('box')
-  const taskDialog = ref(false)
-  const aiDialog = ref(false)
-  const aiConfirming = ref(false)
-  const aiConfirmText = ref('')
-  const taskForm = reactive({
-    projectId: '',
-    start: '',
-    end: '',
-    title: '',
-    type: 'other' as 'script' | 'publish' | 'ad' | 'milestone' | 'other',
-    note: ''
-  })
-
-  type BoxSel = { itemId: string; projectId: string; x0: number; x1: number }
-  const boxSel = ref<BoxSel | null>(null)
-
-  const MILESTONE_PROGRESS: Record<string, number> = {
-    已完成: 1,
-    进行中: 0.5,
-    待确认: 0.9,
-    未开始: 0
-  }
-
-  function fmtNum(n: number | null | undefined) {
-    if (n == null) return '—'
-    if (n >= 10000) return `${(n / 10000).toFixed(1)}w`
-    return String(n)
-  }
-
-  /** 程序侧梳理：纠正起止颠倒、空日期；不做 AI 决策，只修显示 */
-  function normalizeRange(start?: string | null, end?: string | null) {
-    let s = (start || '').trim()
-    let e = (end || '').trim()
-    const unscheduled = !s || !e
-    if (unscheduled) return { start: todayKey, end: todayKey, unscheduled: true as const }
-    if (s > e) [s, e] = [e, s]
-    return { start: s, end: e, unscheduled: false as const }
-  }
-
-  function resolveProject(text: string) {
-    const hit = dojoProjectStore.projects.find((p) => matchProjectText(text, p))
-    return hit || dojoProjectStore.projects.find((p) => p.id === 'dojo')!
-  }
-
-  const activeProjects = computed(() =>
-    dojoProjectStore.projects.filter((p) => p.active !== false)
-  )
-
-  const filterIds = computed(() => {
-    if (props.projectIds?.length) return props.projectIds
-    if (props.projectId) return [props.projectId]
-    if (dojoProjectStore.selectedIds.length) return dojoProjectStore.selectedIds
-    return [] as string[]
-  })
-
-  const projectLanes = computed(() => {
-    const ids = filterIds.value
-    if (ids.length) return activeProjects.value.filter((p) => ids.includes(p.id))
-    return activeProjects.value
-  })
-
-  const milestoneItems: GanttItem[] = workflowStages.map((s) => {
-    const range = normalizeRange(s.startDate, s.endDate)
-    const proj = resolveProject(`dojo ${s.name}`)
-    return {
-      id: `MS-${s.id}`,
-      name: s.name,
-      sub: s.owner || '未指派',
-      source: '内容流转',
-      owner: s.owner || '未指派',
-      region: '—',
-      product: '—',
-      project: proj.name,
-      projectId: proj.id,
-      status: s.status,
-      start: range.start,
-      end: range.end,
-      progress: range.unscheduled ? null : (MILESTONE_PROGRESS[s.status] ?? null),
-      metaText: range.unscheduled ? '未填日期' : s.statusLabel || s.status,
-      unscheduled: range.unscheduled
-    }
-  })
-
-  const adItems: GanttItem[] = adTimeline.map((t) => {
-    const range = normalizeRange(t.startDate, t.endDate)
-    const proj = resolveProject(`${t.name} ${t.project}`)
-    return {
-      id: t.id,
-      name: t.name,
-      sub: [t.product, t.videoCount ? `${t.videoCount} 条` : ''].filter(Boolean).join(' · '),
-      source: '投放项目',
-      owner: '投流组',
-      region: t.region || '未标注',
-      product: t.product || '未标注',
-      project: proj.name,
-      projectId: proj.id,
-      status: t.status,
-      start: range.start,
-      end: range.end,
-      progress: t.viewsRate,
-      metaText:
-        t.viewsRate != null
-          ? `${Math.round(t.viewsRate * 100)}% · ${fmtNum(t.currentViews)}/${fmtNum(t.targetViews)}`
-          : '无播放数据',
-      unscheduled: range.unscheduled
-    }
-  })
-
-  const scheduleItems = computed<GanttItem[]>(() =>
-    dojoScheduleStore.blocks.map((b) => ({
-      id: b.id,
-      name: b.title,
-      sub: b.note || b.type,
-      source: '自建排期',
-      owner: '运营',
-      region: '—',
-      product: '—',
-      project: b.projectName,
-      projectId: b.projectId,
-      status: '进行中',
-      start: b.start,
-      end: b.end,
-      progress: 0.3,
-      metaText: `来源：${b.source}`,
-      unscheduled: false
-    }))
-  )
-
-  const allItems = computed(() => {
-    const ids = filterIds.value
-    const showMilestones = !ids.length || ids.includes('dojo')
-    const milestones = showMilestones ? milestoneItems : []
-    const ads = adItems.filter(
-      (i) => !ids.length || ids.includes(i.projectId) || ids.some((id) => matchProjectText(`${i.name} ${i.product}`, getProjectById(id)))
-    )
-    const customs = scheduleItems.value.filter((i) => matchesProjectIds(i.projectId, ids))
-    const base = [...milestones, ...ads, ...customs]
-
-    // 每个项目至少保留一条空轨道，方便框选排期（剪辑时间线体验）
-    const present = new Set(base.map((i) => i.projectId))
-    const lanes: GanttItem[] = []
-    for (const p of projectLanes.value) {
-      if (!present.has(p.id)) {
-        lanes.push({
-          id: `LANE-${p.id}`,
-          name: `${p.name} · 轨道`,
-          sub: '空轨道',
-          source: '项目轨道',
-          owner: '—',
-          region: '—',
-          product: '—',
-          project: p.name,
-          projectId: p.id,
-          status: '未开始',
-          start: todayKey,
-          end: todayKey,
-          progress: null,
-          metaText: '可框选添加',
-          unscheduled: true,
-          laneOnly: true
-        })
-      }
-    }
-    return [...base, ...lanes]
-  })
-
-  const groupOptions = [
-    { label: '按项目', value: 'project' },
-    { label: '按来源', value: 'source' },
-    { label: '按状态', value: 'status' },
-    { label: '按投放地区', value: 'region' },
-    { label: '按产品', value: 'product' },
-    { label: '按负责方', value: 'owner' },
-    { label: '不分组', value: 'none' }
-  ] as const
-
-  const groupBy = ref<(typeof groupOptions)[number]['value']>('project')
-  const sourceFilter = ref('')
-  const statusFilter = ref('')
-  const keyword = ref('')
-  const activeId = ref('')
-
-  const sources = computed(() => [...new Set(allItems.value.map((i) => i.source))])
-  const statuses = computed(() => [...new Set(allItems.value.map((i) => i.status))])
-
-  const legend = [
-    { key: 'done', label: '已完成 / 已达标', color: '#22c55e' },
-    { key: 'doing', label: '进行中', color: '#4a90d9' },
-    { key: 'wait', label: '待确认', color: '#f59e0b' },
-    { key: 'risk', label: '逾期未达标', color: '#ef4444' },
-    { key: 'none', label: '未开始', color: '#94a3b8' }
+  const zooms: Array<{ value: Scale; label: string }> = [
+    { value: 'week', label: 'Week' },
+    { value: 'month', label: 'Month' },
+    { value: 'quarter', label: 'Quarter' }
   ]
 
-  const items = computed(() => {
-    const kw = keyword.value.trim().toLowerCase()
-    return allItems.value.filter((i) => {
-      if (i.laneOnly) return true
-      if (sourceFilter.value && i.source !== sourceFilter.value) return false
-      if (statusFilter.value && i.status !== statusFilter.value) return false
-      if (kw && !`${i.name} ${i.region} ${i.product} ${i.sub} ${i.project}`.toLowerCase().includes(kw))
-        return false
-      return true
-    })
+  const PHASE_COLORS: Record<string, string> = {
+    accounts: '#8E8E93',
+    scripts: '#5E6AD2',
+    shoot: '#FF9F0A',
+    edit: '#FF375F',
+    approve: '#64D2FF',
+    distribute: '#32ADE6',
+    ads: '#FFD60A',
+    done: '#30D158',
+    cycle: '#5E6AD2'
+  }
+
+  const PHASE_LABEL: Record<string, string> = Object.fromEntries([
+    ...PLAN_PHASE_META.map((p) => [p.key, p.label]),
+    ['approve', '过审'],
+    ['done', 'Done'],
+    ['cycle', '周期']
+  ])
+
+  /** 默认 Week：天更宽，拖拽好对准 */
+  const scale = ref<Scale>('week')
+  const activeId = ref('')
+  const scroller = ref<HTMLElement | null>(null)
+  const headScroller = ref<HTMLElement | null>(null)
+  const panning = ref(false)
+  const cursorX = ref<number | null>(null)
+  /** projectId → 是否展开细项行 */
+  const expanded = ref<Record<string, boolean>>({})
+
+  const addVisible = ref(false)
+  const addProjectId = ref('')
+  const addPhaseKey = ref<PlanPhaseKey | ''>('')
+  const addRange = ref<[string, string] | null>(null)
+
+  const drag = ref<{
+    id: string
+    kind: 'project' | 'phase'
+    projectId: string
+    phaseKey?: string
+    mode: DragMode
+    originX: number
+    start: string
+    end: string
+    baseLeft: number
+    baseWidth: number
+  } | null>(null)
+  const dragDx = ref(0)
+
+  let panStart = { x: 0, scroll: 0 }
+  let panRaf = 0
+  let pendingPanX = 0
+  let dragRaf = 0
+  let pendingDragX = 0
+
+  /** 天列加宽：拖拽好对准，时间轴更有「拉长」的沉浸感 */
+  const pxPerDay = computed(() => {
+    if (scale.value === 'week') return 36
+    if (scale.value === 'month') return 16
+    return 6
   })
 
-  const displayRows = computed(() => {
-    const list = [...items.value].sort((a, b) => {
-      if (a.project !== b.project) return a.project.localeCompare(b.project)
-      if (a.laneOnly !== b.laneOnly) return a.laneOnly ? 1 : -1
+  function formatHudDate(date: string) {
+    if (!date) return ''
+    const [, m, d] = date.split('-')
+    return `${Number(m)}/${Number(d)}`
+  }
+
+  function previewRange(mode: DragMode, start: string, end: string, dayDelta: number) {
+    let nextStart = start
+    let nextEnd = end
+    if (mode === 'move') {
+      nextStart = addDays(start, dayDelta)
+      nextEnd = addDays(end, dayDelta)
+    } else if (mode === 'start') {
+      nextStart = addDays(start, dayDelta)
+      if (nextStart > nextEnd) nextStart = nextEnd
+      const span = daysBetween(nextStart, nextEnd) + 1
+      if (span < MIN_SPAN_DAYS) nextStart = addDays(nextEnd, -(MIN_SPAN_DAYS - 1))
+    } else {
+      nextEnd = addDays(end, dayDelta)
+      if (nextEnd < nextStart) nextEnd = nextStart
+      const span = daysBetween(nextStart, nextEnd) + 1
+      if (span < MIN_SPAN_DAYS) nextEnd = addDays(nextStart, MIN_SPAN_DAYS - 1)
+    }
+    return { start: nextStart, end: nextEnd }
+  }
+
+  const filterIds = computed(() => {
+    if (props.projectIds !== undefined) return props.projectIds
+    if (props.projectId) return [props.projectId]
+    return dojoProjectStore.selectedIds
+  })
+
+  const exactIds = computed(() => props.projectIds !== undefined)
+
+  function currentPhase(rt: ProjectRuntime) {
+    const scriptT = plannedScripts(rt.kpi)
+    const stages = [
+      { key: 'scripts', label: '脚本', done: rt.current.scripts, target: scriptT },
+      { key: 'accounts', label: '起号', done: rt.current.accounts, target: rt.kpi.accounts },
+      { key: 'shoot', label: '拍摄', done: Math.min(rt.current.edited, rt.kpi.videos), target: rt.kpi.videos },
+      { key: 'edit', label: '剪辑', done: rt.current.edited, target: rt.kpi.videos },
+      { key: 'distribute', label: '分发', done: rt.current.distributed, target: rt.kpi.videos },
+      { key: 'ads', label: '投放', done: rt.current.exposure, target: rt.kpi.exposure }
+    ]
+    for (const s of stages) {
+      if (s.target > 0 && s.done < s.target) {
+        return { key: s.key, label: s.label, color: PHASE_COLORS[s.key] }
+      }
+    }
+    return { key: 'done', label: 'Done', color: PHASE_COLORS.done }
+  }
+
+  function priorityRank(p: string) {
+    if (p === 'high') return 0
+    if (p === 'medium') return 1
+    return 2
+  }
+
+  function md(date: string) {
+    return date.slice(5).replace('-', '/')
+  }
+
+  function iso(d: Date) {
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+  }
+
+  function toggleExpand(projectId: string) {
+    expanded.value = {
+      ...expanded.value,
+      [projectId]: !expanded.value[projectId]
+    }
+  }
+
+  function onListClick(row: TimelineRow) {
+    activeId.value = row.id
+    if (row.kind === 'project' && !expanded.value[row.projectId]) {
+      expanded.value = { ...expanded.value, [row.projectId]: true }
+    }
+  }
+
+  const projectBases = computed(() => {
+    void projectRuntimeRevision.value
+    void dojoScheduleStore.revision
+    const ids = filterIds.value
+    const list = dojoProjectStore.projects
+      .filter((p) => {
+        if (p.active === false) return false
+        if (exactIds.value) return ids.includes(p.id)
+        return matchesProjectIds(p.id, ids)
+      })
+      .map((p) => {
+        const rt = getProjectRuntime(p.id)
+        const start = rt?.kpi.cycleStart
+        const end = rt?.kpi.cycleEnd
+        if (!rt || !start || !end) return null
+        const phase = currentPhase(rt)
+        const progressPct = overallKpiProgressPct(rt)
+        const span = Math.max(1, daysBetween(start, end) + 1)
+        const overdue = end < todayKey && phase.key !== 'done' && rt.runStatus !== '完结'
+        const children = listProjectPhaseBlocks(p.id)
+        return {
+          id: p.id,
+          kind: 'project' as const,
+          projectId: p.id,
+          name: p.name,
+          start,
+          end,
+          phaseKey: phase.key,
+          phaseLabel: phase.label,
+          phaseColor: phase.color,
+          progressPct,
+          overdue,
+          priority: priorityRank(rt.priority),
+          childCount: children.length,
+          tip: [
+            p.name,
+            `${start} → ${end}（${span}d）`,
+            `综合 ${progressPct}% · 展开后可加脚本/起号/拍摄等细项`
+          ].join('\n'),
+          children
+        }
+      })
+      .filter(Boolean) as Array<{
+      id: string
+      kind: 'project'
+      projectId: string
+      name: string
+      start: string
+      end: string
+      phaseKey: string
+      phaseLabel: string
+      phaseColor: string
+      progressPct: number
+      overdue: boolean
+      priority: number
+      childCount: number
+      tip: string
+      children: ReturnType<typeof listProjectPhaseBlocks>
+    }>
+
+    list.sort((a, b) => {
+      if (a.priority !== b.priority) return a.priority - b.priority
       return a.start.localeCompare(b.start)
     })
-    if (groupBy.value === 'none') {
-      return list.map((item) => ({ type: 'item' as const, key: item.id, item }))
-    }
-    const buckets = new Map<string, GanttItem[]>()
-    for (const item of list) {
-      const k = (item[groupBy.value as keyof GanttItem] as string) || '未分组'
-      if (!buckets.has(k)) buckets.set(k, [])
-      buckets.get(k)!.push(item)
-    }
-    // 按项目分组时，保证所有活跃项目组都出现
-    if (groupBy.value === 'project') {
-      for (const p of projectLanes.value) {
-        if (!buckets.has(p.name)) buckets.set(p.name, [])
-      }
-    }
-    const rows: Array<
-      | { type: 'group'; key: string; label: string; count: number }
-      | { type: 'item'; key: string; item: GanttItem }
-    > = []
-    for (const [label, group] of buckets) {
-      const real = group.filter((g) => !g.laneOnly)
-      rows.push({ type: 'group', key: `g-${label}`, label, count: real.length || group.length })
-      if (!group.length) {
-        const p = projectLanes.value.find((x) => x.name === label)
-        if (p) {
-          const lane: GanttItem = {
-            id: `LANE-${p.id}`,
-            name: `${p.name} · 轨道`,
-            sub: '空轨道',
-            source: '项目轨道',
-            owner: '—',
-            region: '—',
-            product: '—',
-            project: p.name,
-            projectId: p.id,
-            status: '未开始',
-            start: todayKey,
-            end: todayKey,
-            progress: null,
-            metaText: '可框选添加',
-            unscheduled: true,
-            laneOnly: true
-          }
-          rows.push({ type: 'item', key: lane.id, item: lane })
-        }
-        continue
-      }
-      for (const item of group) rows.push({ type: 'item', key: item.id, item })
-    }
-    return rows
+    return list
   })
 
-  /** 时间范围取全部数据的最小/最大日期，前后各留 3 天余量；分发焦点区间会扩展视野 */
-  const bounds = computed(() => {
-    const src = items.value.filter((i) => !i.laneOnly)
-    const fallback = allItems.value.filter((i) => !i.laneOnly)
-    const use = src.length ? src : fallback
-    let min = use[0]?.start ?? todayKey
-    let max = use[0]?.end ?? todayKey
-    for (const i of use) {
-      if (i.start < min) min = i.start
-      if (i.end > max) max = i.end
-    }
-    const focus = dojoScheduleStore.focusRange
-    if (focus) {
-      if (focus.start < min) min = focus.start
-      if (focus.end > max) max = focus.end
-    }
-    if (todayKey < min) min = todayKey
-    if (todayKey > max) max = todayKey
-    return { min: shift(min, -3), max: shift(max, 3) }
-  })
+  const projectCount = computed(() => projectBases.value.length)
 
-  const rangeStart = computed(() => bounds.value.min)
-  const rangeEnd = computed(() => bounds.value.max)
-
-  const days = computed(() => {
-    const out: Array<{ key: string; dom: number; weekend: boolean }> = []
-    const end = new Date(`${rangeEnd.value}T00:00:00`).getTime()
-    let t = new Date(`${rangeStart.value}T00:00:00`).getTime()
-    while (t <= end) {
-      const d = new Date(t)
-      out.push({ key: iso(d), dom: d.getDate(), weekend: d.getDay() === 0 || d.getDay() === 6 })
-      t += DAY
+  const flatRows = computed(() => {
+    const out: Array<Omit<TimelineRow, 'left' | 'width'>> = []
+    for (const p of projectBases.value) {
+      out.push({
+        id: p.id,
+        kind: 'project',
+        projectId: p.projectId,
+        name: p.name,
+        start: p.start,
+        end: p.end,
+        phaseKey: p.phaseKey,
+        phaseLabel: p.phaseLabel,
+        phaseColor: p.phaseColor,
+        progressPct: p.progressPct,
+        overdue: p.overdue,
+        priority: p.priority,
+        tip: p.tip,
+        childCount: p.childCount
+      })
+      if (!expanded.value[p.projectId]) continue
+      for (const b of p.children) {
+        const key = phaseKeyFromBlockId(b.id, p.projectId) || 'other'
+        const label = PHASE_LABEL[key] || b.title
+        const color = PHASE_COLORS[key] || '#9b9b9f'
+        const pct =
+          b.target && b.target > 0
+            ? Math.min(100, Math.round(((b.done || 0) / b.target) * 100))
+            : 0
+        out.push({
+          id: b.id,
+          kind: 'phase',
+          projectId: p.projectId,
+          name: label,
+          start: b.start,
+          end: b.end,
+          phaseKey: key,
+          phaseLabel: label,
+          phaseColor: color,
+          progressPct: pct,
+          overdue: b.end < todayKey && pct < 100,
+          priority: p.priority,
+          tip: [`${p.name} · ${label}`, `${b.start} → ${b.end}`, b.title].join('\n')
+        })
+      }
     }
     return out
   })
 
-  const totalWidth = computed(() => days.value.length * PX)
+  const bounds = computed(() => {
+    const list = flatRows.value
+    let min = list[0]?.start ?? todayKey
+    let max = list[0]?.end ?? todayKey
+    for (const r of list) {
+      if (r.start < min) min = r.start
+      if (r.end > max) max = r.end
+    }
+    if (todayKey < min) min = todayKey
+    if (todayKey > max) max = todayKey
+    // 两侧多留空白，滚动时像走进一条长轴
+    const pad = scale.value === 'quarter' ? 45 : scale.value === 'month' ? 28 : 21
+    return { min: addDays(min, -pad), max: addDays(max, pad) }
+  })
+
+  const rangeStart = computed(() => bounds.value.min)
+  const rangeEnd = computed(() => bounds.value.max)
+  const dayCount = computed(() => Math.max(1, daysBetween(rangeStart.value, rangeEnd.value) + 1))
+  const totalWidth = computed(() => dayCount.value * pxPerDay.value)
+
+  function offsetOf(date: string) {
+    return Math.max(0, daysBetween(rangeStart.value, date)) * pxPerDay.value
+  }
+
+  const rows = computed<TimelineRow[]>(() => {
+    const px = pxPerDay.value
+    return flatRows.value.map((r) => {
+      const left = offsetOf(r.start)
+      const span = Math.max(MIN_SPAN_DAYS, daysBetween(r.start, r.end) + 1)
+      return { ...r, left, width: Math.max(px * MIN_SPAN_DAYS, span * px) }
+    })
+  })
+
+  /** 拖拽位移按整天吸附，避免条在「半天上」晃 */
+  const snappedDx = computed(() => {
+    if (!drag.value) return 0
+    return Math.round(dragDx.value / pxPerDay.value) * pxPerDay.value
+  })
+
+  const dragDayDelta = computed(() => {
+    if (!drag.value) return 0
+    return Math.round(dragDx.value / pxPerDay.value)
+  })
+
+  const dragPreview = computed(() => {
+    const d = drag.value
+    if (!d) return null
+    const { start, end } = previewRange(d.mode, d.start, d.end, dragDayDelta.value)
+    const row = rows.value.find((r) => r.id === d.id)
+    return {
+      name: row?.name || '',
+      start,
+      end,
+      startLabel: formatHudDate(start),
+      endLabel: formatHudDate(end),
+      days: Math.max(1, daysBetween(start, end) + 1)
+    }
+  })
+
+  const cursorDate = computed(() => {
+    if (cursorX.value == null) return ''
+    const idx = Math.max(0, Math.min(dayCount.value - 1, Math.floor(cursorX.value / pxPerDay.value)))
+    return addDays(rangeStart.value, idx)
+  })
+
+  /** 高亮当前对准的「天」列（拖拽边 / 光标） */
+  const snapDayLeft = computed(() => {
+    const px = pxPerDay.value
+    if (drag.value && dragPreview.value) {
+      const edge =
+        drag.value.mode === 'end'
+          ? dragPreview.value.end
+          : drag.value.mode === 'start'
+            ? dragPreview.value.start
+            : dragPreview.value.start
+      return offsetOf(edge)
+    }
+    if (cursorDate.value) return offsetOf(cursorDate.value)
+    return null
+  })
+
+  const monthBands = computed(() => {
+    const out: Array<{ key: string; label: string; left: number; width: number }> = []
+    const px = pxPerDay.value
+    let t = new Date(`${rangeStart.value}T00:00:00`).getTime()
+    const end = new Date(`${rangeEnd.value}T00:00:00`).getTime()
+    let i = 0
+    while (t <= end) {
+      const d = new Date(t)
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+      const last = out[out.length - 1]
+      if (last && last.key === key) last.width += px
+      else {
+        const months = [
+          'Jan',
+          'Feb',
+          'Mar',
+          'Apr',
+          'May',
+          'Jun',
+          'Jul',
+          'Aug',
+          'Sep',
+          'Oct',
+          'Nov',
+          'Dec'
+        ]
+        out.push({
+          key,
+          label: `${months[d.getMonth()]} ${d.getFullYear()}`,
+          left: i * px,
+          width: px
+        })
+      }
+      t += DAY_MS
+      i++
+    }
+    return out
+  })
+
+  const tickLabels = computed(() => {
+    const px = pxPerDay.value
+    const out: Array<{ key: string; label: string; left: number; width: number }> = []
+    let t = new Date(`${rangeStart.value}T00:00:00`).getTime()
+    const end = new Date(`${rangeEnd.value}T00:00:00`).getTime()
+    let i = 0
+    while (t <= end) {
+      const d = new Date(t)
+      const key = iso(d)
+      let show = false
+      let label = String(d.getDate())
+      if (scale.value === 'week') {
+        // 每天都标日期，周一补星期
+        show = true
+        const wd = ['日', '一', '二', '三', '四', '五', '六'][d.getDay()]
+        label = d.getDay() === 1 || i === 0 ? `${d.getDate()}·${wd}` : String(d.getDate())
+      } else if (scale.value === 'month') {
+        show =
+          d.getDate() === 1 ||
+          d.getDate() % 2 === 1 ||
+          key === todayKey ||
+          i === 0
+        if (d.getDate() === 1) label = `${d.getMonth() + 1}/${d.getDate()}`
+      } else {
+        show = d.getDate() === 1 || d.getDate() === 15 || key === todayKey || i === 0
+        if (d.getDate() === 1) label = `${d.getMonth() + 1}月`
+      }
+      if (show) out.push({ key, label, left: i * px, width: px })
+      t += DAY_MS
+      i++
+    }
+    return out
+  })
+
+  const todayLeft = computed(() => {
+    if (todayKey < rangeStart.value || todayKey > rangeEnd.value) return null
+    return offsetOf(todayKey)
+  })
 
   const canvasStyle = computed(() => ({
     width: `${totalWidth.value}px`,
@@ -610,280 +724,188 @@
   }))
 
   const sheetStyle = computed(() => ({
-    width: `${NAME_W + totalWidth.value}px`,
-    minWidth: `${NAME_W + totalWidth.value}px`
-  }))
-
-  const trackCellStyle = computed(() => ({
     width: `${totalWidth.value}px`,
-    minWidth: `${totalWidth.value}px`
+    minWidth: `${totalWidth.value}px`,
+    minHeight: `${Math.max(rows.value.length, 1) * ROW_H}px`,
+    ['--day-px' as string]: `${pxPerDay.value}px`
   }))
 
-  const trackRowCount = computed(
-    () => displayRows.value.filter((r) => r.type === 'item').length
-  )
-
-  const months = computed(() => {
-    const out: Array<{ key: string; label: string; left: number; width: number }> = []
-    days.value.forEach((d, idx) => {
-      const key = d.key.slice(0, 7)
-      const last = out[out.length - 1]
-      if (last && last.key === key) {
-        last.width += PX
-      } else {
-        out.push({
-          key,
-          label: `${Number(key.slice(5))} 月 ${key.slice(0, 4)}`,
-          left: idx * PX,
-          width: PX
-        })
+  function barStyle(row: TimelineRow) {
+    const d = drag.value
+    const dx = snappedDx.value
+    const minW = pxPerDay.value * MIN_SPAN_DAYS
+    const base: Record<string, string> = {
+      left: `${row.left}px`,
+      width: `${row.width}px`,
+      background: row.phaseColor,
+      transform: 'translate3d(0,0,0)',
+      transition:
+        d?.id === row.id
+          ? 'none'
+          : 'left .2s cubic-bezier(.25,.1,.25,1), width .2s cubic-bezier(.25,.1,.25,1)'
+    }
+    if (!d || d.id !== row.id) return base
+    if (d.mode === 'move') {
+      return { ...base, transform: `translate3d(${dx}px,0,0)`, willChange: 'transform' }
+    }
+    if (d.mode === 'start') {
+      const shiftX = Math.min(dx, d.baseWidth - minW)
+      return {
+        ...base,
+        left: `${d.baseLeft}px`,
+        width: `${Math.max(minW, d.baseWidth - shiftX)}px`,
+        transform: `translate3d(${shiftX}px,0,0)`,
+        willChange: 'transform,width'
       }
-    })
-    return out
-  })
-
-  const todayLeft = computed(() => {
-    const i = days.value.findIndex((d) => d.key === todayKey)
-    return i < 0 ? null : i * PX
-  })
-
-  function iso(d: Date) {
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+    }
+    return {
+      ...base,
+      width: `${Math.max(minW, d.baseWidth + dx)}px`,
+      willChange: 'width'
+    }
   }
 
-  function shift(date: string, delta: number) {
-    const d = new Date(`${date}T00:00:00`)
-    d.setDate(d.getDate() + delta)
-    return iso(d)
-  }
-
-  function diffDays(from: string, to: string) {
-    return Math.round(
-      (new Date(`${to}T00:00:00`).getTime() - new Date(`${from}T00:00:00`).getTime()) / DAY
-    )
-  }
-
-  function offsetOf(date: string) {
-    return Math.max(0, diffDays(rangeStart.value, date)) * PX
-  }
-
-  function md(date: string) {
-    return date.slice(5).replace('-', '/')
-  }
-
-  function isRisk(item: GanttItem) {
-    if (item.status === '已完成' || item.status === '已达标') return false
-    return item.end < todayKey && (item.progress == null || item.progress < 1)
-  }
-
-  function colorOf(item: GanttItem) {
-    if (item.source === '自建排期') return '#a78bfa'
-    if (isRisk(item)) return '#ef4444'
-    if (item.status === '已完成' || item.status === '已达标') return '#22c55e'
-    if (item.status === '待确认') return '#f59e0b'
-    if (item.status === '未开始') return '#94a3b8'
-    return '#4a90d9'
-  }
-
-  const boxStyle = computed(() => {
-    if (!boxSel.value) return {}
-    const left = Math.min(boxSel.value.x0, boxSel.value.x1)
-    const width = Math.max(PX, Math.abs(boxSel.value.x1 - boxSel.value.x0))
-    return { left: `${left}px`, width: `${width}px` }
-  })
-
-  const boxDateLabel = computed(() => {
-    if (!boxSel.value) return ''
-    const start = xToDate(Math.min(boxSel.value.x0, boxSel.value.x1))
-    const end = xToDate(Math.max(boxSel.value.x0, boxSel.value.x1))
-    return `${md(start)} → ${md(end)}`
-  })
-
-  function xToDate(x: number) {
-    const idx = Math.max(0, Math.min(days.value.length - 1, Math.floor(x / PX)))
-    return days.value[idx]?.key || todayKey
-  }
-
-  function trackX(ev: PointerEvent) {
-    if (!scroller.value) return 0
+  function onBoardHover(e: PointerEvent) {
+    if (!scroller.value || drag.value || panning.value) return
     const rect = scroller.value.getBoundingClientRect()
-    return ev.clientX - rect.left - NAME_W + scroller.value.scrollLeft
+    cursorX.value = e.clientX - rect.left + scroller.value.scrollLeft
   }
 
-  function onRowPointerDown(e: PointerEvent, item: GanttItem) {
-    if (interactMode.value !== 'box' || e.button !== 0) return
+  function onBarDown(e: PointerEvent, row: TimelineRow, mode: DragMode) {
+    if (e.button !== 0) return
     e.preventDefault()
     e.stopPropagation()
-    const x = trackX(e)
-    boxSel.value = { itemId: item.id, projectId: item.projectId, x0: x, x1: x }
-    const target = e.currentTarget as HTMLElement
-    target.setPointerCapture(e.pointerId)
-    const onMove = (ev: PointerEvent) => {
-      if (!boxSel.value) return
-      boxSel.value = {
-        ...boxSel.value,
-        x1: trackX(ev)
-      }
+    activeId.value = row.id
+    cursorX.value = null
+    dragDx.value = 0
+    pendingDragX = e.clientX
+    drag.value = {
+      id: row.id,
+      kind: row.kind,
+      projectId: row.projectId,
+      phaseKey: row.kind === 'phase' ? row.phaseKey : undefined,
+      mode,
+      originX: e.clientX,
+      start: row.start,
+      end: row.end,
+      baseLeft: row.left,
+      baseWidth: row.width
     }
-    const onUp = () => {
-      target.releasePointerCapture(e.pointerId)
-      window.removeEventListener('pointermove', onMove)
-      window.removeEventListener('pointerup', onUp)
-      finishBoxSelect()
-    }
-    window.addEventListener('pointermove', onMove)
-    window.addEventListener('pointerup', onUp)
-  }
-
-  function finishBoxSelect() {
-    const sel = boxSel.value
-    if (!sel) return
-    const start = xToDate(Math.min(sel.x0, sel.x1))
-    const end = xToDate(Math.max(sel.x0, sel.x1))
-    if (Math.abs(sel.x1 - sel.x0) < PX * 0.4) {
-      boxSel.value = null
-      return
-    }
-    taskForm.projectId = sel.projectId
-    taskForm.start = start
-    taskForm.end = end
-    taskForm.title = ''
-    taskForm.type = 'other'
-    taskForm.note = ''
-    taskDialog.value = true
-    boxSel.value = null
-  }
-
-  async function confirmAddTask() {
-    if (!taskForm.title.trim()) {
-      ElMessage.warning('请填写任务名')
-      return
-    }
-    const proj = activeProjects.value.find((p) => p.id === taskForm.projectId)
-    if (!proj) {
-      ElMessage.warning('请选择项目')
-      return
-    }
-    addScheduleBlock({
-      projectId: proj.id,
-      projectName: proj.name,
-      title: taskForm.title.trim(),
-      type: taskForm.type,
-      start: taskForm.start,
-      end: taskForm.end,
-      note: taskForm.note,
-      source: 'timeline'
-    })
-    taskDialog.value = false
-    ElMessage.success('已添加到时间规划轨道')
-
-    aiConfirming.value = true
+    document.body.style.cursor = mode === 'move' ? 'grabbing' : 'ew-resize'
+    document.body.style.userSelect = 'none'
     try {
-      const reply = await chatAgent(
-        `用户刚在时间规划上框选添加了任务。请二次确认应如何同步到节奏日历，用简短中文说明（3–6 句）。
-项目：${proj.name}
-任务：${taskForm.title}
-类型：${taskForm.type}
-区间：${taskForm.start} ~ ${taskForm.end}
-备注：${taskForm.note || '无'}`,
-        { scene: 'timeline', project: proj.name }
-      )
-      aiConfirmText.value = reply.content
-      aiDialog.value = true
+      ;(e.currentTarget as HTMLElement | null)?.setPointerCapture?.(e.pointerId)
     } catch {
-      aiConfirmText.value = `已写入时间规划「${proj.name}」轨道（${taskForm.start} → ${taskForm.end}）。建议在节奏日历同区间挂一条「${taskForm.title}」事项，并与分发/脚本计划对齐。`
-      aiDialog.value = true
-    } finally {
-      aiConfirming.value = false
+      /* ignore */
+    }
+    window.addEventListener('pointermove', onBarMove)
+    window.addEventListener('pointerup', onBarUp)
+  }
+
+  function maybeAutoScroll(clientX: number) {
+    const el = scroller.value
+    if (!el || !drag.value) return
+    const rect = el.getBoundingClientRect()
+    const edge = 56
+    const step = Math.max(pxPerDay.value, 24)
+    if (clientX < rect.left + edge) el.scrollLeft -= step
+    else if (clientX > rect.right - edge) el.scrollLeft += step
+  }
+
+  function onBarMove(e: PointerEvent) {
+    pendingDragX = e.clientX
+    maybeAutoScroll(e.clientX)
+    if (dragRaf) return
+    dragRaf = requestAnimationFrame(() => {
+      dragRaf = 0
+      if (!drag.value) return
+      dragDx.value = pendingDragX - drag.value.originX
+    })
+  }
+
+  function onBarUp(e?: PointerEvent) {
+    if (dragRaf) {
+      cancelAnimationFrame(dragRaf)
+      dragRaf = 0
+    }
+    const d = drag.value
+    const clientX = e?.clientX ?? pendingDragX
+    const dx = d ? clientX - d.originX : 0
+    drag.value = null
+    dragDx.value = 0
+    document.body.style.cursor = ''
+    document.body.style.userSelect = ''
+    window.removeEventListener('pointermove', onBarMove)
+    window.removeEventListener('pointerup', onBarUp)
+    if (!d) return
+    const dayDelta = Math.round(dx / pxPerDay.value)
+    const { start, end } = previewRange(d.mode, d.start, d.end, dayDelta)
+    if (start === d.start && end === d.end) return
+    if (d.kind === 'phase' && d.phaseKey) {
+      applyPhaseDates(d.projectId, d.phaseKey as PlanPhaseKey, start, end)
+    } else {
+      applyProjectCycle(d.projectId, start, end)
     }
   }
 
-  function barStyle(item: GanttItem) {
-    const left = offsetOf(item.start)
-    if (item.unscheduled) return { left: `${left}px`, width: '92px' }
-    const span = Math.max(1, diffDays(item.start, item.end) + 1)
-    return {
-      left: `${left}px`,
-      width: `${span * PX}px`,
-      background: colorOf(item)
+  const addPhaseOptions = computed(() => {
+    if (!addProjectId.value) return []
+    return availablePhasesToAdd(addProjectId.value)
+  })
+
+  function openAdd(projectId: string) {
+    expanded.value = { ...expanded.value, [projectId]: true }
+    addProjectId.value = projectId
+    const rt = getProjectRuntime(projectId)
+    const start = rt?.kpi.cycleStart || todayKey
+    const end = rt?.kpi.cycleEnd || start
+    addRange.value = [start, addDays(start, Math.min(6, daysBetween(start, end)))]
+    const opts = availablePhasesToAdd(projectId)
+    addPhaseKey.value = opts[0]?.key || ''
+    if (!opts.length) {
+      ElMessage.info('六个步骤都已添加，可直接拖条改期')
+      return
     }
+    addVisible.value = true
   }
 
-  function fillStyle(item: GanttItem) {
-    return { width: `${Math.min(100, Math.max(0, (item.progress ?? 0) * 100))}%` }
+  function resetAdd() {
+    addProjectId.value = ''
+    addPhaseKey.value = ''
+    addRange.value = null
   }
 
-  function metaOf(item: GanttItem) {
-    return isRisk(item) ? `逾期 · ${item.metaText}` : item.metaText
+  function confirmAdd() {
+    if (!addProjectId.value || !addPhaseKey.value) return
+    const block = addProjectPhaseBar(addProjectId.value, addPhaseKey.value, {
+      start: addRange.value?.[0],
+      end: addRange.value?.[1]
+    })
+    if (block) {
+      ElMessage.success(`已添加「${PHASE_LABEL[addPhaseKey.value] || addPhaseKey.value}」时间条`)
+      expanded.value = { ...expanded.value, [addProjectId.value]: true }
+      activeId.value = block.id
+    }
+    addVisible.value = false
   }
 
-  function tooltip(item: GanttItem) {
-    return [
-      item.name,
-      item.unscheduled
-        ? '尚未排期'
-        : `${item.start} → ${item.end}（${diffDays(item.start, item.end) + 1} 天）`,
-      `状态：${item.status}`,
-      item.region !== '—' ? `地区：${item.region}` : '',
-      item.product !== '—' ? `产品：${item.product}` : '',
-      item.metaText
-    ]
-      .filter(Boolean)
-      .join('\n')
+  function removePhase(row: TimelineRow) {
+    if (row.kind !== 'phase') return
+    const key = phaseKeyFromBlockId(row.id, row.projectId)
+    if (!key || key === 'cycle') return
+    removeProjectPhaseBar(row.projectId, key)
+    ElMessage.success('已删除细项条')
   }
-
-  function select(item: GanttItem) {
-    activeId.value = item.id
-  }
-
-  // ── 拖动平移 ──────────────────────────────────────────
-  const scroller = ref<HTMLElement | null>(null)
-  const headScroller = ref<HTMLElement | null>(null)
-  const panning = ref(false)
-  const scrollLeft = ref(0)
-  const viewWidth = ref(0)
-  let panStart = { x: 0, scroll: 0 }
 
   function onScroll() {
-    if (!scroller.value) return
-    scrollLeft.value = scroller.value.scrollLeft
-    viewWidth.value = scroller.value.clientWidth
-    if (headScroller.value) {
-      headScroller.value.scrollLeft = scroller.value.scrollLeft
-    }
-  }
-
-  /** 长条完全在可视区左边还是右边；在视野内返回 null */
-  function offscreenOf(item: GanttItem): 'left' | 'right' | null {
-    if (!viewWidth.value) return null
-    const trackViewW = Math.max(0, viewWidth.value - NAME_W)
-    const left = offsetOf(item.start)
-    const right = left + Math.max(1, diffDays(item.start, item.end) + 1) * PX
-    if (right < scrollLeft.value + 8) return 'left'
-    if (left > scrollLeft.value + trackViewW - 8) return 'right'
-    return null
-  }
-
-  function jumpStyle(item: GanttItem) {
-    const trackViewW = Math.max(0, viewWidth.value - NAME_W)
-    return offscreenOf(item) === 'left'
-      ? { left: `${scrollLeft.value + 8}px` }
-      : { left: `${scrollLeft.value + trackViewW - 128}px` }
-  }
-
-  function jumpTo(item: GanttItem) {
-    if (!scroller.value) return
-    activeId.value = item.id
-    scroller.value.scrollTo({
-      left: Math.max(0, offsetOf(item.start) - 80),
-      behavior: 'smooth'
-    })
+    if (!scroller.value || !headScroller.value) return
+    headScroller.value.scrollLeft = scroller.value.scrollLeft
   }
 
   function startPan(e: PointerEvent) {
     if (!scroller.value || e.button !== 0) return
-    if (interactMode.value === 'box') return
-    if ((e.target as HTMLElement).closest('.gantt__name-cell')) return
+    if ((e.target as HTMLElement).closest('.tl__bar')) return
+    if ((e.target as HTMLElement).closest('.tl__handle')) return
     panning.value = true
     panStart = { x: e.clientX, scroll: scroller.value.scrollLeft }
     scroller.value.setPointerCapture(e.pointerId)
@@ -893,16 +915,24 @@
 
   function onPan(e: PointerEvent) {
     if (!panning.value || !scroller.value) return
-    scroller.value.scrollLeft = panStart.scroll - (e.clientX - panStart.x)
+    pendingPanX = panStart.scroll - (e.clientX - panStart.x)
+    if (panRaf) return
+    panRaf = requestAnimationFrame(() => {
+      panRaf = 0
+      if (scroller.value) scroller.value.scrollLeft = pendingPanX
+    })
   }
 
   function endPan() {
     panning.value = false
+    if (panRaf) {
+      cancelAnimationFrame(panRaf)
+      panRaf = 0
+    }
     window.removeEventListener('pointermove', onPan)
     window.removeEventListener('pointerup', endPan)
   }
 
-  /** 触控板横向 / Shift+滚轮横向滚动；普通滚轮纵向翻页 */
   function onWheel(e: WheelEvent) {
     if (!scroller.value) return
     if (e.shiftKey || Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
@@ -911,650 +941,701 @@
     }
   }
 
-  /**
-   * 「断层」主因：默认滚到今天后，多数投放条在 3–7 月，全部落在视野左侧外。
-   * 看全部条 = 滚到当前列表最早一条附近，让时间条重新进视野。
-   */
-  function scrollToContent() {
-    if (!scroller.value || !items.value.length) return
-    const earliest = [...items.value].sort((a, b) => a.start.localeCompare(b.start))[0]
-    scroller.value.scrollTo({
-      left: Math.max(0, offsetOf(earliest.start) - 80),
-      behavior: 'smooth'
-    })
-    nextTick(onScroll)
-  }
-
   function scrollToToday() {
     if (!scroller.value || todayLeft.value == null) return
-    const trackViewW = Math.max(120, scroller.value.clientWidth - NAME_W)
+    const w = Math.max(120, scroller.value.clientWidth)
     scroller.value.scrollTo({
-      left: Math.max(0, todayLeft.value - trackViewW * 0.72),
+      left: Math.max(0, todayLeft.value - w * 0.28),
       behavior: 'smooth'
     })
   }
 
-  let ro: ResizeObserver | null = null
-
   onMounted(() => {
-    nextTick(() => {
-      onScroll()
-      // 有历史条时优先滚到内容区，避免「左侧有名、右侧空白」
-      if (items.value.some((i) => !i.unscheduled && i.end < todayKey)) scrollToContent()
-      else scrollToToday()
+    // 有细项的项目默认展开，方便看见结构
+    const next: Record<string, boolean> = { ...expanded.value }
+    projectBases.value.forEach((p) => {
+      if (p.childCount) next[p.projectId] = true
     })
+    expanded.value = next
+    nextTick(scrollToToday)
     window.addEventListener('resize', onScroll)
-    if (scroller.value && typeof ResizeObserver !== 'undefined') {
-      ro = new ResizeObserver(() => onScroll())
-      ro.observe(scroller.value)
-    }
   })
 
   onUnmounted(() => {
     window.removeEventListener('resize', onScroll)
-    ro?.disconnect()
     endPan()
+    onBarUp()
   })
 
-  watch([groupBy, sourceFilter, statusFilter, keyword, () => props.projectId, () => props.projectIds], () =>
-    nextTick(() => {
-      onScroll()
-      scrollToContent()
-    })
-  )
+  watch(scale, () => nextTick(scrollToToday))
 </script>
 
 <style scoped lang="scss">
-  $border: var(--el-border-color-lighter);
+  $line: color-mix(in srgb, var(--el-border-color) 55%, transparent);
   $muted: var(--el-text-color-secondary);
-  $name-w: 240px;
-  $row-h: 46px;
-  $group-h: 34px;
-  $head-h: 56px;
-  $surface: var(--el-bg-color);
-  $surface-soft: var(--el-fill-color-light);
+  $bg: var(--el-bg-color);
+  $soft: color-mix(in srgb, var(--el-fill-color-lighter) 88%, $bg);
+  $accent: #5e6ad2;
+  $list-w: 268px;
+  $row-h: 44px;
+  $chrono-h: 56px;
+  $ease: cubic-bezier(0.25, 0.1, 0.25, 1);
 
-  .ai-confirm-text {
-    margin: 0;
-    line-height: 1.7;
-    white-space: pre-wrap;
-    color: var(--el-text-color-regular);
+  .tl {
+    position: relative;
+    border: 1px solid $line;
+    border-radius: 18px;
+    background:
+      linear-gradient(180deg, color-mix(in srgb, $soft 55%, $bg) 0%, $bg 48px),
+      $bg;
+    overflow: hidden;
+    box-shadow:
+      0 1px 2px rgb(15 23 42 / 3%),
+      0 12px 32px rgb(15 23 42 / 5%);
+    font-feature-settings: 'ss01' on, 'cv11' on;
+    -webkit-font-smoothing: antialiased;
   }
 
-  .gantt {
-    border: 1px solid $border;
+  .tl__chrome {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 14px;
+    border-bottom: 1px solid color-mix(in srgb, $line 70%, transparent);
+    background: transparent;
+  }
+
+  .tl__zoom {
+    display: inline-flex;
+    padding: 3px;
+    border-radius: 999px;
+    background: color-mix(in srgb, $soft 90%, rgb(0 0 0 / 3%));
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, $line 80%, transparent);
+  }
+
+  .tl__zoom-btn {
+    border: 0;
+    background: transparent;
+    color: $muted;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    padding: 6px 12px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition:
+      background 0.18s $ease,
+      color 0.18s $ease,
+      box-shadow 0.18s $ease;
+
+    &.active {
+      background: $bg;
+      color: var(--el-text-color-primary);
+      box-shadow:
+        0 1px 2px rgb(15 23 42 / 6%),
+        0 0 0 1px color-mix(in srgb, $line 50%, transparent);
+    }
+
+    &:hover:not(.active) {
+      color: var(--el-text-color-primary);
+    }
+  }
+
+  .tl__chrome-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .tl__meta {
+    font-size: 12px;
+    color: $muted;
+    letter-spacing: -0.01em;
+  }
+
+  .tl__today-btn {
+    border: 0;
+    background: color-mix(in srgb, $accent 10%, $bg);
+    color: $accent;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    padding: 7px 14px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition:
+      background 0.18s $ease,
+      transform 0.18s $ease;
+
+    &:hover {
+      background: color-mix(in srgb, $accent 16%, $bg);
+    }
+
+    &:active {
+      transform: scale(0.98);
+    }
+  }
+
+  .tl__cursor-hud,
+  .tl__drag-hud {
+    position: absolute;
+    z-index: 20;
+    top: 58px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 6px 14px;
+    border-radius: 999px;
+    background: rgb(28 28 30 / 90%);
+    backdrop-filter: blur(10px);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+    pointer-events: none;
+    box-shadow: 0 8px 24px rgb(0 0 0 / 18%);
+    white-space: nowrap;
+  }
+
+  .tl__drag-hud {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 16px;
+
+    strong {
+      font-weight: 600;
+      max-width: 160px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    span {
+      opacity: 0.92;
+    }
+
+    em {
+      font-style: normal;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgb(255 255 255 / 14%);
+      color: #c7c7ff;
+      font-weight: 600;
+      font-size: 11px;
+    }
+  }
+
+  .tl__viewport {
+    display: flex;
+    height: min(78vh, 820px);
+    min-height: 440px;
+
+    &.is-dragging {
+      cursor: grabbing;
+
+      .tl__bar {
+        transition: none !important;
+      }
+    }
+  }
+
+  .tl__list {
+    flex: 0 0 $list-w;
+    width: $list-w;
+    border-right: 1px solid color-mix(in srgb, $line 75%, transparent);
+    background: color-mix(in srgb, $soft 35%, $bg);
+    overflow: auto;
+  }
+
+  .tl__list-head {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    height: $chrono-h;
+    padding: 0 16px 12px;
+    display: flex;
+    align-items: flex-end;
+    border-bottom: 1px solid color-mix(in srgb, $line 70%, transparent);
+    background: color-mix(in srgb, $soft 45%, $bg);
+    backdrop-filter: blur(8px);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: $muted;
+  }
+
+  .tl__list-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: $row-h;
+    margin: 2px 8px;
+    padding: 0 8px 0 6px;
+    border: 0;
     border-radius: 12px;
-    background: $surface;
-    color: var(--el-text-color-primary);
+    cursor: pointer;
+    transition: background 0.16s $ease;
+
+    &:hover {
+      background: color-mix(in srgb, $soft 90%, transparent);
+    }
+
+    &.active {
+      background: color-mix(in srgb, $accent 9%, $bg);
+    }
+
+    &.is-phase {
+      margin-left: 12px;
+      background: transparent;
+
+      &:hover,
+      &.active {
+        background: color-mix(in srgb, $soft 70%, transparent);
+      }
+    }
+  }
+
+  .tl__expand {
+    flex: 0 0 22px;
+    width: 22px;
+    height: 22px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    padding: 0;
+    border-radius: 999px;
+    background: color-mix(in srgb, $soft 80%, transparent);
+    cursor: pointer;
+    transition:
+      background 0.16s $ease,
+      transform 0.16s $ease;
+
+    &:hover {
+      background: color-mix(in srgb, $accent 12%, $soft);
+    }
+
+    &.open {
+      background: color-mix(in srgb, $accent 14%, $bg);
+
+      .tl__expand-chevron {
+        transform: rotate(90deg);
+        border-color: $accent;
+      }
+    }
+  }
+
+  .tl__expand-chevron {
+    width: 6px;
+    height: 6px;
+    border-right: 1.5px solid $muted;
+    border-bottom: 1.5px solid $muted;
+    transform: rotate(-45deg);
+    margin-left: -1px;
+    transition:
+      transform 0.18s $ease,
+      border-color 0.18s $ease;
+  }
+
+  .tl__indent {
+    flex: 0 0 22px;
+  }
+
+  .tl__add,
+  .tl__del {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    border: 0;
+    border-radius: 999px;
+    background: color-mix(in srgb, $soft 85%, transparent);
+    color: $muted;
+    font-size: 15px;
+    line-height: 1;
+    cursor: pointer;
+    transition:
+      background 0.16s $ease,
+      color 0.16s $ease,
+      transform 0.16s $ease;
+
+    &:hover {
+      color: $accent;
+      background: color-mix(in srgb, $accent 12%, $bg);
+      transform: scale(1.04);
+    }
+  }
+
+  .tl__del:hover {
+    color: #ff375f;
+    background: color-mix(in srgb, #ff375f 10%, $bg);
+  }
+
+  .tl__status {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    box-shadow: 0 0 0 3px rgb(15 23 42 / 5%);
+  }
+
+  .tl__list-text {
+    min-width: 0;
+    flex: 1;
     overflow: hidden;
 
-    &__toolbar {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 14px 16px;
-      border-bottom: 1px solid $border;
-      background: $surface;
-    }
-
-    &__filters {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 12px;
-    }
-
-    &__field {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-
-      > span {
-        font-size: 13px;
-        color: $muted;
-        white-space: nowrap;
-        flex-shrink: 0;
-      }
-    }
-
-    &__select {
-      :deep(.el-select__wrapper) {
-        background: $surface;
-        box-shadow: 0 0 0 1px var(--el-border-color) inset;
-      }
-
-      :deep(.el-select__selected-item),
-      :deep(.el-select__placeholder),
-      :deep(.el-select__caret) {
-        color: var(--el-text-color-regular);
-      }
-
-      :deep(.el-select__selected-item) {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      }
-    }
-
-    &__actions {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    &__hint {
-      font-size: 12px;
-      color: var(--el-text-color-placeholder);
-    }
-
-    &__legend {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 16px;
-      padding: 8px 16px;
-      border-bottom: 1px solid $border;
-      background: $surface-soft;
-      font-size: 12px;
-      color: $muted;
-    }
-
-    &__legend-item {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-
-      i {
-        width: 12px;
-        height: 8px;
-        border-radius: 3px;
-      }
-    }
-
-    &__legend-count {
-      margin-left: auto;
-      color: var(--el-text-color-placeholder);
-    }
-
-    &__viewport {
-      display: flex;
-      flex-direction: column;
-      max-height: 640px;
-      overflow: hidden;
-      background: $surface;
-      border-top: 1px solid $border;
-    }
-
-    &__sticky-head {
-      display: flex;
-      flex-shrink: 0;
-      z-index: 6;
-      background: $surface;
-      border-bottom: 1px solid $border;
-    }
-
-    &__head-track {
-      flex: 1;
-      min-width: 0;
-      overflow: hidden;
-    }
-
-    &__sheet-scroll {
-      flex: 1;
-      min-height: 0;
-      overflow: auto;
-      cursor: grab;
-      user-select: none;
-      background: $surface;
-
-      &.panning {
-        cursor: grabbing;
-      }
-
-      &--box {
-        cursor: default;
-      }
-    }
-
-    &__sheet {
-      position: relative;
-      background: $surface;
-    }
-
-    &__today-sheet {
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      z-index: 4;
-      width: 2px;
-      background: #ef4444;
-      pointer-events: none;
-    }
-
-    &__line {
-      display: flex;
-      width: 100%;
-
-      &--group {
-        min-height: $group-h;
-      }
-    }
-
-    &__name-cell {
-      position: sticky;
-      left: 0;
-      z-index: 3;
-      flex: 0 0 $name-w;
-      width: $name-w;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      height: $row-h;
-      padding: 0 14px;
-      border-right: 1px solid $border;
-      border-bottom: 1px solid var(--el-border-color-extra-light);
-      background: $surface;
-      overflow: hidden;
-
-      &.active {
-        background: rgb(74 144 217 / 12%);
-      }
-
-      &--group {
-        height: $group-h;
-        background: $surface-soft;
-        border-bottom: 1px solid $border;
-        font-size: 12px;
-        font-weight: 600;
-        color: var(--el-text-color-primary);
-        text-overflow: ellipsis;
-        white-space: nowrap;
-
-        em {
-          font-style: normal;
-          font-weight: 400;
-          color: var(--el-text-color-placeholder);
-          flex-shrink: 0;
-        }
-      }
-    }
-
-    &__track-cell {
-      position: relative;
-      flex: 0 0 auto;
-      height: $row-h;
-      border-bottom: 1px solid var(--el-border-color-extra-light);
-      background-color: $surface;
-      overflow: hidden;
-
-      &::before {
-        content: '';
-        position: absolute;
-        inset: 0;
-        z-index: 0;
-        pointer-events: none;
-        background-image: repeating-linear-gradient(
-          to right,
-          transparent 0,
-          transparent 29px,
-          color-mix(in srgb, var(--el-border-color) 90%, #64748b) 29px,
-          color-mix(in srgb, var(--el-border-color) 90%, #64748b) 30px
-        );
-      }
-
-      &--group {
-        height: $group-h;
-        background: color-mix(in srgb, $surface-soft 90%, transparent);
-      }
-
-      &--boxable {
-        cursor: crosshair;
-
-        .gantt__rail {
-          background: color-mix(in srgb, #8b5cf6 18%, var(--el-border-color-lighter));
-          border-color: color-mix(in srgb, #8b5cf6 35%, var(--el-border-color));
-        }
-      }
-
-      &--boxing {
-        .gantt__rail {
-          border-color: #7c3aed;
-          background: color-mix(in srgb, #8b5cf6 28%, var(--el-fill-color-light));
-        }
-      }
-    }
-
-    &__names-head {
-      display: flex;
-      align-items: flex-end;
-      flex: 0 0 $name-w;
-      width: $name-w;
-      height: $head-h;
-      padding: 0 14px 10px;
-      border-right: 1px solid $border;
-      background: $surface;
-      font-size: 12px;
-      font-weight: 600;
-      color: $muted;
-    }
-
-    &__dot {
-      width: 8px;
-      height: 8px;
-      flex-shrink: 0;
-      border-radius: 50%;
-    }
-
-    &__name-text {
-      min-width: 0;
-      flex: 1;
-      overflow: hidden;
-
-      strong {
-        display: block;
-        font-size: 13px;
-        font-weight: 500;
-        color: var(--el-text-color-primary);
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-
-      span {
-        display: block;
-        font-size: 11px;
-        color: var(--el-text-color-placeholder);
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-    }
-
-    &__head {
-      height: $head-h;
-      background: $surface;
-    }
-
-    &__months {
-      position: relative;
-      height: 26px;
-    }
-
-    &__month {
-      position: absolute;
-      top: 0;
-      display: flex;
-      align-items: center;
-      height: 26px;
-      padding-left: 8px;
-      border-left: 1px solid $border;
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--el-text-color-primary);
-      white-space: nowrap;
-    }
-
-    &__days {
-      display: flex;
-      height: 29px;
-    }
-
-    &__day {
-      flex-shrink: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 11px;
-      color: var(--el-text-color-placeholder);
-
-      &.weekend {
-        background: $surface-soft;
-      }
-
-      &.today {
-        color: #fff;
-        font-weight: 700;
-        background: #ef4444;
-      }
-    }
-
-    &__name-jump {
-      flex-shrink: 0;
-      width: 22px;
-      height: 22px;
-      margin-left: auto;
-      border: 1px solid var(--el-border-color);
-      border-radius: 6px;
-      background: var(--el-fill-color-light);
-      color: #4a90d9;
-      font-size: 14px;
-      line-height: 1;
-      cursor: pointer;
-
-      &:hover {
-        border-color: #4a90d9;
-        background: rgb(74 144 217 / 10%);
-      }
-    }
-
-    &__today {
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      z-index: 1;
-      width: 2px;
-      background: #ef4444;
-      pointer-events: none;
-
-      span {
-        position: absolute;
-        top: 2px;
-        left: 4px;
-        padding: 1px 5px;
-        border-radius: 4px;
-        background: #ef4444;
-        color: #fff;
-        font-size: 10px;
-        white-space: nowrap;
-      }
-    }
-
-    &__box {
-      position: absolute;
-      top: 5px;
-      z-index: 5;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 36px;
-      border-radius: 8px;
-      background: color-mix(in srgb, #8b5cf6 28%, #fff);
-      border: 2px solid #7c3aed;
-      box-shadow:
-        0 0 0 1px rgb(124 58 237 / 15%),
-        inset 0 1px 0 rgb(255 255 255 / 50%);
-      pointer-events: none;
-    }
-
-    &__box-label {
-      padding: 0 8px;
-      font-size: 11px;
-      font-weight: 600;
-      color: #5b21b6;
-      white-space: nowrap;
-      user-select: none;
-    }
-
-    &__offscreen-hint {
-      position: absolute;
-      top: 10px;
-      z-index: 0;
-      height: 26px;
-      border-radius: 6px;
-      border: 1px dashed color-mix(in srgb, #4a90d9 55%, var(--el-border-color));
-      background: color-mix(in srgb, #4a90d9 12%, transparent);
-      pointer-events: none;
-
-      &.left {
-        border-left-width: 3px;
-        border-left-color: #4a90d9;
-      }
-
-      &.right {
-        border-right-width: 3px;
-        border-right-color: #4a90d9;
-      }
-    }
-
-    &__lane-hint {
-      position: absolute;
-      left: 12px;
-      top: 14px;
-      z-index: 1;
-      font-size: 11px;
-      color: var(--el-text-color-placeholder);
-      pointer-events: none;
-    }
-
-    &__rail {
-      position: absolute;
-      left: 8px;
-      right: 8px;
-      top: 10px;
-      z-index: 1;
-      height: 26px;
-      border-radius: 8px;
-      border: 1px solid var(--el-border-color);
-      background: color-mix(in srgb, var(--el-fill-color-light) 70%, $surface);
-      pointer-events: none;
-    }
-
-    &__slot {
-      position: absolute;
-      top: 12px;
-      z-index: 2;
-      min-width: 64px;
-      height: 22px;
-      padding: 0 8px;
-      border: 1px dashed var(--el-border-color);
-      border-radius: 6px;
-      background: var(--el-fill-color-blank);
-      color: var(--el-text-color-placeholder);
-      font-size: 11px;
-      line-height: 20px;
-      white-space: nowrap;
-    }
-
-    &__bar {
-      position: absolute;
-      top: 9px;
-      z-index: 3;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      height: 28px;
-      padding: 0 10px;
-      border-radius: 6px;
-      color: #fff;
-      cursor: pointer;
-      overflow: hidden;
-      box-shadow: 0 1px 2px rgb(0 0 0 / 12%);
-      transition: filter 0.15s ease;
-
-      &:hover {
-        filter: brightness(1.06);
-      }
-
-      &.active {
-        outline: 2px solid #1f2937;
-        outline-offset: 1px;
-      }
-
-      &.unscheduled {
-        border: 1px dashed #cbd5e1;
-        background: transparent;
-        color: #94a3b8;
-        box-shadow: none;
-        justify-content: center;
-        font-size: 11px;
-      }
-    }
-
-    /** 达成度覆盖层：亮色部分是已完成的比例 */
-    &__fill {
-      position: absolute;
-      inset: 0 auto 0 0;
-      background: rgb(255 255 255 / 26%);
-      pointer-events: none;
-    }
-
-    &__bar-date {
-      position: relative;
-      flex-shrink: 0;
-      font-size: 11px;
-      font-variant-numeric: tabular-nums;
-      opacity: 0.85;
-    }
-
-    &__bar-label {
-      position: relative;
-      flex: 1;
-      min-width: 0;
-      font-size: 12px;
-      font-weight: 500;
-      text-align: center;
+    strong {
+      display: block;
+      font-size: 13px;
+      font-weight: 560;
+      letter-spacing: -0.015em;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
 
-    &__jump {
-      position: absolute;
-      top: 11px;
-      z-index: 2;
-      min-width: 118px;
-      height: 24px;
-      padding: 0 8px;
-      border: 1px solid rgb(74 144 217 / 45%);
-      border-radius: 10px;
-      background: rgb(74 144 217 / 12%);
-      color: #2563eb;
+    span {
+      display: block;
+      margin-top: 1px;
       font-size: 11px;
+      color: $muted;
+      letter-spacing: -0.01em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    em {
+      font-style: normal;
+      color: #ff453a;
       font-weight: 600;
-      font-variant-numeric: tabular-nums;
-      white-space: nowrap;
-      cursor: pointer;
-      box-shadow: 0 1px 2px rgb(0 0 0 / 6%);
-
-      &.left {
-        text-align: left;
-      }
-
-      &.right {
-        text-align: right;
-      }
-
-      &:hover {
-        border-color: #4a90d9;
-        background: rgb(74 144 217 / 22%);
-      }
     }
+  }
 
-    &__meta {
+  .tl__empty-side {
+    margin: 28px 18px;
+    font-size: 12px;
+    line-height: 1.5;
+    color: $muted;
+  }
+
+  .tl__board {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .tl__chrono {
+    flex-shrink: 0;
+    height: $chrono-h;
+    overflow: hidden;
+    border-bottom: 1px solid color-mix(in srgb, $line 70%, transparent);
+    background: color-mix(in srgb, $soft 28%, $bg);
+  }
+
+  .tl__chrono-inner {
+    position: relative;
+    height: 100%;
+  }
+
+  .tl__band {
+    position: absolute;
+    top: 8px;
+    height: 18px;
+    padding-left: 10px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--el-text-color-regular);
+    border-left: 0;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
+  .tl__ticks {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 22px;
+  }
+
+  .tl__tick {
+    position: absolute;
+    bottom: 6px;
+    font-size: 10px;
+    color: color-mix(in srgb, $muted 88%, transparent);
+    text-align: center;
+    white-space: nowrap;
+    transform: translateX(-50%);
+    pointer-events: none;
+
+    &.today {
+      color: $accent;
+      font-weight: 700;
+    }
+  }
+
+  .tl__scroll {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+    cursor: grab;
+    background: $bg;
+
+    &.panning {
+      cursor: grabbing;
+    }
+  }
+
+  .tl__sheet {
+    position: relative;
+    background-image: repeating-linear-gradient(
+      to right,
+      transparent 0,
+      transparent calc(var(--day-px) - 1px),
+      color-mix(in srgb, $line 35%, transparent) calc(var(--day-px) - 1px),
+      color-mix(in srgb, $line 35%, transparent) var(--day-px)
+    );
+  }
+
+  .tl__today {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    z-index: 2;
+    width: 2px;
+    margin-left: -1px;
+    background: linear-gradient(180deg, $accent, color-mix(in srgb, $accent 55%, transparent));
+    pointer-events: none;
+    box-shadow: 0 0 12px color-mix(in srgb, $accent 35%, transparent);
+
+    &::before {
+      content: '';
       position: absolute;
-      top: 15px;
-      font-size: 11px;
-      color: var(--el-text-color-placeholder);
-      white-space: nowrap;
-      pointer-events: none;
+      top: 4px;
+      left: -4px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: $accent;
+      box-shadow: 0 0 0 3px color-mix(in srgb, $accent 22%, transparent);
+    }
+  }
+
+  .tl__cursor {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    z-index: 3;
+    width: 1px;
+    background: color-mix(in srgb, #1c1c1e 28%, transparent);
+    pointer-events: none;
+  }
+
+  .tl__day-snap {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    z-index: 1;
+    pointer-events: none;
+    background: color-mix(in srgb, $accent 10%, transparent);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, $accent 22%, transparent);
+  }
+
+  .tl__row {
+    position: relative;
+    height: $row-h;
+    border-bottom: 1px solid color-mix(in srgb, $line 28%, transparent);
+
+    &.active {
+      background: color-mix(in srgb, $accent 4.5%, transparent);
     }
 
-    &__empty {
-      padding: 32px;
-      text-align: center;
-      color: var(--el-text-color-placeholder);
+    &.is-phase {
+      background: color-mix(in srgb, $soft 22%, transparent);
     }
+  }
+
+  .tl__bar {
+    position: absolute;
+    top: 12px;
+    z-index: 4;
+    height: 20px;
+    border-radius: 999px;
+    color: #fff;
+    cursor: grab;
+    overflow: hidden;
+    touch-action: none;
+    box-shadow:
+      0 1px 2px rgb(15 23 42 / 7%),
+      inset 0 1px 0 rgb(255 255 255 / 22%);
+    transition:
+      box-shadow 0.18s $ease,
+      filter 0.18s $ease,
+      opacity 0.18s $ease;
+
+    &.is-phase {
+      top: 14px;
+      height: 16px;
+      opacity: 0.94;
+      box-shadow:
+        0 1px 2px rgb(15 23 42 / 5%),
+        inset 0 1px 0 rgb(255 255 255 / 16%);
+    }
+
+    &.dragging {
+      z-index: 8;
+      cursor: grabbing;
+      filter: saturate(1.05);
+      box-shadow:
+        0 10px 24px rgb(15 23 42 / 18%),
+        inset 0 1px 0 rgb(255 255 255 / 22%);
+    }
+
+    &.overdue {
+      box-shadow:
+        0 0 0 2px color-mix(in srgb, #ff453a 45%, transparent),
+        0 1px 2px rgb(15 23 42 / 8%);
+    }
+
+    &.done {
+      opacity: 0.68;
+      filter: saturate(0.85);
+    }
+
+    &.is-light {
+      color: #1c1c1e;
+
+      .tl__bar-name {
+        text-shadow: none;
+      }
+
+      .tl__progress {
+        background: linear-gradient(90deg, rgb(0 0 0 / 10%), rgb(0 0 0 / 4%));
+      }
+
+      .tl__handle::after {
+        background: rgb(28 28 30 / 45%);
+      }
+    }
+
+    &:hover .tl__handle {
+      opacity: 1;
+    }
+  }
+
+  .tl__progress {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 0;
+    border-radius: 999px 0 0 999px;
+    background: linear-gradient(90deg, rgb(255 255 255 / 28%), rgb(255 255 255 / 12%));
+    pointer-events: none;
+  }
+
+  .tl__bar-label {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    height: 100%;
+    padding: 0 11px 0 12px;
+    pointer-events: none;
+    overflow: hidden;
+  }
+
+  .tl__bar-name {
+    font-size: 11px;
+    font-weight: 560;
+    letter-spacing: -0.015em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-shadow: 0 1px 1px rgb(0 0 0 / 12%);
+  }
+
+  .tl__bar-pct {
+    flex-shrink: 0;
+    font-size: 11px;
+    font-weight: 500;
+    opacity: 0.88;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .tl__handle {
+    position: absolute;
+    top: 0;
+    z-index: 5;
+    width: 12px;
+    height: 100%;
+    cursor: ew-resize;
+    opacity: 0;
+    background: transparent;
+    transition: opacity 0.16s $ease;
+
+    &::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      width: 3px;
+      height: 8px;
+      margin-top: -4px;
+      border-radius: 999px;
+      background: rgb(255 255 255 / 72%);
+    }
+
+    &--l {
+      left: 0;
+
+      &::after {
+        left: 5px;
+      }
+    }
+
+    &--r {
+      right: 0;
+
+      &::after {
+        right: 5px;
+      }
+    }
+  }
+
+  .tl__empty {
+    margin: 0;
+    padding: 32px 18px;
+    text-align: center;
+    color: $muted;
+    font-size: 13px;
+    letter-spacing: -0.01em;
+  }
+
+  .add-tip {
+    margin: 0 0 12px;
+    color: $muted;
+    font-size: 13px;
+    line-height: 1.55;
+  }
+
+  .opt-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    margin-right: 8px;
+    border-radius: 50%;
+    vertical-align: middle;
+  }
+
+  .opt-meta {
+    margin-left: 8px;
+    color: $muted;
+    font-size: 12px;
   }
 </style>

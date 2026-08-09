@@ -60,22 +60,27 @@ nginx -t && systemctl restart nginx
 ## 三、本机打包（Windows）
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File C:\coding\Dojo\scripts\deploy\pack-release.ps1
+powershell -ExecutionPolicy Bypass -File J:\BaiduNetdiskDownload\coding\Dojo-rebuild\scripts\deploy\pack-release.ps1
 ```
 
-产物：`C:\coding\Dojo\release\dojo-web-release.tar.gz`
+产物（内容相同，两个文件名任选上传）：
+
+- `release/dojo-web-release.tgz`
+- `release/dojo-web-release.tar.gz`
+- 桌面也会复制一份
 
 打包脚本会：
 
-- 注入 `.env.local` 中的 `VITE_DEEPSEEK_*` / `VITE_RAPIDAPI_*` 到生产构建
-- 生成 `secrets.env`（Nginx 反代用，Unix 换行无 BOM）
-- 写入 `VERSION.txt`（含 `main_js` / `review_js` 哈希，便于验收）
+- 构建生产 dist
+- 同时输出 `.tgz` 与 `.tar.gz`（避免服务器上文件名对不上）
+- 生成 `dist/VERSION.txt`（含 `main_js` / `review_js` 哈希，便于 `curl` 验收）
+- 可选从 `.env.local` 生成 `secrets.env`（Nginx 反代用，不进前端包）
 
 ---
 
 ## 四、上传到服务器
 
-OrcaTerm **文件上传** → `/root/dojo-web-release.tar.gz`（覆盖旧包）
+OrcaTerm **文件上传** → `/root/dojo-web-release.tgz` 或 `/root/dojo-web-release.tar.gz`（覆盖旧包，二者等价）
 
 ---
 
@@ -84,9 +89,11 @@ OrcaTerm **文件上传** → `/root/dojo-web-release.tar.gz`（覆盖旧包）
 **每次更新前端，在 OrcaTerm 依次执行（一次一条，勿粘贴 shell 提示符）：**
 
 ```bash
-tar -xzf /root/dojo-web-release.tar.gz -C /tmp
+tar -xzf /root/dojo-web-release.tgz -C /tmp
 bash /tmp/dojo-web-release/install-on-server.sh
 ```
+
+（若上传的是 `.tar.gz`，把第一行文件名改成对应即可；安装脚本两种扩展名都认。）
 
 安装脚本会：
 

@@ -1,0 +1,41 @@
+name: Build Release
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  pack:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: pnpm
+          cache-dependency-path: dojo-web/pnpm-lock.yaml
+
+      - name: Install and build
+        working-directory: dojo-web
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm exec vue-tsc --noEmit
+          pnpm exec vite build
+
+      - name: Pack release tarball
+        run: bash scripts/deploy/pack-release.sh
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dojo-web-release
+          path: |
+            release/dojo-web-release.tgz
+            release/dojo-web-release.tar.gz

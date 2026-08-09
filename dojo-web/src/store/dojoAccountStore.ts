@@ -62,6 +62,7 @@ function normalize(handle: string) {
 /**
  * 首次进入时用已有数据播种台账：内容规划表给出细分与链接，
  * 监看表和分发记录补上那些只在数据里出现过的账号。
+ * 种子数据已清空时返回空台账，由账号接入 / 手工添加重新入库。
  */
 function seedAccounts(): MatrixAccount[] {
   const map = new Map<string, MatrixAccount>()
@@ -122,17 +123,28 @@ function persist() {
   saveTable(TABLE_VIDEOS, dojoAccountStore.videos)
 }
 
+/** 账号台账变更后写入工作复盘（动态导入避免循环依赖） */
+function touchWorklog() {
+  void import('@/store/dojoWorklogStore').then(({ reconcileWorklog }) => {
+    reconcileWorklog()
+  })
+}
+
 export function findAccount(handle: string) {
   const id = normalize(handle)
   return dojoAccountStore.accounts.find((a) => normalize(a.handle) === id)
 }
 
 /** 入库或更新账号，返回是否为新增 */
-export function upsertAccount(input: Partial<MatrixAccount> & { handle: string }) {
+export function upsertAccount(
+  input: Partial<MatrixAccount> & { handle: string },
+  opts?: { silent?: boolean }
+) {
   const existing = findAccount(input.handle)
   if (existing) {
     Object.assign(existing, input, { handle: existing.handle })
     persist()
+    if (!opts?.silent) touchWorklog()
     return false
   }
   dojoAccountStore.accounts.push({
@@ -147,6 +159,7 @@ export function upsertAccount(input: Partial<MatrixAccount> & { handle: string }
     note: input.note || ''
   })
   persist()
+  if (!opts?.silent) touchWorklog()
   return true
 }
 
@@ -154,9 +167,19 @@ export function removeAccount(handle: string) {
   const id = normalize(handle)
   const i = dojoAccountStore.accounts.findIndex((a) => normalize(a.handle) === id)
   if (i >= 0) {
+    const projectId = dojoAccountStore.accounts[i].projectId
     dojoAccountStore.accounts.splice(i, 1)
     delete dojoAccountStore.videos[id]
     persist()
+    touchWorklog()
+    void import('@/store/dojoAccountWow').then(({ clearWowBaseline }) => {
+      clearWowBaseline(id)
+    })
+    if (projectId) {
+      void import('@/store/dojoProjectMetrics').then(({ syncProjectCurrentFromLedger }) => {
+        syncProjectCurrentFromLedger(projectId)
+      })
+    }
   }
 }
 
@@ -164,11 +187,143 @@ export function removeAccount(handle: string) {
 export function importAccounts(rows: Array<Partial<MatrixAccount> & { handle: string }>) {
   let added = 0
   let updated = 0
+  const projectIds = new Set<string>()
   rows.forEach((row) => {
-    if (upsertAccount(row)) added++
+    if (upsertAccount(row, { silent: true })) added++
     else updated++
+    if (row.projectId) projectIds.add(row.projectId)
+  })
+  // 导入账号后回写项目「现状·账号数」
+  if (projectIds.size) {
+    void import('@/store/dojoProjectMetrics').then(({ syncProjectCurrentFromLedger }) => {
+      projectIds.forEach((id) => syncProjectCurrentFromLedger(id))
+    })
+  }
+  const projectId = projectIds.size === 1 ? [...projectIds][0] : undefined
+  void import('@/store/dojoWorklogStore').then(({ logAccountImportSummary, reconcileWorklog }) => {
+    logAccountImportSummary(added, updated, projectId)
+    reconcileWorklog()
   })
   return { added, updated }
+}
+
+export interface ImportVideoRow {
+  handle: string
+  videoId: string
+  videoUrl: string
+  description?: string
+  publishDate?: string
+  views?: number
+  likes?: number
+  comments?: number
+  shares?: number
+}
+
+function mergeVideoList(
+  existing: TikTokAccountVideo[],
+  incoming: TikTokAccountVideo[]
+): TikTokAccountVideo[] {
+  const map = new Map<string, TikTokAccountVideo>()
+  existing.forEach((v) => map.set(v.videoId, v))
+  incoming.forEach((v) => {
+    const prev = map.get(v.videoId)
+    if (!prev) {
+      map.set(v.videoId, v)
+      return
+    }
+    // API/导入互补：有值的字段覆盖空字段，指标取较大者
+    map.set(v.videoId, {
+      ...prev,
+      ...v,
+      views: Math.max(prev.views || 0, v.views || 0),
+      likes: Math.max(prev.likes || 0, v.likes || 0),
+      comments: Math.max(prev.comments || 0, v.comments || 0),
+      shares: Math.max(prev.shares || 0, v.shares || 0),
+      description: v.description || prev.description,
+      publishDate: v.publishDate || prev.publishDate,
+      cover: v.cover || prev.cover
+    })
+  })
+  return [...map.values()].sort((a, b) => (b.publishDate || '').localeCompare(a.publishDate || ''))
+}
+
+/**
+ * 导入作品链接：
+ * - 按 videoId 合并进 videos[handle]
+ * - 账号不在池里时自动补录（空有视频无账号的回归入库）
+ */
+export function importVideos(
+  rows: ImportVideoRow[],
+  opts: {
+    projectId?: string
+    segment?: string
+    /** 默认 true：缺账号则从视频 handle 建档 */
+    ensureAccount?: boolean
+    source?: AccountSource
+  } = {}
+) {
+  const ensureAccount = opts.ensureAccount !== false
+  let videoAdded = 0
+  let videoUpdated = 0
+  let accountBackfilled = 0
+  const projectIds = new Set<string>()
+  if (opts.projectId) projectIds.add(opts.projectId)
+
+  rows.forEach((row) => {
+    const handle = row.handle?.trim()
+    const videoId = String(row.videoId || '').trim()
+    if (!handle || !videoId) return
+    const id = normalize(handle)
+
+    let account = findAccount(handle)
+    if (!account && ensureAccount) {
+      upsertAccount({
+        handle,
+        projectId: opts.projectId || '',
+        segment: opts.segment || '',
+        link: `https://www.tiktok.com/@${stripHandle(handle)}`,
+        source: opts.source || 'document',
+        status: 'active',
+        note: '由视频导入自动补录'
+      })
+      account = findAccount(handle)
+      accountBackfilled++
+    }
+    if (!account) return
+
+    if (opts.projectId && !account.projectId) {
+      account.projectId = opts.projectId
+      if (opts.projectId) projectIds.add(opts.projectId)
+    }
+
+    const incoming: TikTokAccountVideo = {
+      videoId,
+      videoUrl: row.videoUrl || `https://www.tiktok.com/@${stripHandle(handle)}/video/${videoId}`,
+      handle: account.handle,
+      description: row.description || '',
+      publishDate: row.publishDate || '',
+      views: row.views || 0,
+      likes: row.likes || 0,
+      comments: row.comments || 0,
+      shares: row.shares || 0,
+      engagementRate: 0,
+      isAd: false
+    }
+    const prev = dojoAccountStore.videos[id] || []
+    const had = prev.some((v) => v.videoId === videoId)
+    dojoAccountStore.videos[id] = mergeVideoList(prev, [incoming])
+    if (had) videoUpdated++
+    else videoAdded++
+  })
+
+  persist()
+  if (projectIds.size) {
+    void import('@/store/dojoProjectMetrics').then(({ syncProjectCurrentFromLedger }) => {
+      projectIds.forEach((pid) => syncProjectCurrentFromLedger(pid))
+    })
+  }
+
+  return { videoAdded, videoUpdated, accountBackfilled }
 }
 
 export function isSyncing(handle: string) {
@@ -203,8 +358,18 @@ export async function syncAccount(handle: string) {
     account.syncSource = result.source === 'rapidapi' ? 'rapidapi' : snapshot.source
     account.syncError = undefined
 
-    if (result.videos.length) dojoAccountStore.videos[id] = result.videos
+    // 与导入作品按 videoId 合并，避免 Rapid 同步冲掉手工导入的链接
+    if (result.videos.length) {
+      dojoAccountStore.videos[id] = mergeVideoList(dojoAccountStore.videos[id] || [], result.videos)
+    }
     persist()
+    // Rapid 作品 → 分发量 / 曝光量
+    if (account.projectId) {
+      void import('@/store/dojoProjectMetrics').then(({ syncProjectCurrentFromLedger }) => {
+        syncProjectCurrentFromLedger(account.projectId)
+      })
+    }
+    touchWorklog()
     return { snapshot, videos: result.videos }
   } catch (e) {
     account.syncError = e instanceof Error ? e.message : '同步失败'
@@ -226,6 +391,8 @@ export async function syncAccounts(
     done++
     onProgress?.(done, handles.length, handle)
   }
+  // 批量结束后再对账一次，合并项目级指标变化
+  touchWorklog()
   return done
 }
 

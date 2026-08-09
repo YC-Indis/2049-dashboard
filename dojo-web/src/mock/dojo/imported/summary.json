@@ -2,18 +2,18 @@
   "recoveredFrom": "dojo-web-release.tar.gz / dist/assets/index-D_9QqzGF.js (线上 2026-08-09 构建)",
   "generatedBy": "scripts/gen-imported.mjs",
   "counts": {
-    "workflowStages": 14,
-    "accountPlans": 5,
+    "workflowStages": 0,
+    "accountPlans": 0,
     "weeklyScripts": {
-      "W1": 56,
+      "W1": 0,
       "W2": 0,
       "W3": 0,
       "W4": 0,
       "W5": 0
     },
-    "distributionRecords": 34,
-    "accountMonitor": 5,
+    "distributionRecords": 0,
+    "accountMonitor": 0,
     "timelineStart": "2026-08-04",
-    "timelineEnd": "2026-08-07"
+    "timelineEnd": "2026-08-04"
   }
 }

@@ -1,435 +1,224 @@
 <template>
-  <div class="dojo-page">
+  <div class="dojo-page ad-videos">
     <header class="dojo-page__head">
       <div>
         <h1>投放视频监控</h1>
-        <p>各批次视频投放记录与播放对比</p>
+        <p>汇总全部投放视频 · 列表 / 卡片切换，点进查看播放与互动</p>
       </div>
       <div class="head-ops">
         <DojoProjectSelect v-model="selectedProjectIds" :sync-store="false" width="240px" />
-        <div class="auto-refresh">
-          <span>自动刷新设置</span>
-          <ElSelect v-model="autoInterval" style="width: 120px">
-            <ElOption label="关闭" value="off" />
-            <ElOption label="5 分钟" value="5" />
-            <ElOption label="15 分钟" value="15" />
-            <ElOption label="30 分钟" value="30" />
-          </ElSelect>
-        </div>
+        <ElRadioGroup v-model="viewMode" size="default">
+          <ElRadioButton value="list">列表</ElRadioButton>
+          <ElRadioButton value="card">卡片</ElRadioButton>
+        </ElRadioGroup>
+        <ElButton :loading="syncing" @click="syncAll">同步播放量</ElButton>
         <ElButton @click="exportRows">导出</ElButton>
-        <ElButton @click="showAdd = true">增加账号/视频</ElButton>
-        <ElButton :loading="syncing" @click="syncPage">同步本页播放量</ElButton>
       </div>
     </header>
 
-    <p v-if="!selectedProjectIds.length" class="demo-hint">
-      未选项目时展示<strong>全部</strong>投放视频（{{ rows.length }}
-      条可见）；勾选上方项目可收窄范围。
+    <p v-if="!filteredVideos.length && !dojoAccountStore.accounts.length" class="demo-hint">
+      暂无投放视频，请先在投放账号监控中添加账号并同步。
     </p>
 
     <div class="stat-row">
       <div class="stat">
-        <span class="stat__n">{{ rows.length }}</span>
-        <span class="stat__l">当前筛选条数</span>
+        <span class="stat__n accent">{{ filteredVideos.length }}</span>
+        <span class="stat__l">投放视频</span>
       </div>
       <div class="stat">
-        <span class="stat__n">{{ stats.delivered }}</span>
-        <span class="stat__l">已投放</span>
+        <span class="stat__n accent">{{ formatCompact(totalViews) }}</span>
+        <span class="stat__l">播放量合计</span>
       </div>
       <div class="stat">
-        <span class="stat__n">{{ fmt(stats.views) }}</span>
-        <span class="stat__l">播放量合计（含自然流）</span>
+        <span class="stat__n accent">{{ formatCompact(totalLikes) }}</span>
+        <span class="stat__l">点赞合计</span>
       </div>
       <div class="stat">
-        <span class="stat__n" :class="{ danger: stats.laggard }">{{ stats.laggard }}</span>
-        <span class="stat__l">播放不顺利</span>
+        <span class="stat__n accent">{{ formatCompact(totalEngagement) }}</span>
+        <span class="stat__l">互动量合计</span>
       </div>
     </div>
 
     <section class="panel">
       <div class="filters">
-        <span class="filter-hint">{{ projectFilterLabel }}</span>
-        <ElSelect v-model="batch" placeholder="全部项目批次" clearable style="width: 200px">
-          <ElOption
-            v-for="b in batchOptions"
-            :key="b.batch"
-            :label="`${b.batch}（${b.videoCount}）`"
-            :value="b.batch"
-          />
-        </ElSelect>
-        <ElSelect v-model="status" placeholder="投放状态" clearable style="width: 140px">
-          <ElOption v-for="s in statuses" :key="s" :label="s" :value="s" />
-        </ElSelect>
+        <ElInput
+          v-model="keyword"
+          clearable
+          placeholder="搜索账号 / 视频描述 / 链接"
+          style="width: 260px"
+        />
         <ElSelect v-model="sortBy" style="width: 160px">
           <ElOption label="按播放量高→低" value="views-desc" />
           <ElOption label="按播放量低→高" value="views-asc" />
           <ElOption label="按日期新→旧" value="date-desc" />
           <ElOption label="按日期旧→新" value="date-asc" />
         </ElSelect>
-        <ElInput
-          v-model="keyword"
-          placeholder="搜索链接 / 云机 / 区域 / 备注"
-          clearable
-          style="width: 240px"
-        />
-        <ElCheckbox v-model="onlyLaggard">只看播放不顺利</ElCheckbox>
-        <span class="filters__count">{{ rows.length }}</span>
+        <span class="muted">共 {{ filteredVideos.length }} 条视频</span>
       </div>
 
-      <ElTable :data="paged" stripe style="width: 100%" :row-class-name="rowClass">
-        <ElTableColumn
-          label="#"
-          type="index"
-          width="60"
-          :index="(i: number) => (page - 1) * pageSize + i + 1"
-        />
-        <ElTableColumn prop="batch" label="项目批次" min-width="140" show-overflow-tooltip>
+      <p v-if="!filteredVideos.length" class="empty-hint">
+        {{ dojoAccountStore.accounts.length ? '暂无投放视频，请先同步投放账号' : '暂无投放账号' }}
+      </p>
+
+      <ElTable
+        v-else-if="viewMode === 'list'"
+        :data="displayVideos"
+        stripe
+        row-key="videoId"
+        @row-click="goDetail"
+      >
+        <ElTableColumn label="发布日期" width="120" prop="publishDate" />
+        <ElTableColumn label="所属账号" min-width="140">
           <template #default="{ row }">
-            <span>{{ row.batch }}</span>
-            <ElTag v-if="row.custom" size="small" type="warning" class="custom-tag">自建</ElTag>
+            <strong>{{ row.accountNickname || row.accountHandle }}</strong>
+            <div class="muted">{{ row.accountHandle }}</div>
           </template>
         </ElTableColumn>
-        <ElTableColumn label="日期" min-width="100">
-          <template #default="{ row }">{{ row.date || '—' }}</template>
-        </ElTableColumn>
-        <ElTableColumn label="云机编号" min-width="100">
-          <template #default="{ row }">{{ row.device || '—' }}</template>
-        </ElTableColumn>
-        <ElTableColumn label="视频链接" min-width="180">
+        <ElTableColumn label="内容" min-width="220" show-overflow-tooltip>
           <template #default="{ row }">
-            <a class="link" :href="row.videoUrl" target="_blank" rel="noopener">
-              {{ shortUrl(row.videoUrl) }}
-            </a>
+            {{ row.description || row.videoId }}
           </template>
         </ElTableColumn>
-        <ElTableColumn label="播放量" min-width="110" align="right">
+        <ElTableColumn label="播放量" width="110" align="right">
+          <template #default="{ row }">{{ num(row.views) }}</template>
+        </ElTableColumn>
+        <ElTableColumn label="点赞" width="90" align="right">
+          <template #default="{ row }">{{ num(row.likes) }}</template>
+        </ElTableColumn>
+        <ElTableColumn label="评论" width="90" align="right">
+          <template #default="{ row }">{{ num(row.comments) }}</template>
+        </ElTableColumn>
+        <ElTableColumn label="转发" width="90" align="right">
+          <template #default="{ row }">{{ num(row.shares) }}</template>
+        </ElTableColumn>
+        <ElTableColumn label="操作" width="110" fixed="right">
           <template #default="{ row }">
-            <strong>{{ fmt(effectiveViews(row)) }}</strong>
-            <em v-if="synced[row.id]" class="synced">已同步</em>
+            <ElButton link type="primary" @click.stop="goDetail(row)">查看详情 →</ElButton>
           </template>
-        </ElTableColumn>
-        <ElTableColumn label="对比同批次" min-width="150">
-          <template #default="{ row }">
-            <div v-if="medianOf(row.batch)" class="bar">
-              <div
-                class="bar__fill"
-                :style="{
-                  width: `${Math.min(100, (effectiveViews(row) / (medianOf(row.batch) * 2)) * 100)}%`,
-                  background: perfColor(row)
-                }"
-              />
-              <span class="bar__text">{{ ratioText(row) }}</span>
-            </div>
-            <span v-else class="muted">无基准</span>
-          </template>
-        </ElTableColumn>
-        <ElTableColumn label="投放区域" min-width="110" show-overflow-tooltip>
-          <template #default="{ row }">{{ row.region || '—' }}</template>
-        </ElTableColumn>
-        <ElTableColumn label="状态" min-width="100">
-          <template #default="{ row }">
-            <ElTag size="small" :type="statusType(row.status)">{{ row.status }}</ElTag>
-          </template>
-        </ElTableColumn>
-        <ElTableColumn label="投流反馈" min-width="110" show-overflow-tooltip>
-          <template #default="{ row }">{{ row.feedback || row.note || '—' }}</template>
         </ElTableColumn>
       </ElTable>
 
-      <ElPagination
-        v-model:current-page="page"
-        v-model:page-size="pageSize"
-        class="pager"
-        layout="total, sizes, prev, pager, next"
-        :page-sizes="[20, 50, 100]"
-        :total="rows.length"
-      />
+      <div v-else class="video-grid">
+        <article
+          v-for="row in displayVideos"
+          :key="row.videoId"
+          class="vid-card"
+          @click="goDetail(row)"
+        >
+          <div class="vid-card__cover">
+            <img v-if="row.cover" :src="row.cover" alt="" loading="lazy" />
+            <div v-else class="vid-card__placeholder">
+              <span>▶</span>
+            </div>
+          </div>
+          <div class="vid-card__body">
+            <p class="vid-card__account">{{ row.accountNickname || row.accountHandle }}</p>
+            <h3>{{ row.description || row.videoId }}</h3>
+            <p class="vid-card__date muted">{{ row.publishDate || '—' }}</p>
+            <dl class="vid-card__kv">
+              <div>
+                <dt>播放</dt>
+                <dd>{{ num(row.views) }}</dd>
+              </div>
+              <div>
+                <dt>点赞</dt>
+                <dd>{{ num(row.likes) }}</dd>
+              </div>
+              <div>
+                <dt>评论</dt>
+                <dd>{{ num(row.comments) }}</dd>
+              </div>
+              <div>
+                <dt>转发</dt>
+                <dd>{{ num(row.shares) }}</dd>
+              </div>
+            </dl>
+          </div>
+        </article>
+      </div>
     </section>
-
-    <ElDialog
-      v-model="showAdd"
-      title="增加账号/视频"
-      width="520px"
-      destroy-on-close
-      @closed="resetForm"
-    >
-      <ElForm ref="formRef" :model="form" :rules="formRules" label-width="100px">
-        <ElFormItem label="项目批次" prop="batch">
-          <ElInput v-model="form.batch" placeholder="批次名称" />
-        </ElFormItem>
-        <ElFormItem label="日期">
-          <ElDatePicker
-            v-model="form.date"
-            type="date"
-            value-format="YYYY-MM-DD"
-            placeholder="投放日期"
-            style="width: 100%"
-          />
-        </ElFormItem>
-        <ElFormItem label="云机编号">
-          <ElInput v-model="form.device" placeholder="云机编号" />
-        </ElFormItem>
-        <ElFormItem label="账号链接">
-          <ElInput v-model="form.accountUrl" placeholder="https://www.tiktok.com/@..." />
-        </ElFormItem>
-        <ElFormItem label="视频链接" prop="videoUrl">
-          <ElInput v-model="form.videoUrl" placeholder="https://www.tiktok.com/@.../video/..." />
-        </ElFormItem>
-        <ElFormItem label="备注">
-          <ElInput v-model="form.note" type="textarea" :rows="2" placeholder="可选说明" />
-        </ElFormItem>
-      </ElForm>
-      <template #footer>
-        <ElButton @click="showAdd = false">取消</ElButton>
-        <ElButton type="primary" @click="submitAdd">添加</ElButton>
-      </template>
-    </ElDialog>
   </div>
 </template>
 
 <script setup lang="ts">
-  import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue'
-  import { useRoute } from 'vue-router'
-  import type { FormInstance, FormRules } from 'element-plus'
+  import { computed, ref } from 'vue'
+  import { useRouter } from 'vue-router'
   import { ElMessage } from 'element-plus'
-  import type { AdVideo } from '@/mock/dojo/imported/ads'
-  import { runtimeAdBatches, runtimeAdVideos } from '@/store/dojoRuntimeStore'
-  import { syncVideoMetrics } from '@/api/tiktok'
-  import { exportCsv } from '@/utils/dojoExport'
-  import { markAccountsSynced, markVideosSynced, normalizeHandle } from '@/store/dojoSyncStore'
   import DojoProjectSelect from '@/components/dojo/DojoProjectSelect.vue'
-  import { getProjectById, matchesAnyProject } from '@/store/dojoProjectStore'
+  import {
+    adMonitorVideos,
+    type AdMonitorVideo
+  } from '@/store/dojoAdMonitorStore'
+  import { dojoAccountStore, syncAccounts } from '@/store/dojoAccountStore'
+  import { dojoProjectStore } from '@/store/dojoProjectStore'
+  import { exportCsv } from '@/utils/dojoExport'
 
   defineOptions({ name: 'DojoAdVideos' })
 
-  type DisplayVideo = AdVideo & { custom?: boolean }
-
-  const route = useRoute()
-
-  const selectedProjectIds = ref<string[]>([])
-  const sortBy = ref<'views-desc' | 'views-asc' | 'date-desc' | 'date-asc'>('views-desc')
-
-  const projectFilterLabel = computed(() => {
-    if (!selectedProjectIds.value.length) return '全部项目'
-    return selectedProjectIds.value
-      .map((id) => getProjectById(id)?.name)
-      .filter(Boolean)
-      .join('、')
-  })
-
-  function matchesProject(row: DisplayVideo) {
-    return matchesAnyProject(
-      `${row.batch} ${row.region ?? ''} ${row.content ?? ''}`,
-      selectedProjectIds.value
-    )
-  }
-
-  const batch = ref('')
-  const status = ref('')
+  const router = useRouter()
+  const viewMode = ref<'list' | 'card'>('card')
+  const selectedProjectIds = ref<string[]>([...dojoProjectStore.selectedIds])
   const keyword = ref('')
-  const onlyLaggard = ref(false)
-  const page = ref(1)
-  const pageSize = ref(20)
+  const sortBy = ref<'views-desc' | 'views-asc' | 'date-desc' | 'date-asc'>('views-desc')
   const syncing = ref(false)
-  const synced = ref<Record<string, number>>({})
-  const customVideos = ref<DisplayVideo[]>([])
-  const autoInterval = ref<'off' | '5' | '15' | '30'>('off')
-  const showAdd = ref(false)
-  const formRef = ref<FormInstance>()
 
-  let intervalTimer: ReturnType<typeof setInterval> | null = null
-
-  const form = reactive({
-    batch: '',
-    date: '',
-    device: '',
-    accountUrl: '',
-    videoUrl: '',
-    note: ''
-  })
-
-  const formRules: FormRules = {
-    batch: [{ required: true, message: '请填写项目批次', trigger: 'blur' }],
-    videoUrl: [{ required: true, message: '请填写视频链接', trigger: 'blur' }]
-  }
-
-  const allVideos = computed<DisplayVideo[]>(() => [
-    ...runtimeAdVideos.value,
-    ...customVideos.value
-  ])
-
-  const batchOptions = computed(() => {
-    const map = new Map(runtimeAdBatches.value.map((b) => [b.batch, { ...b }]))
-    for (const v of customVideos.value) {
-      const existing = map.get(v.batch)
-      if (existing) {
-        existing.videoCount += 1
-      } else {
-        map.set(v.batch, {
-          batch: v.batch,
-          videoCount: 1,
-          deliveredCount: 0,
-          firstDate: v.date,
-          lastDate: v.date,
-          totalNaturalViews: 0,
-          totalViews: 0
-        })
-      }
-    }
-    return [...map.values()]
-  })
-
-  const statuses = computed(() => [...new Set(allVideos.value.map((v) => v.status))])
-
-  onMounted(() => {
-    const q = route.query.batch
-    if (typeof q === 'string' && q) batch.value = q
-  })
-
-  onUnmounted(() => {
-    if (intervalTimer) clearInterval(intervalTimer)
-  })
-
-  watch(autoInterval, (v) => {
-    if (intervalTimer) {
-      clearInterval(intervalTimer)
-      intervalTimer = null
-    }
-    if (v === 'off') return
-    intervalTimer = setInterval(() => syncPage(), Number(v) * 60 * 1000)
-  })
-
-  function effectiveViews(row: DisplayVideo) {
-    return synced.value[row.id] ?? row.views ?? row.naturalViews ?? 0
-  }
-
-  const medians = computed(() => {
-    const map = new Map<string, number>()
-    for (const b of batchOptions.value) {
-      const vals = allVideos.value
-        .filter((v) => v.batch === b.batch)
-        .map(effectiveViews)
-        .filter((n) => n > 0)
-        .sort((x, y) => x - y)
-      if (vals.length) map.set(b.batch, vals[Math.floor(vals.length / 2)])
-    }
-    return map
-  })
-
-  function medianOf(b: string) {
-    return medians.value.get(b) ?? 0
-  }
-
-  function isLaggard(row: DisplayVideo) {
-    const m = medianOf(row.batch)
-    const v = effectiveViews(row)
-    if (row.status === '已投放' && v === 0) return true
-    return m > 0 && v > 0 && v < m * 0.5
-  }
-
-  const rows = computed(() => {
-    const kw = keyword.value.trim().toLowerCase()
-    const list = allVideos.value.filter((v) => {
-      if (!matchesProject(v)) return false
-      if (batch.value && v.batch !== batch.value) return false
-      if (status.value && v.status !== status.value) return false
-      if (onlyLaggard.value && !isLaggard(v)) return false
-      if (
-        kw &&
-        !`${v.videoUrl} ${v.device} ${v.region} ${v.note} ${v.accountUrl}`
-          .toLowerCase()
-          .includes(kw)
+  const filteredVideos = computed(() => {
+    const ids = selectedProjectIds.value
+    const q = keyword.value.trim().toLowerCase()
+    return adMonitorVideos.value.filter((v) => {
+      if (ids.length && v.projectId && !ids.includes(v.projectId)) return false
+      if (ids.length && !v.projectId) return false
+      if (!q) return true
+      return (
+        v.accountHandle.toLowerCase().includes(q) ||
+        (v.accountNickname || '').toLowerCase().includes(q) ||
+        (v.description || '').toLowerCase().includes(q) ||
+        v.videoUrl.toLowerCase().includes(q)
       )
-        return false
-      return true
     })
+  })
+
+  const displayVideos = computed(() => {
+    const list = [...filteredVideos.value]
     list.sort((a, b) => {
-      if (sortBy.value === 'views-desc') return effectiveViews(b) - effectiveViews(a)
-      if (sortBy.value === 'views-asc') return effectiveViews(a) - effectiveViews(b)
-      if (sortBy.value === 'date-asc') return (a.date || '').localeCompare(b.date || '')
-      return (b.date || '').localeCompare(a.date || '')
+      if (sortBy.value === 'views-desc') return b.views - a.views
+      if (sortBy.value === 'views-asc') return a.views - b.views
+      if (sortBy.value === 'date-asc') return (a.publishDate || '').localeCompare(b.publishDate || '')
+      return (b.publishDate || '').localeCompare(a.publishDate || '')
     })
     return list
   })
 
-  const paged = computed(() =>
-    rows.value.slice((page.value - 1) * pageSize.value, page.value * pageSize.value)
+  const totalViews = computed(() => filteredVideos.value.reduce((n, v) => n + v.views, 0))
+  const totalLikes = computed(() => filteredVideos.value.reduce((n, v) => n + v.likes, 0))
+  const totalEngagement = computed(() =>
+    filteredVideos.value.reduce((n, v) => n + v.likes + v.comments + v.shares, 0)
   )
 
-  const stats = computed(() => ({
-    delivered: rows.value.filter((v) => v.status === '已投放').length,
-    views: rows.value.reduce((n, v) => n + effectiveViews(v), 0),
-    laggard: rows.value.filter(isLaggard).length
-  }))
-
-  watch([selectedProjectIds, batch, status, keyword, onlyLaggard, sortBy], () => {
-    page.value = 1
-  })
-
-  function fmt(n: number | null) {
-    return n == null ? '—' : n.toLocaleString('en-US')
+  function num(n: number) {
+    return n.toLocaleString('en-US')
   }
 
-  function shortUrl(u: string) {
-    return u.replace(/^https?:\/\//, '').slice(0, 34)
+  function formatCompact(n: number) {
+    if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`
+    if (n >= 1000) return `${(n / 1000).toFixed(1)}k`
+    return String(n)
   }
 
-  function ratioText(row: DisplayVideo) {
-    const m = medianOf(row.batch)
-    if (!m) return '—'
-    return `${Math.round((effectiveViews(row) / m) * 100)}% 中位`
+  function goDetail(row: AdMonitorVideo) {
+    router.push(`/ad-video/${encodeURIComponent(row.videoId)}`)
   }
 
-  function perfColor(row: DisplayVideo) {
-    const m = medianOf(row.batch)
-    const r = m ? effectiveViews(row) / m : 0
-    if (r >= 1.2) return '#22c55e'
-    if (r >= 0.8) return '#4a90d9'
-    if (r >= 0.5) return '#f59e0b'
-    return '#ef4444'
-  }
-
-  function statusType(s: string) {
-    if (s === '已投放') return 'success'
-    if (s === '暂不投放') return 'info'
-    if (s === '跟进中') return 'warning'
-    return 'info'
-  }
-
-  function rowClass({ row }: { row: DisplayVideo }) {
-    return isLaggard(row) ? 'row-laggard' : ''
-  }
-
-  async function syncPage() {
+  async function syncAll() {
+    const handles = dojoAccountStore.accounts.map((a) => a.handle)
+    if (!handles.length) {
+      ElMessage.info('请先在投放账号监控中添加账号')
+      return
+    }
     syncing.value = true
     try {
-      const targets = paged.value
-      const results = await Promise.all(targets.map((v) => syncVideoMetrics(v.videoUrl)))
-      let hit = 0
-      const syncedUrls: string[] = []
-      const syncedHandles: string[] = []
-      let fromRapid = false
-
-      results.forEach((r, i) => {
-        if (r?.views != null) {
-          synced.value[targets[i].id] = r.views
-          hit++
-          if (r.source === 'rapidapi') {
-            fromRapid = true
-            syncedUrls.push(targets[i].videoUrl)
-            const handle = normalizeHandle(targets[i].accountUrl)
-            if (handle) syncedHandles.push(handle)
-          }
-        }
-      })
-
-      if (fromRapid) {
-        markVideosSynced(syncedUrls)
-        if (syncedHandles.length) markAccountsSynced(syncedHandles)
-      }
-
-      const src = fromRapid ? 'RapidAPI' : '本地 mock'
-      ElMessage.success(`已更新 ${hit} 条播放量（来源：${src}）`)
+      await syncAccounts(handles)
+      ElMessage.success(`已同步 ${handles.length} 个账号的作品与指标`)
     } finally {
       syncing.value = false
     }
@@ -438,167 +227,138 @@
   function exportRows() {
     exportCsv(
       '投放视频监控',
-      [
-        '项目批次',
-        '日期',
-        '云机编号',
-        '账号链接',
-        '视频链接',
-        '播放量',
-        '投放区域',
-        '状态',
-        '备注'
-      ],
-      rows.value.map((v) => [
-        v.batch,
-        v.date,
-        v.device,
-        v.accountUrl,
+      ['发布日期', '所属账号', '视频链接', '播放量', '点赞', '评论', '转发', '互动率'],
+      filteredVideos.value.map((v) => [
+        v.publishDate,
+        v.accountHandle,
         v.videoUrl,
-        effectiveViews(v),
-        v.region,
-        v.status,
-        v.feedback || v.note
+        v.views,
+        v.likes,
+        v.comments,
+        v.shares,
+        v.engagementRate
       ])
     )
   }
-
-  function resetForm() {
-    form.batch = ''
-    form.date = ''
-    form.device = ''
-    form.accountUrl = ''
-    form.videoUrl = ''
-    form.note = ''
-  }
-
-  async function submitAdd() {
-    const valid = await formRef.value?.validate().catch(() => false)
-    if (!valid) return
-
-    customVideos.value.push({
-      id: `custom-v-${Date.now()}`,
-      custom: true,
-      batch: form.batch.trim(),
-      date: form.date || null,
-      platform: 'TikTok',
-      device: form.device.trim(),
-      accountUrl: form.accountUrl.trim(),
-      videoUrl: form.videoUrl.trim(),
-      content: '',
-      naturalViews: null,
-      views: null,
-      code: '',
-      region: '',
-      note: form.note.trim(),
-      feedback: '',
-      status: '跟进中'
-    })
-
-    showAdd.value = false
-    ElMessage.success('已添加视频监控条目')
-  }
 </script>
 
-<style scoped lang="scss" src="../dojo-page.scss"></style>
-
 <style scoped lang="scss">
-  .stat__n.danger {
-    color: #ef4444;
-  }
+  @use '../dojo-page.scss';
 
-  .custom-tag {
-    margin-left: 6px;
-    vertical-align: middle;
+  .accent {
+    color: var(--el-color-primary);
   }
 
   .filters {
     display: flex;
     flex-wrap: wrap;
-    align-items: center;
     gap: 10px;
-    margin-bottom: 14px;
-
-    &__count {
-      margin-left: auto;
-      font-size: 12px;
-      color: var(--el-text-color-secondary);
-    }
-  }
-
-  .filter-hint {
-    font-size: 12px;
-    color: var(--el-text-color-secondary);
-  }
-
-  .gate {
-    padding: 48px 24px;
-    border: 1px dashed var(--el-border-color);
-    border-radius: 12px;
-    text-align: center;
-    color: var(--el-text-color-secondary);
-    background: var(--el-fill-color-lighter);
-  }
-
-  .auto-refresh {
-    display: inline-flex;
     align-items: center;
-    gap: 8px;
-    font-size: 13px;
-    color: var(--el-text-color-regular);
-  }
-
-  .link {
-    color: var(--el-color-primary);
-    text-decoration: none;
-    font-size: 12px;
-
-    &:hover {
-      text-decoration: underline;
-    }
-  }
-
-  .synced {
-    margin-left: 6px;
-    font-style: normal;
-    font-size: 10px;
-    color: #22c55e;
-  }
-
-  .bar {
-    position: relative;
-    height: 18px;
-    border-radius: 9px;
-    background: var(--el-fill-color-light);
-    overflow: hidden;
-
-    &__fill {
-      height: 100%;
-      border-radius: 9px;
-    }
-
-    &__text {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 11px;
-      color: var(--el-text-color-primary);
-    }
+    margin-bottom: 14px;
   }
 
   .muted {
     color: var(--el-text-color-secondary);
-    font-size: 12px;
+    font-size: 13px;
   }
 
-  .pager {
-    margin-top: 14px;
-    justify-content: flex-end;
+  .empty-hint {
+    margin: 0;
+    padding: 32px 16px;
+    text-align: center;
+    color: var(--el-text-color-secondary);
+    font-size: 14px;
   }
 
-  :deep(.row-laggard) {
-    --el-table-tr-bg-color: rgb(239 68 68 / 6%);
+  .video-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 14px;
+  }
+
+  .vid-card {
+    overflow: hidden;
+    border: 1px solid var(--el-border-color-lighter);
+    border-radius: 12px;
+    background: var(--el-bg-color);
+    cursor: pointer;
+    transition:
+      border-color 0.15s ease,
+      box-shadow 0.15s ease;
+
+    &:hover {
+      border-color: var(--el-color-primary-light-5);
+      box-shadow: 0 4px 16px rgb(0 0 0 / 4%);
+    }
+
+    &__cover {
+      aspect-ratio: 16 / 9;
+      background: var(--el-fill-color-light);
+      overflow: hidden;
+
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+    }
+
+    &__placeholder {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: var(--el-text-color-secondary);
+      font-size: 28px;
+    }
+
+    &__body {
+      padding: 12px 14px 14px;
+    }
+
+    &__account {
+      margin: 0 0 4px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--el-color-primary);
+    }
+
+    h3 {
+      margin: 0 0 6px;
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    &__date {
+      margin: 0 0 10px;
+      font-size: 12px;
+    }
+
+    &__kv {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      margin: 0;
+
+      dt {
+        color: var(--el-text-color-secondary);
+        font-size: 11px;
+      }
+
+      dd {
+        margin: 2px 0 0;
+        font-size: 13px;
+        font-weight: 600;
+      }
+    }
+  }
+
+  :deep(.el-table__row) {
+    cursor: pointer;
   }
 </style>

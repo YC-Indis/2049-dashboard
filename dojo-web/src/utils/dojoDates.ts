@@ -36,6 +36,16 @@ export function daysBetween(a: string, b: string): number {
   return Math.round(ms / 86400000)
 }
 
+/** ISO 日期加减天数 */
+export function addDays(iso: string, n: number): string {
+  const d = new Date(`${iso.slice(0, 10)}T00:00:00`)
+  d.setDate(d.getDate() + n)
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${y}-${m}-${day}`
+}
+
 /** 2026-08-04 → 8月4日 */
 export function formatMonthDay(iso: string): string {
   const [, m, d] = iso.split('-')

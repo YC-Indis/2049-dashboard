@@ -1,9 +1,16 @@
 #!/bin/bash
 # Dojo 前端 · Ubuntu 一键安装
-# 前置：/root/dojo-web-release.tar.gz 已上传
+# 前置：/root/dojo-web-release.tgz 或 .tar.gz 已上传
 set -euo pipefail
 
-RELEASE="/root/dojo-web-release.tar.gz"
+RELEASE=""
+for candidate in /root/dojo-web-release.tar.gz /root/dojo-web-release.tgz; do
+  if [[ -f "$candidate" ]]; then
+    RELEASE="$candidate"
+    break
+  fi
+done
+
 STAGE="/tmp/dojo-web-release"
 WEB_ROOT="/var/www/dojo"
 SECRETS="/etc/dojo/secrets.env"
@@ -14,8 +21,8 @@ export DEBIAN_FRONTEND=noninteractive
 apt-get update -qq
 apt-get install -y nginx rsync curl
 
-if [[ ! -f "$RELEASE" ]]; then
-  echo "错误: 请先上传 $RELEASE"
+if [[ -z "$RELEASE" ]]; then
+  echo "错误: 请先上传 /root/dojo-web-release.tgz（或 .tar.gz）"
   exit 1
 fi
 

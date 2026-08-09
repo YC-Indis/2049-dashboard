@@ -8,7 +8,7 @@
 const PREFIX = 'dojo:v1:'
 
 /** 存储层版本，结构不兼容时递增，旧数据会被丢弃而不是报错 */
-const SCHEMA_VERSION = 1
+const SCHEMA_VERSION = 2
 
 interface Envelope<T> {
   version: number

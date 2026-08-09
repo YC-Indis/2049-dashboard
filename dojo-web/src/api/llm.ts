@@ -45,7 +45,9 @@ export async function chatAgent(
   // 1) 直接 DeepSeek（本地 .env.local）
   if (DEEPSEEK_KEY) {
     try {
-      const reply = await callDeepSeek(system, message, history)
+      const reply = await callDeepSeek(system, message, history, {
+        expectJson: Boolean(context.expectJson)
+      })
       if (reply) return reply
     } catch {
       /* try next */
@@ -113,7 +115,8 @@ ${raw}
 async function callDeepSeek(
   system: string,
   message: string,
-  history: ChatTurn[]
+  history: ChatTurn[],
+  opts: { expectJson?: boolean } = {}
 ): Promise<LlmReply | null> {
   const messages = [
     { role: 'system', content: system },
@@ -130,7 +133,8 @@ async function callDeepSeek(
     body: JSON.stringify({
       model: DEEPSEEK_MODEL,
       messages,
-      temperature: 0.3
+      temperature: opts.expectJson ? 0.1 : 0.3,
+      ...(opts.expectJson ? { response_format: { type: 'json_object' } } : {})
     })
   })
   if (!res.ok) return null

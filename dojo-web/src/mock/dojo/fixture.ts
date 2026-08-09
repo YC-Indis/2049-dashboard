@@ -100,151 +100,9 @@ export const demoProject = {
 
 // 今日概览指标、三个最重要动作与建议语已迁至 store/dojoOverview.ts，改为从数据推导。
 
-export const demoTasks: DojoTask[] = [
-  {
-    id: 'T-104',
-    title: '确认第 4 周发布计划（12 条）',
-    type: 'plan',
-    role: 'pm',
-    owner: 'pm_lucas',
-    due: '今天',
-    dueAt: '2026-08-07T18:00:00',
-    status: 'pending_review',
-    confirmState: 'awaiting_pm',
-    progress: 100,
-    priority: 'high',
-    note: 'Agent 已拆解草案，等待项目经理确认后下发执行',
-    project: 'Dojo',
-    week: 'W4',
-    linkHint: '关联：周计划 / 脚本 8 份'
-  },
-  {
-    id: 'T-105',
-    title: '审核 3 条待过审脚本',
-    type: 'script',
-    role: 'pm',
-    owner: 'pm_lucas',
-    due: '今天',
-    dueAt: '2026-08-07T20:00:00',
-    status: 'pending_review',
-    confirmState: 'awaiting_pm',
-    progress: 60,
-    priority: 'high',
-    note: 'Hook 与产品卖点需对照项目记忆规则',
-    project: 'Dojo',
-    week: 'W4',
-    linkHint: '关联：脚本库'
-  },
-  {
-    id: 'T-211',
-    title: '完成脚本 XR-UK-041 拍摄素材上传',
-    type: 'asset',
-    role: 'executor',
-    owner: 'Ken',
-    due: '今天',
-    dueAt: '2026-08-07T22:00:00',
-    status: 'doing',
-    confirmState: 'confirmed',
-    progress: 40,
-    priority: 'medium',
-    note: '缺 B-roll，预计今晚补齐',
-    project: 'Dojo',
-    week: 'W4',
-    linkHint: '关联：脚本 XR-UK-041'
-  },
-  {
-    id: 'T-212',
-    title: '发布 @vape.uk.daily 今日 2 条',
-    type: 'publish',
-    role: 'executor',
-    owner: 'Mia',
-    due: '今天',
-    dueAt: '2026-08-07T18:00:00',
-    status: 'blocked',
-    confirmState: 'confirmed',
-    progress: 20,
-    priority: 'high',
-    note: '阻塞：总账号预览未通过（异常互动）',
-    blockReason: '账号 @vape.uk.daily 检阅异常',
-    project: 'Dojo',
-    week: 'W4',
-    linkHint: '关联：总账号预览'
-  },
-  {
-    id: 'T-213',
-    title: '逾期：第 3 周脚本修补',
-    type: 'script_revise',
-    role: 'executor',
-    owner: 'pm_lucas',
-    due: '昨天',
-    dueAt: '2026-08-04T18:00:00',
-    status: 'todo',
-    confirmState: 'confirmed',
-    progress: 0,
-    priority: 'high',
-    note: '逾期：需补进度与实际发布时间',
-    project: 'Dojo',
-    week: 'W3',
-    linkHint: '关联：脚本库'
-  },
-  {
-    id: 'T-214',
-    title: '素材包交付',
-    type: 'asset',
-    role: 'executor',
-    owner: 'pm_lucas',
-    due: '昨天',
-    dueAt: '2026-08-04T18:00:00',
-    status: 'todo',
-    confirmState: 'confirmed',
-    progress: 0,
-    priority: 'medium',
-    note: '等待剪辑接手',
-    project: 'Dojo',
-    week: 'W3',
-    linkHint: '关联：内容流转'
-  }
-]
+export const demoTasks: DojoTask[] = []
 
-export const contentFlowItems: ContentFlowItem[] = [
-  {
-    id: 'C-04',
-    title: 'XR-UK-041 开箱对比',
-    stage: 'edit',
-    grade: 'A',
-    progress: 62,
-    startDate: '2026-02-25',
-    endDate: '2026-03-08',
-    targetDate: '2026-03-08',
-    owner: '2049',
-    tags: ['剪辑', '产品'],
-    stageSpans: [
-      { stage: 'script', startDate: '2026-02-25', endDate: '2026-02-27' },
-      { stage: 'record', startDate: '2026-02-28', endDate: '2026-03-02' },
-      { stage: 'edit', startDate: '2026-03-03', endDate: '2026-03-07' },
-      { stage: 'publish', startDate: '2026-03-08', endDate: '2026-03-08' }
-    ]
-  },
-  {
-    id: 'C-05',
-    title: '英国市场口味偏好测试',
-    stage: 'publish',
-    grade: 'B',
-    progress: 88,
-    startDate: '2026-02-22',
-    endDate: '2026-03-06',
-    targetDate: '2026-03-06',
-    owner: '2049',
-    tags: ['发布'],
-    stageSpans: [
-      { stage: 'script', startDate: '2026-02-22', endDate: '2026-02-24' },
-      { stage: 'record', startDate: '2026-02-25', endDate: '2026-02-27' },
-      { stage: 'edit', startDate: '2026-02-28', endDate: '2026-03-03' },
-      { stage: 'publish', startDate: '2026-03-04', endDate: '2026-03-06' },
-      { stage: 'review', startDate: '2026-03-06', endDate: '2026-03-06' }
-    ]
-  }
-]
+export const contentFlowItems: ContentFlowItem[] = []
 
 export const stageLabels: Record<ContentStage, string> = {
   script: '脚本',
@@ -262,51 +120,7 @@ export const stageColors: Record<ContentStage, string> = {
   review: '#909399'
 }
 
-export const demoAccounts: DojoAccount[] = [
-  {
-    id: 'A-01',
-    handle: '@vape.uk.daily',
-    stage: '放量',
-    followers: 18240,
-    posts7d: 9,
-    views7d: 126000,
-    lastPost: '1 天前',
-    review: '异常',
-    syncedAt: '2026-08-07 09:12'
-  },
-  {
-    id: 'A-02',
-    handle: '@xros.uk.tips',
-    stage: '稳定运营',
-    followers: 9630,
-    posts7d: 7,
-    views7d: 54000,
-    lastPost: '今天',
-    review: '通过',
-    syncedAt: '2026-08-07 09:12'
-  },
-  {
-    id: 'A-03',
-    handle: '@cloud.puff.uk',
-    stage: '养号',
-    followers: 1280,
-    posts7d: 3,
-    views7d: 4200,
-    lastPost: '2 天前',
-    review: '待检阅',
-    syncedAt: '2026-08-06 18:40'
-  },
-  {
-    id: 'A-04',
-    handle: '@uk.device.lab',
-    stage: '待创建',
-    followers: 0,
-    posts7d: 0,
-    views7d: 0,
-    lastPost: '未发布',
-    review: '待检阅'
-  }
-]
+export const demoAccounts: DojoAccount[] = []
 
 export const agentStarterPrompts = [
   '今天具体做什么？',
@@ -316,34 +130,7 @@ export const agentStarterPrompts = [
 ]
 
 /** 来自 dojo数据.xlsx 字段 — 平台日常录入 */
-export const publishRecords: PublishRecord[] = [
-  {
-    account: 'tiktok.com/@justdojoit',
-    publishDate: '2026-02-12',
-    videoUrl: 'https://www.tiktok.com/@user977543303451666/video/7605744864243797270',
-    paidViews: 25900,
-    engagementRate: 0.0073,
-    note: '自然流+投流'
-  },
-  {
-    account: 'tiktok.com/@justdojoit',
-    publishDate: '2026-02-14',
-    videoUrl: 'https://www.tiktok.com/@user977543303451666/video/7606700315831799062',
-    paidViews: 17100,
-    engagementRate: 0.0138,
-    note: '自然流+投流'
-  },
-  {
-    account: 'tiktok.com/@justdojoit',
-    publishDate: '2026-03-10',
-    videoUrl: 'https://www.tiktok.com/@user977543303451666/video/7615080782259883286',
-    naturalViews: 1904,
-    paidViews: 66100,
-    engagementRate: 0.0082,
-    retention3s: 0.13,
-    note: '自然流+投流，投放中'
-  }
-]
+export const publishRecords: PublishRecord[] = []
 
 /** 矩阵号周报说话结构 — Agent 有的放矢 */
 export const weeklyReportTemplate = {
