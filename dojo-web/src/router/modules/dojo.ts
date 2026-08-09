@@ -58,6 +58,12 @@ export const dojoRoutes: AppRouteRecord[] = [
     component: '/dojo/accounts',
     meta: { title: 'menus.dojo.accounts', icon: 'ri:file-text-line', roles }
   },
+  {
+    name: 'DojoBackup',
+    path: '/backup',
+    component: '/dojo/backup',
+    meta: { title: 'menus.dojo.backup', icon: 'ri:database-2-line', roles }
+  },
 
   // —— 侧栏隐藏，卡片/旧链接仍可进入 ——
   {

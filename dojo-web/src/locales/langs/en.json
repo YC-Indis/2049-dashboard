@@ -223,7 +223,8 @@
       "accounts": "Retrospective",
       "accountReview": "All Accounts",
       "accountDetail": "Account Analysis",
-      "accountIntake": "Account Intake"
+      "accountIntake": "Account Intake",
+      "backup": "Data Backup"
     },
     "login": {
       "title": "Login"

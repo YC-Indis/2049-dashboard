@@ -16,6 +16,7 @@
         >
           隐藏已结束（{{ endedVisibleCount }}）
         </ElButton>
+        <ElButton @click="router.push('/backup')">数据备份</ElButton>
         <ElButton @click="refreshAllMetrics" :loading="refreshing">刷新现状</ElButton>
         <ElButton @click="importVisible = true">AI 导入</ElButton>
         <ElButton type="primary" @click="openCreate">新建项目</ElButton>
@@ -402,6 +403,7 @@
 
 <script setup lang="ts">
   import { computed, onMounted, reactive, ref } from 'vue'
+  import { useRouter } from 'vue-router'
   import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'element-plus'
   import {
     createProject,
@@ -435,6 +437,7 @@
 
   defineOptions({ name: 'DojoProject' })
 
+  const router = useRouter()
   const dialogVisible = ref(false)
   const formRef = ref<FormInstance>()
   const importVisible = ref(false)

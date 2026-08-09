@@ -223,7 +223,8 @@
       "accounts": "工作复盘",
       "accountReview": "总账号预览",
       "accountDetail": "账号分析",
-      "accountIntake": "账号接入"
+      "accountIntake": "账号接入",
+      "backup": "数据备份"
     },
     "login": {
       "title": "登录"
