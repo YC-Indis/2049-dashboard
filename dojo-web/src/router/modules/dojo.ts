@@ -44,6 +44,12 @@ export const dojoRoutes: AppRouteRecord[] = [
     meta: { title: 'menus.dojo.distribution', icon: 'ri:send-plane-line', roles }
   },
   {
+    name: 'DojoAccountIntake',
+    path: '/accounts/intake',
+    component: '/dojo/accounts/intake',
+    meta: { title: 'menus.dojo.accountIntake', icon: 'ri:inbox-archive-line', roles }
+  },
+  {
     name: 'DojoAccountReview',
     path: '/accounts/review',
     component: '/dojo/accounts/review',

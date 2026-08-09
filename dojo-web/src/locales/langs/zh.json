@@ -220,7 +220,8 @@
       "adVideos": "投放视频监控",
       "adAccounts": "买量账号监看",
       "accounts": "复盘总结",
-      "accountReview": "总账号预览"
+      "accountReview": "总账号预览",
+      "accountIntake": "账号接入"
     },
     "login": {
       "title": "登录"
