@@ -6,9 +6,14 @@ import { dirname, join } from 'node:path'
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const script = readFileSync(join(__dirname, 'server-apply-seed.sh'), 'utf8')
 
-const host = '129.226.147.77'
-const username = 'root'
-const password = '123456'
+const host = process.env.DOJO_SSH_HOST || '129.226.147.77'
+const username = process.env.DOJO_SSH_USER || 'root'
+const password = process.env.DOJO_SSH_PASSWORD || ''
+
+if (!password) {
+  console.error('请设置环境变量 DOJO_SSH_PASSWORD')
+  process.exit(1)
+}
 
 const conn = new Client()
 
