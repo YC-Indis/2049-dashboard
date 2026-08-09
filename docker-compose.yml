@@ -1,10 +1,14 @@
 services:
+  # 后端尚未落地（server 目录随源码一并丢失），放进 profile 里，默认不启动，
+  # 这样 `docker compose up` 只跑 web 也能成功。补完后端后用
+  # `docker compose --profile api up` 一起拉起。
   api:
+    profiles: ['api']
     build: ./server
     image: dojo-api
     container_name: dojo-api
     ports:
-      - "8000:8000"
+      - '8000:8000'
     env_file:
       - ./server/.env
     environment:
@@ -20,9 +24,11 @@ services:
     image: dojo-web
     container_name: dojo-web
     ports:
-      - "8080:80"
-    depends_on:
-      - api
+      - '8080:80'
+    environment:
+      # nginx 用它代理 RapidAPI，密钥不进前端产物
+      - RAPIDAPI_KEY=${RAPIDAPI_KEY:?请在 .env 或环境变量里提供 RAPIDAPI_KEY}
+      - RAPIDAPI_HOST=${RAPIDAPI_HOST:-tiktok-api6.p.rapidapi.com}
     restart: unless-stopped
 
 volumes:
