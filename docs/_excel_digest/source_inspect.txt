@@ -1,0 +1,26 @@
+=== 账号发布内容-2026-08-04 (1).csv enc=utf-8-sig rows=231 ===
+COLS: 导出日期 | 账号名称 | 平台 | 发布日期 | 内容标题 | 内容链接 | 播放量 | 点赞量 | 评论量 | 转发量
+ROW: 2026/8/4 | 美国1 | TikTok | 2026/7/25 | This is the cutest thing ever 🥹 #pet #te | https://www.tiktok.com/@smcw37/video/766 | 1376 | 114 | 2 | 3
+ROW: 2026/8/4 | 西班牙6 | TikTok | 2026/7/26 | Moverse con electricidad cambia la forma | https://www.tiktok.com/@user849798173506 | 960 | 2 | 0 | 1
+ROW: 2026/8/4 | 德国4 | TikTok | 2026/7/25 | Sofort gespeichert 📌 #pet #tesla #ugc #f | https://www.tiktok.com/@user752069554370 | 959 | 56 | 1 | 15
+=== 账号发布内容-2026-08-04.csv enc=utf-8-sig rows=137 ===
+COLS: 导出日期 | 账号名称 | 平台 | 发布日期 | 内容标题 | 内容链接 | 播放量 | 点赞量 | 评论量 | 转发量
+ROW: 2026-08-04 | user8878185454171 | TikTok | 2026-08-02 | #tesla #سياراتكهربائية  #تكنولوجياالمستق | https://www.tiktok.com/@user887818545417 | 0 | 0 | 0 | 
+ROW: 2026-08-04 | user8150370781921 | TikTok | 2026-08-02 | هل تكفي حقوق التعدين لضمان عائد جيد؟ #te | https://www.tiktok.com/@user815037078192 | 0 | 0 | 0 | 0
+ROW: 2026-08-04 | user8150370781921 | TikTok | 2026-07-26 | أجمل فيديو شفته اليوم 🐾✨#حيوانات_أليفة # | https://www.tiktok.com/@user815037078192 | 0 | 0 | 0 | 0
+=== 账号粉丝量-2026-08-04 (1).csv enc=utf-8-sig rows=100 ===
+COLS: 云机编号 | 账号链接 | 粉丝量 | 日期
+ROW: 澳洲7 | https://www.tiktok.com/@eqfp5d74 | 119 | 2026/8/4
+ROW: 西班牙3 | https://www.tiktok.com/@user820143650819 | 94 | 2026/8/4
+ROW: 英国2 | https://www.tiktok.com/@user318061955571 | 89 | 2026/8/4
+=== 账号粉丝量-2026-08-04.csv enc=utf-8-sig rows=100 ===
+COLS: 云机编号 | 账号链接 | 粉丝量 | 日期
+ROW: user8878185454171 | https://www.tiktok.com/@user887818545417 | 0 | 2026-08-04
+ROW: 沙特3 | https://www.tiktok.com/@user901857932690 | 0 | 2026-08-04
+ROW: 沙特2 | https://www.tiktok.com/@user902173374222 | 0 | 2026-08-04
+xlsx err: No module named 'openpyxl'
+=== battery-posts-export (6) rows=849 ===
+COLS: platform | region | searchQuery | title | author | publishedAt | views | likes | comments | shares | reposts | level | riskType | riskReason | batch | link
+platforms: [('LinkedIn', 321), ('Google', 191), ('TikTok', 156), ('X', 122), ('YouTube', 59)]
+tiktok rows: 156
+tiktok sample: {"platform": "TikTok", "region": "大洋洲", "searchQuery": "solar energy", "title": "الطاقة و الالواح الشمسية | Solar energy and panels #Sustainability #ecology #urbandesign #عمران #urbanism", "author": "MESSAOUDI Baraa", "publishedAt": "2026-08-01T10:18:39+00:00", "views": "4452", "likes": "288", "comments": "7", "shares": "7", "reposts": "0", "level": "4"}

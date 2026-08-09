@@ -1,0 +1,108 @@
+[
+  {
+    "id": "WF-2",
+    "name": "产品寄送",
+    "owner": "客户",
+    "status": "已完成",
+    "statusLabel": "已完成",
+    "startDate": "2026-02-13",
+    "endDate": "2026-02-26",
+    "markCols": [
+      2
+    ]
+  },
+  {
+    "id": "WF-3",
+    "name": "内容运营细化方案",
+    "owner": "2049",
+    "status": "已完成",
+    "statusLabel": "已完成",
+    "startDate": "2026-03-02",
+    "endDate": "2026-03-02",
+    "markCols": [
+      6
+    ]
+  },
+  {
+    "id": "WF-4",
+    "name": "内容运营细化方案确认",
+    "owner": "客户",
+    "status": "待确认",
+    "statusLabel": "待确认",
+    "startDate": "2026-03-02",
+    "endDate": "2026-03-02",
+    "markCols": [
+      6
+    ]
+  },
+  {
+    "id": "WF-5",
+    "name": "账号养号运营",
+    "owner": "2049",
+    "status": "已完成",
+    "statusLabel": "已完成",
+    "startDate": "2026-02-13",
+    "endDate": "2026-02-26",
+    "markCols": [
+      2
+    ]
+  },
+  {
+    "id": "WF-6",
+    "name": "脚本撰写",
+    "owner": "2049",
+    "status": "进行中",
+    "statusLabel": "进行中 · 11项",
+    "startDate": "2026-02-13",
+    "endDate": "2026-02-26",
+    "markCols": [
+      2
+    ]
+  },
+  {
+    "id": "WF-7",
+    "name": "脚本确认",
+    "owner": "客户",
+    "status": "已完成",
+    "statusLabel": "已完成",
+    "startDate": "2026-02-13",
+    "endDate": "2026-02-26",
+    "markCols": [
+      2
+    ]
+  },
+  {
+    "id": "WF-8",
+    "name": "内容制作",
+    "owner": "2049",
+    "status": "进行中",
+    "statusLabel": "进行中 · 11项",
+    "startDate": "2026-02-13",
+    "endDate": "2026-02-26",
+    "markCols": [
+      2
+    ]
+  },
+  {
+    "id": "WF-9",
+    "name": "发布内容确认",
+    "owner": "客户",
+    "status": "已完成",
+    "statusLabel": "已完成",
+    "startDate": "2026-02-13",
+    "endDate": "2026-02-26",
+    "markCols": [
+      2
+    ]
+  },
+  {
+    "id": "WF-10",
+    "name": "结案报告输出",
+    "owner": "2049",
+    "status": "未开始",
+    "statusLabel": "未开始",
+    "startDate": null,
+    "endDate": null,
+    "markCols": []
+  }
+]
