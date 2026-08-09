@@ -74,7 +74,13 @@ export const dojoProjectStore = reactive({
     {
       id: 'matrix-blast-10k-v3',
       name: '垂类矩阵 · blast 10k v3.0',
-      aliases: ['balst 10k 3.0 垂类', 'blast10k 英国3.0', 'blast 10k v3', '垂类 blast 10k', 'blast 10k v3.0'],
+      aliases: [
+        'balst 10k 3.0 垂类',
+        'blast10k 英国3.0',
+        'blast 10k v3',
+        '垂类 blast 10k',
+        'blast 10k v3.0'
+      ],
       region: '英国',
       status: '结案中',
       active: true

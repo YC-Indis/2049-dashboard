@@ -188,7 +188,10 @@ export function removeScheduleBlock(id: string) {
 }
 
 /** 拖拽改期等局部更新，返回更新后的块 */
-export function patchScheduleBlock(id: string, patch: Partial<ScheduleBlock>): ScheduleBlock | null {
+export function patchScheduleBlock(
+  id: string,
+  patch: Partial<ScheduleBlock>
+): ScheduleBlock | null {
   const idx = dojoScheduleStore.blocks.findIndex((b) => b.id === id)
   if (idx < 0) return null
   const next = { ...dojoScheduleStore.blocks[idx], ...patch, id }

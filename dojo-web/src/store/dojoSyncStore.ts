@@ -25,7 +25,13 @@ export function markVideosSynced(urls: string[], at = new Date().toISOString()) 
 
 export function normalizeHandle(raw: string) {
   const m = raw.match(/@([\w.]+)/)
-  return m ? `@${m[1]}` : raw.trim().startsWith('@') ? raw.trim() : raw.trim() ? `@${raw.trim()}` : ''
+  return m
+    ? `@${m[1]}`
+    : raw.trim().startsWith('@')
+      ? raw.trim()
+      : raw.trim()
+        ? `@${raw.trim()}`
+        : ''
 }
 
 export function isAccountRecentlySynced(handle: string, withinMs = 6 * 60 * 60 * 1000) {

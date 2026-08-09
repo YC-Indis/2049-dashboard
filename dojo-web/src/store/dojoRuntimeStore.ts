@@ -1,6 +1,12 @@
 import { computed, reactive } from 'vue'
 import { accountMonitor, accountPlans, distributionRecords } from '@/mock/dojo/imported'
-import type { AdAccount, AdBatch, AdTarget, AdTimelineItem, AdVideo } from '@/mock/dojo/imported/ads'
+import type {
+  AdAccount,
+  AdBatch,
+  AdTarget,
+  AdTimelineItem,
+  AdVideo
+} from '@/mock/dojo/imported/ads'
 import { getProjectById } from '@/store/dojoProjectStore'
 import { patchProjectCurrent } from '@/store/dojoProjectRuntime'
 import { removeScheduleBlock, upsertScheduleBlock } from '@/store/dojoScheduleStore'
@@ -186,7 +192,9 @@ export const runtimeAdBatches = computed<Omit<AdBatch, 'videos'>[]>(() => {
 
 export const runtimeAdAccounts = computed<(AdAccount & { id: string; custom: boolean })[]>(() => {
   void dojoRuntimeStore.revision
-  const accounts = [...new Set(dojoRuntimeStore.distributions.map((d) => d.account))].filter(Boolean)
+  const accounts = [...new Set(dojoRuntimeStore.distributions.map((d) => d.account))].filter(
+    Boolean
+  )
   return accounts.map((account, i) => {
     const rows = dojoRuntimeStore.distributions.filter((d) => d.account === account)
     const meta = batchMeta(rows[0]?.projectId)
@@ -212,7 +220,10 @@ export const runtimeAdAccounts = computed<(AdAccount & { id: string; custom: boo
   })
 })
 
-export const runtimeAdTargets = computed<AdTarget[]>(() => {
+/** 投放目标带上 projectId，预警时才能和项目的时间进度对比 */
+export type RuntimeAdTarget = AdTarget & { projectId: string }
+
+export const runtimeAdTargets = computed<RuntimeAdTarget[]>(() => {
   const batches = runtimeAdBatches.value
   return RUNTIME_PROJECT_IDS.map((projectId) => {
     const meta = batchMeta(projectId)
@@ -223,6 +234,7 @@ export const runtimeAdTargets = computed<AdTarget[]>(() => {
     const currentCount = batch.videoCount
     return {
       id: `AD-${projectId}`,
+      projectId,
       project: meta.batch,
       region: meta.region,
       product: 'XROS 6',

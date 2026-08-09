@@ -18,9 +18,7 @@
         </div>
         <ElButton @click="exportRows">导出</ElButton>
         <ElButton @click="showAdd = true">增加账号</ElButton>
-        <ElButton type="primary" :loading="syncing" @click="syncPage">
-          同步本页粉丝量
-        </ElButton>
+        <ElButton type="primary" :loading="syncing" @click="syncPage"> 同步本页粉丝量 </ElButton>
       </div>
     </header>
 
@@ -53,7 +51,12 @@
         <ElSelect v-model="batch" placeholder="全部项目批次" clearable style="width: 200px">
           <ElOption v-for="b in batchNames" :key="b" :label="b" :value="b" />
         </ElSelect>
-        <ElInput v-model="keyword" placeholder="搜索云机编号 / 账号链接" clearable style="width: 240px" />
+        <ElInput
+          v-model="keyword"
+          placeholder="搜索云机编号 / 账号链接"
+          clearable
+          style="width: 240px"
+        />
         <ElSelect v-model="sortBy" style="width: 160px">
           <ElOption label="按视频数" value="videoCount" />
           <ElOption label="按累计播放" value="totalViews" />
@@ -73,7 +76,13 @@
         </ElTableColumn>
         <ElTableColumn label="账号链接" min-width="200">
           <template #default="{ row }">
-            <a v-if="row.accountUrl" class="link" :href="row.accountUrl" target="_blank" rel="noopener">
+            <a
+              v-if="row.accountUrl"
+              class="link"
+              :href="row.accountUrl"
+              target="_blank"
+              rel="noopener"
+            >
               {{ handleOf(row.accountUrl) }}
             </a>
             <span v-else class="muted">未登记</span>
@@ -83,7 +92,9 @@
           <template #default="{ row }">
             <template v-if="followers[rowKey(row)]">
               <strong>{{ fmt(followers[rowKey(row)].followers) }}</strong>
-              <em class="src">{{ followers[rowKey(row)].source === 'rapidapi' ? 'RapidAPI' : 'mock' }}</em>
+              <em class="src">{{
+                followers[rowKey(row)].source === 'rapidapi' ? 'RapidAPI' : 'mock'
+              }}</em>
             </template>
             <ElButton v-else link type="primary" size="small" @click="syncOne(row)">拉取</ElButton>
           </template>
@@ -167,12 +178,13 @@
   import { computed, onUnmounted, reactive, ref, watch } from 'vue'
   import type { FormInstance, FormRules } from 'element-plus'
   import { ElMessage } from 'element-plus'
-  import { adAccounts, adBatches, type AdAccount } from '@/mock/dojo/imported/ads'
+  import type { AdAccount } from '@/mock/dojo/imported/ads'
+  import { runtimeAdAccounts, runtimeAdBatches } from '@/store/dojoRuntimeStore'
   import { syncTikTokAccount, type TikTokAccountSnapshot } from '@/api/tiktok'
   import { exportCsv } from '@/utils/dojoExport'
   import { markAccountsSynced, normalizeHandle } from '@/store/dojoSyncStore'
   import DojoProjectSelect from '@/components/dojo/DojoProjectSelect.vue'
-  import { dojoProjectStore, getProjectById, matchesAnyProject } from '@/store/dojoProjectStore'
+  import { getProjectById, matchesAnyProject } from '@/store/dojoProjectStore'
 
   defineOptions({ name: 'DojoAdAccounts' })
 
@@ -219,10 +231,13 @@
     batches: [{ required: true, message: '请填写所属批次', trigger: 'blur' }]
   }
 
-  const allAccounts = computed(() => [...adAccounts, ...customAccounts.value])
+  const allAccounts = computed<DisplayAccount[]>(() => [
+    ...runtimeAdAccounts.value,
+    ...customAccounts.value
+  ])
 
   const batchNames = computed(() => {
-    const names = new Set(adBatches.map((b) => b.batch))
+    const names = new Set(runtimeAdBatches.value.map((b) => b.batch))
     for (const a of customAccounts.value) {
       for (const b of a.batches) names.add(b)
     }
@@ -275,7 +290,10 @@
     })
     return [...list].sort((a, b) => {
       if (sortBy.value === 'followers') {
-        return (followers.value[rowKey(b)]?.followers ?? -1) - (followers.value[rowKey(a)]?.followers ?? -1)
+        return (
+          (followers.value[rowKey(b)]?.followers ?? -1) -
+          (followers.value[rowKey(a)]?.followers ?? -1)
+        )
       }
       if (sortBy.value === 'totalViews') return totalOf(b) - totalOf(a)
       if (sortBy.value === 'avgNaturalViews') return avgOf(b) - avgOf(a)
@@ -283,7 +301,9 @@
     })
   })
 
-  const paged = computed(() => rows.value.slice((page.value - 1) * pageSize.value, page.value * pageSize.value))
+  const paged = computed(() =>
+    rows.value.slice((page.value - 1) * pageSize.value, page.value * pageSize.value)
+  )
 
   const stats = computed(() => ({
     videos: rows.value.reduce((n, a) => n + a.videoCount, 0),
@@ -300,7 +320,7 @@
   }
 
   function handleOf(url: string) {
-    const m = url.match(/@([\w.\-]+)/)
+    const m = url.match(/@([\w.-]+)/)
     return m ? `@${m[1]}` : url.replace(/^https?:\/\//, '').slice(0, 32)
   }
 
@@ -346,7 +366,18 @@
   function exportRows() {
     exportCsv(
       '买量账号监看',
-      ['云机编号', '账号链接', '平台', '粉丝量', '视频数', '已投放', '累计播放', '均播', '所属批次', '投放区间'],
+      [
+        '云机编号',
+        '账号链接',
+        '平台',
+        '粉丝量',
+        '视频数',
+        '已投放',
+        '累计播放',
+        '均播',
+        '所属批次',
+        '投放区间'
+      ],
       rows.value.map((a) => [
         a.device,
         a.accountUrl,

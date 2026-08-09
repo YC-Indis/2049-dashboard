@@ -47,7 +47,14 @@ export const dojoProjectRuntime = reactive<Record<string, ProjectRuntime>>({
       exposure: 31826,
       scriptsPerAccount: 10
     },
-    current: { accounts: 3, scripts: 40, edited: 17, approved: 40, distributed: 24, exposure: 21217 }
+    current: {
+      accounts: 3,
+      scripts: 40,
+      edited: 17,
+      approved: 40,
+      distributed: 24,
+      exposure: 21217
+    }
   },
   'matrix-xros6-de': {
     projectId: 'matrix-xros6-de',
@@ -116,11 +123,31 @@ export function progressRows(p: ProjectRuntime, today: string = DOJO_TODAY): Run
       value: timeProgress(kpi, today),
       tip: `${kpi.cycleStart} → ${today} / ${kpi.cycleEnd}`
     },
-    { label: '账号数', value: pct(current.accounts, kpi.accounts), tip: `${current.accounts}/${kpi.accounts}` },
-    { label: '脚本完成量', value: pct(current.scripts, scriptTarget), tip: `${current.scripts}/${scriptTarget}` },
-    { label: '片子完成量', value: pct(current.edited, kpi.videos), tip: `${current.edited}/${kpi.videos}` },
-    { label: '过审片子量', value: pct(current.approved, kpi.videos), tip: `${current.approved}/${kpi.videos}` },
-    { label: '分发量', value: pct(current.distributed, kpi.videos), tip: `${current.distributed}/${kpi.videos}` },
+    {
+      label: '账号数',
+      value: pct(current.accounts, kpi.accounts),
+      tip: `${current.accounts}/${kpi.accounts}`
+    },
+    {
+      label: '脚本完成量',
+      value: pct(current.scripts, scriptTarget),
+      tip: `${current.scripts}/${scriptTarget}`
+    },
+    {
+      label: '片子完成量',
+      value: pct(current.edited, kpi.videos),
+      tip: `${current.edited}/${kpi.videos}`
+    },
+    {
+      label: '过审片子量',
+      value: pct(current.approved, kpi.videos),
+      tip: `${current.approved}/${kpi.videos}`
+    },
+    {
+      label: '分发量',
+      value: pct(current.distributed, kpi.videos),
+      tip: `${current.distributed}/${kpi.videos}`
+    },
     {
       label: '曝光量',
       value: pct(current.exposure, kpi.exposure),
@@ -133,7 +160,11 @@ export function progressRows(p: ProjectRuntime, today: string = DOJO_TODAY): Run
 export function currentRows(p: ProjectRuntime): RuntimeRow[] {
   const { kpi, current } = p
   return [
-    { label: '当前日期 · 周期', value: timeProgress(kpi), tip: `${DOJO_TODAY} · ${cycleLabel(kpi)}` },
+    {
+      label: '当前日期 · 周期',
+      value: timeProgress(kpi),
+      tip: `${DOJO_TODAY} · ${cycleLabel(kpi)}`
+    },
     { label: '账号数', value: current.accounts, tip: '已起号 / 在手' },
     { label: '脚本条数', value: current.scripts, tip: '已完成脚本' },
     { label: '剪辑片数', value: current.edited, tip: '已剪辑成片' },

@@ -18,7 +18,7 @@ export function formatAiText(raw: string): string {
     return body
   })
 
-  if (/^\s*[\[{]/.test(text)) {
+  if (/^\s*[[{]/.test(text)) {
     try {
       text = flattenJsonToText(JSON.parse(text))
     } catch {
@@ -39,7 +39,10 @@ function flattenJsonToText(data: unknown, depth = 0): string {
   if (typeof data === 'string') return data
   if (typeof data === 'number' || typeof data === 'boolean') return String(data)
   if (Array.isArray(data)) {
-    return data.map((item) => flattenJsonToText(item, depth + 1)).filter(Boolean).join('\n')
+    return data
+      .map((item) => flattenJsonToText(item, depth + 1))
+      .filter(Boolean)
+      .join('\n')
   }
   if (typeof data === 'object') {
     const obj = data as Record<string, unknown>

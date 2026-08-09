@@ -23,7 +23,8 @@
     </header>
 
     <p v-if="!selectedProjectIds.length" class="demo-hint">
-      未选项目时展示<strong>全部</strong>投放视频（{{ rows.length }} 条可见）；勾选上方项目可收窄范围。
+      未选项目时展示<strong>全部</strong>投放视频（{{ rows.length }}
+      条可见）；勾选上方项目可收窄范围。
     </p>
 
     <div class="stat-row">
@@ -49,7 +50,12 @@
       <div class="filters">
         <span class="filter-hint">{{ projectFilterLabel }}</span>
         <ElSelect v-model="batch" placeholder="全部项目批次" clearable style="width: 200px">
-          <ElOption v-for="b in batchOptions" :key="b.batch" :label="`${b.batch}（${b.videoCount}）`" :value="b.batch" />
+          <ElOption
+            v-for="b in batchOptions"
+            :key="b.batch"
+            :label="`${b.batch}（${b.videoCount}）`"
+            :value="b.batch"
+          />
         </ElSelect>
         <ElSelect v-model="status" placeholder="投放状态" clearable style="width: 140px">
           <ElOption v-for="s in statuses" :key="s" :label="s" :value="s" />
@@ -60,13 +66,23 @@
           <ElOption label="按日期新→旧" value="date-desc" />
           <ElOption label="按日期旧→新" value="date-asc" />
         </ElSelect>
-        <ElInput v-model="keyword" placeholder="搜索链接 / 云机 / 区域 / 备注" clearable style="width: 240px" />
+        <ElInput
+          v-model="keyword"
+          placeholder="搜索链接 / 云机 / 区域 / 备注"
+          clearable
+          style="width: 240px"
+        />
         <ElCheckbox v-model="onlyLaggard">只看播放不顺利</ElCheckbox>
         <span class="filters__count">{{ rows.length }}</span>
       </div>
 
       <ElTable :data="paged" stripe style="width: 100%" :row-class-name="rowClass">
-        <ElTableColumn label="#" type="index" width="60" :index="(i: number) => (page - 1) * pageSize + i + 1" />
+        <ElTableColumn
+          label="#"
+          type="index"
+          width="60"
+          :index="(i: number) => (page - 1) * pageSize + i + 1"
+        />
         <ElTableColumn prop="batch" label="项目批次" min-width="140" show-overflow-tooltip>
           <template #default="{ row }">
             <span>{{ row.batch }}</span>
@@ -130,7 +146,13 @@
       />
     </section>
 
-    <ElDialog v-model="showAdd" title="增加账号/视频" width="520px" destroy-on-close @closed="resetForm">
+    <ElDialog
+      v-model="showAdd"
+      title="增加账号/视频"
+      width="520px"
+      destroy-on-close
+      @closed="resetForm"
+    >
       <ElForm ref="formRef" :model="form" :rules="formRules" label-width="100px">
         <ElFormItem label="项目批次" prop="batch">
           <ElInput v-model="form.batch" placeholder="批次名称" />
@@ -170,12 +192,13 @@
   import { useRoute } from 'vue-router'
   import type { FormInstance, FormRules } from 'element-plus'
   import { ElMessage } from 'element-plus'
-  import { adVideos, adBatches, type AdVideo } from '@/mock/dojo/imported/ads'
+  import type { AdVideo } from '@/mock/dojo/imported/ads'
+  import { runtimeAdBatches, runtimeAdVideos } from '@/store/dojoRuntimeStore'
   import { syncVideoMetrics } from '@/api/tiktok'
   import { exportCsv } from '@/utils/dojoExport'
   import { markAccountsSynced, markVideosSynced, normalizeHandle } from '@/store/dojoSyncStore'
   import DojoProjectSelect from '@/components/dojo/DojoProjectSelect.vue'
-  import { dojoProjectStore, getProjectById, matchesAnyProject } from '@/store/dojoProjectStore'
+  import { getProjectById, matchesAnyProject } from '@/store/dojoProjectStore'
 
   defineOptions({ name: 'DojoAdVideos' })
 
@@ -195,7 +218,10 @@
   })
 
   function matchesProject(row: DisplayVideo) {
-    return matchesAnyProject(`${row.batch} ${row.region ?? ''} ${row.content ?? ''}`, selectedProjectIds.value)
+    return matchesAnyProject(
+      `${row.batch} ${row.region ?? ''} ${row.content ?? ''}`,
+      selectedProjectIds.value
+    )
   }
 
   const batch = ref('')
@@ -227,10 +253,13 @@
     videoUrl: [{ required: true, message: '请填写视频链接', trigger: 'blur' }]
   }
 
-  const allVideos = computed(() => [...adVideos, ...customVideos.value])
+  const allVideos = computed<DisplayVideo[]>(() => [
+    ...runtimeAdVideos.value,
+    ...customVideos.value
+  ])
 
   const batchOptions = computed(() => {
-    const map = new Map(adBatches.map((b) => [b.batch, { ...b }]))
+    const map = new Map(runtimeAdBatches.value.map((b) => [b.batch, { ...b }]))
     for (const v of customVideos.value) {
       const existing = map.get(v.batch)
       if (existing) {
@@ -305,7 +334,12 @@
       if (batch.value && v.batch !== batch.value) return false
       if (status.value && v.status !== status.value) return false
       if (onlyLaggard.value && !isLaggard(v)) return false
-      if (kw && !`${v.videoUrl} ${v.device} ${v.region} ${v.note} ${v.accountUrl}`.toLowerCase().includes(kw))
+      if (
+        kw &&
+        !`${v.videoUrl} ${v.device} ${v.region} ${v.note} ${v.accountUrl}`
+          .toLowerCase()
+          .includes(kw)
+      )
         return false
       return true
     })
@@ -318,7 +352,9 @@
     return list
   })
 
-  const paged = computed(() => rows.value.slice((page.value - 1) * pageSize.value, page.value * pageSize.value))
+  const paged = computed(() =>
+    rows.value.slice((page.value - 1) * pageSize.value, page.value * pageSize.value)
+  )
 
   const stats = computed(() => ({
     delivered: rows.value.filter((v) => v.status === '已投放').length,
@@ -402,7 +438,17 @@
   function exportRows() {
     exportCsv(
       '投放视频监控',
-      ['项目批次', '日期', '云机编号', '账号链接', '视频链接', '播放量', '投放区域', '状态', '备注'],
+      [
+        '项目批次',
+        '日期',
+        '云机编号',
+        '账号链接',
+        '视频链接',
+        '播放量',
+        '投放区域',
+        '状态',
+        '备注'
+      ],
       rows.value.map((v) => [
         v.batch,
         v.date,
