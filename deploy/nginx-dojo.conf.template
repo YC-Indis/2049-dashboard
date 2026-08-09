@@ -1,0 +1,39 @@
+server {
+  listen 80;
+  root /usr/share/nginx/html;
+  index index.html;
+
+  location / {
+    try_files $uri $uri/ /index.html;
+  }
+
+  # RapidAPI 由 nginx 代理：密钥留在服务端而不是打进前端产物，同时绕开浏览器 CORS。
+  # envsubst 会把主机名替换成字面量，nginx 启动时即可解析，无需 resolver。
+  location /api/rapidapi/ {
+    proxy_pass https://${RAPIDAPI_HOST}/;
+    proxy_http_version 1.1;
+    proxy_ssl_server_name on;
+    proxy_set_header Host ${RAPIDAPI_HOST};
+    proxy_set_header x-rapidapi-host ${RAPIDAPI_HOST};
+    proxy_set_header x-rapidapi-key ${RAPIDAPI_KEY};
+    proxy_read_timeout 60s;
+  }
+
+  # 后端仍未落地，这里用变量而不是字面量：proxy_pass 带变量时 nginx 会把解析
+  # 推迟到请求时，api 容器不存在也不会导致整个 web 容器起不来（只是该路径 502）。
+  location /api/ {
+    resolver 127.0.0.11 ipv6=off valid=30s;
+    set $dojo_api "http://api:8000";
+    proxy_pass $dojo_api/api/;
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_read_timeout 120s;
+  }
+
+  location /health {
+    resolver 127.0.0.11 ipv6=off valid=30s;
+    set $dojo_health "http://api:8000";
+    proxy_pass $dojo_health/health;
+  }
+}

@@ -7,9 +7,15 @@ COPY dojo-web/ .
 ENV VITE_DOJO_API_BASE=/api/dojo
 ENV VITE_BASE_URL=/
 ENV VITE_DROP_CONSOLE=true
+# 走 nginx 代理拉 RapidAPI，密钥因此不会被打进前端产物
+ENV VITE_RAPIDAPI_PROXY=true
 RUN pnpm exec vite build
 
 FROM nginx:alpine
-COPY deploy/nginx-dojo.conf /etc/nginx/conf.d/default.conf
+# nginx:alpine 启动时会对 /etc/nginx/templates/*.template 做 envsubst 后输出到 conf.d
+COPY deploy/nginx-dojo.conf.template /etc/nginx/templates/default.conf.template
 COPY --from=build /app/dist /usr/share/nginx/html
+ENV RAPIDAPI_HOST=tiktok-api6.p.rapidapi.com
+# 只替换 RAPIDAPI_* ，否则 envsubst 会把 $uri / $host 这类 nginx 内置变量一起吃掉
+ENV NGINX_ENVSUBST_FILTER=^RAPIDAPI_
 EXPOSE 80
