@@ -44,8 +44,7 @@
 
     <ElAlert type="info" :closable="false" class="tip">
       <template #default>
-        文档只用来认账号，不逐张表认字段。上传内容规划表、数据记录表、周报或直接粘贴
-        账号清单都可以，系统会把 @账号 和作品链接挑出来让你确认。
+        文档认 @账号 与作品链接。若只有视频、账号未入池，入库时会把视频里的账号一并补录；勾选「同时写入识别到的视频」。
         <template v-if="syncProgress">
           <strong> 同步中：{{ syncProgress }}</strong>
         </template>
@@ -118,9 +117,18 @@
           <ElOption v-for="p in allProjects" :key="p.id" :label="p.name" :value="p.id" />
         </ElSelect>
         <ElInput v-model="targetSegment" placeholder="内容细分（可留空）" style="width: 200px" />
+        <ElCheckbox v-model="importVideosToo">
+          同时写入视频{{ pendingVideos.length ? `（${pendingVideos.length}）` : '' }}并补录缺失账号
+        </ElCheckbox>
         <ElCheckbox v-model="autoSync">入库后立即同步</ElCheckbox>
         <span class="muted">已勾选 {{ selected.length }} 个</span>
-        <ElButton :disabled="!selected.length" type="primary" @click="commit"> 确认入库 </ElButton>
+        <ElButton
+          :disabled="!selected.length && !(importVideosToo && pendingVideos.length)"
+          type="primary"
+          @click="commit"
+        >
+          确认入库
+        </ElButton>
       </div>
 
       <ElTable
@@ -244,6 +252,7 @@
     dojoAccountStore,
     findAccount,
     importAccounts,
+    importVideos,
     isSyncing,
     removeAccount,
     syncAccount,
@@ -252,6 +261,11 @@
   import type { AccountSource, MatrixAccount } from '@/store/dojoAccountStore'
   import { extractAccountsFromFiles, extractHandlesFromText } from '@/utils/dojoAccountExtract'
   import type { AccountCandidate, ParsedDocument } from '@/utils/dojoAccountExtract'
+  import {
+    extractVideosFromFiles,
+    extractVideosFromText,
+    type VideoCandidate
+  } from '@/utils/dojoVideoExtract'
 
   defineOptions({ name: 'DojoAccountIntake' })
 
@@ -259,10 +273,12 @@
   const parsedDocs = ref<ParsedDocument[]>([])
   const candidates = ref<AccountCandidate[]>([])
   const selected = ref<AccountCandidate[]>([])
+  const pendingVideos = ref<VideoCandidate[]>([])
   const candidateTable = useTemplateRef<TableInstance>('candidateTable')
   const targetProject = ref('')
   const targetSegment = ref('')
   const autoSync = ref(true)
+  const importVideosToo = ref(true)
   const pendingFiles = ref<File[]>([])
 
   const keyword = ref('')
@@ -346,21 +362,61 @@
     parsedDocs.value = [...parsedDocs.value, ...result.documents]
     mergeCandidates(result.candidates)
 
+    const videoResult = await extractVideosFromFiles(files)
+    mergePendingVideos(videoResult.videos)
+    // 视频反推：空有视频无账号的 handle 也进候选
+    if (videoResult.handlesFromVideos.length) {
+      mergeCandidates(
+        videoResult.handlesFromVideos.map((h) => ({
+          handle: h.startsWith('@') ? h : `@${h}`,
+          link: `https://www.tiktok.com/${h.startsWith('@') ? h : `@${h}`}`,
+          confidence: 'high' as const,
+          hits: 1,
+          context: '视频链接反推账号'
+        }))
+      )
+    }
+
     const failed = result.documents.filter((d) => d.error)
     if (failed.length) ElMessage.warning(`${failed.length} 个文件未能解析`)
-    if (!result.candidates.length && !failed.length) {
-      ElMessage.info('文档解析成功，但没找到任何账号')
+    if (!result.candidates.length && !videoResult.videos.length && !failed.length) {
+      ElMessage.info('文档解析成功，但没找到任何账号或视频')
     }
   }
 
   function extractFromPaste() {
     const found = extractHandlesFromText(pasteText.value)
-    if (!found.length) {
-      ElMessage.info('没识别到账号，确认里面有 @账号 或作品链接')
+    const vids = extractVideosFromText(pasteText.value)
+    mergePendingVideos(vids)
+    if (vids.length) {
+      mergeCandidates(
+        [...new Set(vids.map((v) => v.handle.toLowerCase()))].map((h) => ({
+          handle: h.startsWith('@') ? h : `@${h}`,
+          link: `https://www.tiktok.com/${h.startsWith('@') ? h : `@${h}`}`,
+          confidence: 'high' as const,
+          hits: 1,
+          context: '视频链接反推账号'
+        }))
+      )
+    }
+    if (found.length) mergeCandidates(found)
+    if (!found.length && !vids.length) {
+      ElMessage.info('没识别到账号或视频链接')
       return
     }
-    mergeCandidates(found)
-    ElMessage.success(`识别到 ${found.length} 个候选账号`)
+    ElMessage.success(
+      `识别到账号 ${found.length || vids.length} · 视频 ${vids.length}`
+    )
+  }
+
+  function mergePendingVideos(list: VideoCandidate[]) {
+    const map = new Map(pendingVideos.value.map((v) => [v.videoId, v]))
+    list.forEach((v) => {
+      const hit = map.get(v.videoId)
+      if (!hit) map.set(v.videoId, v)
+      else hit.hits += v.hits
+    })
+    pendingVideos.value = [...map.values()]
   }
 
   function mergeCandidates(incoming: AccountCandidate[]) {
@@ -397,21 +453,50 @@
     parsedDocs.value = []
     candidates.value = []
     selected.value = []
+    pendingVideos.value = []
   }
 
   async function commit() {
     const projectId = targetProject.value
-    const rows = selected.value.map((c) => ({
-      handle: c.handle,
-      projectId,
-      segment: targetSegment.value.trim(),
-      link: c.link,
-      source: 'document' as AccountSource
-    }))
-    const { added, updated } = importAccounts(rows)
-    ElMessage.success(`入库完成：新增 ${added} 个，更新 ${updated} 个`)
+    const segment = targetSegment.value.trim()
+    const parts: string[] = []
+    const syncHandles = new Set<string>()
 
-    const handles = rows.map((r) => r.handle)
+    if (selected.value.length) {
+      const rows = selected.value.map((c) => ({
+        handle: c.handle,
+        projectId,
+        segment,
+        link: c.link,
+        source: 'document' as AccountSource
+      }))
+      const { added, updated } = importAccounts(rows)
+      parts.push(`账号 +${added}/更${updated}`)
+      rows.forEach((r) => syncHandles.add(r.handle))
+    }
+
+    // 视频入库 + 空有视频无账号时自动补录
+    if (importVideosToo.value && pendingVideos.value.length) {
+      const { videoAdded, videoUpdated, accountBackfilled } = importVideos(
+        pendingVideos.value.map((v) => ({
+          handle: v.handle,
+          videoId: v.videoId,
+          videoUrl: v.videoUrl
+        })),
+        { projectId, segment, ensureAccount: true, source: 'document' }
+      )
+      parts.push(`视频 +${videoAdded}/更${videoUpdated}`)
+      if (accountBackfilled) parts.push(`补录账号 ${accountBackfilled}`)
+      pendingVideos.value.forEach((v) => syncHandles.add(v.handle))
+    }
+
+    if (!parts.length) {
+      ElMessage.warning('请勾选账号，或开启「同时写入视频」')
+      return
+    }
+    ElMessage.success(`入库完成：${parts.join(' · ')}`)
+
+    const handles = [...syncHandles]
     resetIntake()
     if (autoSync.value && handles.length) await runSync(handles)
   }

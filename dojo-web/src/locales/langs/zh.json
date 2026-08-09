@@ -129,7 +129,7 @@
   },
   "login": {
     "leftView": {
-      "title": "Dojo · 海外项目全流程中控",
+      "title": "2049 · 海外项目全流程中控",
       "subTitle": "从脚本、分发、投放到节奏日历，一站式监控与规划 TikTok 矩阵项目"
     },
     "title": "欢迎回来",
@@ -210,17 +210,19 @@
   },
   "menus": {
     "dojo": {
-      "today": "今日",
+      "today": "今日待办",
       "project": "项目总览",
-      "timeline": "时间规划",
+      "timeline": "项目排期",
       "calendar": "节奏日历",
       "scripts": "脚本进度",
       "distribution": "分发数据",
       "ads": "投放检阅",
       "adVideos": "投放视频监控",
-      "adAccounts": "买量账号监看",
-      "accounts": "复盘总结",
+      "adVideoDetail": "视频分析",
+      "adAccounts": "投放账号监控",
+      "accounts": "工作复盘",
       "accountReview": "总账号预览",
+      "accountDetail": "账号分析",
       "accountIntake": "账号接入"
     },
     "login": {

@@ -4,6 +4,7 @@ dist
 dist-ssr
 *.local
 release/
+scripts/deploy/node_modules/
 
 # 编辑器
 .idea
@@ -28,6 +29,7 @@ secrets.env
 
 # 历史资料原件体积过大（数百 MB），保留在 docs/source 但不入库
 docs/source/
+docs/current/
 
 # 自动生成
 dojo-web/.auto-import.json

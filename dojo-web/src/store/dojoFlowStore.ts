@@ -61,26 +61,8 @@ export interface FlowTagItem {
 
 export const dojoTagStore = reactive({
   /** 每个项目启用了哪些阶段标签；同项目内共用 */
-  projectTags: {
-    'matrix-xros6-uk': ['activate', 'script', 'edit', 'approve', 'distribute', '投放'],
-    'matrix-xros6-de': ['activate', 'script', 'edit', 'approve', 'distribute', '投放']
-  } as Record<string, string[]>,
-  items: [
-    {
-      id: 'tag-matrix-xros6-uk-1',
-      projectId: 'matrix-xros6-uk',
-      date: '2026-08-07',
-      title: 'xros6 英国2.0 · 脚本/分发核对',
-      tags: ['script', 'distribute']
-    },
-    {
-      id: 'tag-matrix-xros6-de-1',
-      projectId: 'matrix-xros6-de',
-      date: '2026-08-07',
-      title: 'xros6 德国2.0 · 脚本/分发核对',
-      tags: ['script', 'distribute']
-    }
-  ] as FlowTagItem[]
+  projectTags: {} as Record<string, string[]>,
+  items: [] as FlowTagItem[]
 })
 
 export function getProjectTags(projectId: string): string[] {

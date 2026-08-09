@@ -154,9 +154,11 @@
   }
 
   const selectedProjectIds = ref<string[]>(
-    dojoProjectStore.selectedIds.length ? [...dojoProjectStore.selectedIds] : ['dojo']
+    [...dojoProjectStore.selectedIds]
   )
-  const planProjectId = computed(() => selectedProjectIds.value[0] || 'dojo')
+  const planProjectId = computed(
+    () => selectedProjectIds.value[0] || dojoProjectStore.projects[0]?.id || ''
+  )
   const dateRange = ref<[string, string] | null>(
     dojoScheduleStore.focusRange
       ? [dojoScheduleStore.focusRange.start, dojoScheduleStore.focusRange.end]
@@ -170,13 +172,9 @@
 
   const projects = computed(() => dojoProjectStore.projects.filter((p) => p.active !== false))
 
-  const projectScripts = reactive<Record<string, ScriptProgressRow[]>>({
-    dojo: [...scriptProgressRows]
-  })
+  const projectScripts = reactive<Record<string, ScriptProgressRow[]>>({})
 
-  const projectPlans = reactive<Record<string, ScriptPlan[]>>({
-    dojo: []
-  })
+  const projectPlans = reactive<Record<string, ScriptPlan[]>>({})
 
   const planForm = reactive({
     date: '',
@@ -192,9 +190,12 @@
   }
 
   const currentScriptRows = computed(() => {
-    const ids = selectedProjectIds.value.length ? selectedProjectIds.value : ['dojo']
+    const ids = selectedProjectIds.value.length
+      ? selectedProjectIds.value
+      : dojoProjectStore.projects.map((p) => p.id)
+    if (!ids.length) return [...scriptProgressRows]
     return ids.flatMap((id) => {
-      if (!projectScripts[id]) projectScripts[id] = id === 'dojo' ? [...scriptProgressRows] : []
+      if (!projectScripts[id]) projectScripts[id] = []
       return projectScripts[id] ?? []
     })
   })
@@ -235,7 +236,9 @@
   })
 
   const currentPlans = computed(() => {
-    const ids = selectedProjectIds.value.length ? selectedProjectIds.value : ['dojo']
+    const ids = selectedProjectIds.value.length
+      ? selectedProjectIds.value
+      : dojoProjectStore.projects.map((p) => p.id)
     return ids.flatMap((id) => projectPlans[id] ?? [])
   })
 

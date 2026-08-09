@@ -499,7 +499,7 @@
   }
 
   function openVideos(row: DisplayTarget) {
-    router.push({ path: '/ads/videos', query: { batch: row.batch || '' } })
+    router.push({ path: '/ad-videos', query: { batch: row.batch || '' } })
   }
 
   function hide(row: DisplayTarget) {

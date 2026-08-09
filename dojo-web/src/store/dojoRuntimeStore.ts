@@ -65,27 +65,17 @@ interface BatchMeta {
   totalCount: number
 }
 
-/** 目前有周期目标的两个在跑项目 */
-const RUNTIME_PROJECT_IDS = ['matrix-xros6-uk', 'matrix-xros6-de'] as const
+/** 有分发记录的项目才生成投放批次视图；空壳阶段为空 */
+const RUNTIME_PROJECT_IDS: string[] = []
 
 function batchMeta(projectId?: string): BatchMeta {
-  if (projectId === 'matrix-xros6-de') {
-    return {
-      id: 'matrix-xros6-de',
-      batch: 'xros6 德国2.0',
-      region: '德国',
-      targetViews: 15000,
-      deadline: '2026-08-31',
-      totalCount: 16
-    }
-  }
   return {
-    id: 'matrix-xros6-uk',
-    batch: 'xros6 英国2.0',
-    region: '英国',
-    targetViews: 30000,
-    deadline: '2026-08-31',
-    totalCount: 40
+    id: projectId || 'dojo',
+    batch: projectId || 'Dojo',
+    region: '—',
+    targetViews: 0,
+    deadline: '',
+    totalCount: 0
   }
 }
 
@@ -281,7 +271,7 @@ function scheduleBlockId(distributionId: string): string {
   return `rt-dist-${distributionId}`
 }
 
-/** 把分发量 / 曝光量 / 账号数回写到项目 KPI，健康诊断随之更新 */
+/** 把分发量 / 曝光量 / 账号数回写到项目 KPI */
 function syncScheduleProgress() {
   for (const projectId of RUNTIME_PROJECT_IDS) {
     const rows = dojoRuntimeStore.distributions.filter(
@@ -299,7 +289,7 @@ function syncScheduleProgress() {
 function syncScheduleBlock(row: DistributionRow) {
   const date = row.publishDate
   if (!date || date === '—') return
-  const projectId = resolveProjectId(row.account, row.projectId) || 'matrix-xros6-uk'
+  const projectId = resolveProjectId(row.account, row.projectId) || 'dojo'
   const project = getProjectById(projectId)
   upsertScheduleBlock({
     id: scheduleBlockId(row.id),

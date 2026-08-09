@@ -211,16 +211,18 @@
   "menus": {
     "dojo": {
       "today": "Today",
-      "project": "Project",
-      "timeline": "Timeline",
+      "project": "Projects",
+      "timeline": "Project Schedule",
       "calendar": "Calendar",
       "scripts": "Scripts",
       "distribution": "Distribution",
       "ads": "Ad Review",
       "adVideos": "Ad Videos",
-      "adAccounts": "Ad Accounts",
-      "accounts": "Retrospectives",
+      "adVideoDetail": "Video Analysis",
+      "adAccounts": "Ad Account Monitor",
+      "accounts": "Retrospective",
       "accountReview": "All Accounts",
+      "accountDetail": "Account Analysis",
       "accountIntake": "Account Intake"
     },
     "login": {

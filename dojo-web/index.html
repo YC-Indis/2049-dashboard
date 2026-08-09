@@ -1,12 +1,12 @@
 <!doctype html>
 <html>
   <head>
-    <title>Dojo</title>
+    <title>2049</title>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="Dojo — TikTok overseas matrix AI operations control center."
+      content="2049 — TikTok overseas matrix AI operations control center."
     />
     <link rel="shortcut icon" type="image/x-icon" href="src/assets/images/favicon.ico" />
 
@@ -42,6 +42,33 @@
 
   <body>
     <div id="app"></div>
+    <script>
+      // 首访空库时同步注入打包种子（须在 Vue / Pinia 模块加载前完成）
+      ;(function () {
+        try {
+          if (typeof Storage === 'undefined' || !window.localStorage) return
+          var raw = localStorage.getItem('dojo:v1:projects')
+          if (raw) {
+            try {
+              var env = JSON.parse(raw)
+              if (env && Array.isArray(env.data) && env.data.length > 0) return
+            } catch (e) {
+              /* fall through and reseed */
+            }
+          }
+          var xhr = new XMLHttpRequest()
+          xhr.open('GET', '/dojo-seed.json', false)
+          xhr.send(null)
+          if (xhr.status < 200 || xhr.status >= 300 || !xhr.responseText) return
+          var dump = JSON.parse(xhr.responseText)
+          Object.keys(dump).forEach(function (k) {
+            if (dump[k] != null) localStorage.setItem(k, dump[k])
+          })
+        } catch (e) {
+          console.warn('Dojo seed bootstrap skipped:', e)
+        }
+      })()
+    </script>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
