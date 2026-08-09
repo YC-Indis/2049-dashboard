@@ -17,12 +17,7 @@
     <section class="panel panel--actions">
       <div class="panel__title">三个最重要动作</div>
       <div class="action-tags">
-        <span
-          v-for="(a, i) in topActions"
-          :key="i"
-          class="action-tag"
-          :class="a.tone"
-        >
+        <span v-for="(a, i) in topActions" :key="i" class="action-tag" :class="a.tone">
           {{ a.text }}
         </span>
       </div>
@@ -75,25 +70,24 @@
 
 <script setup lang="ts">
   import { computed } from 'vue'
-  import {
-    demoTasks,
-    todayStats,
-    topActions,
-    todayAdvice
-  } from '@/mock/dojo/fixture'
+  import { demoTasks } from '@/mock/dojo/fixture'
   import type { DojoTask } from '@/mock/dojo/fixture'
+  import { overviewStats, todayAdvice, topActions } from '@/store/dojoOverview'
 
   defineOptions({ name: 'DojoToday' })
 
   const tasks = demoTasks
 
-  const stats = computed(() => [
-    { label: '里程碑完成', value: `${todayStats.milestonesDone}/${todayStats.milestonesTotal}` },
-    { label: '脚本条目', value: todayStats.scriptItems },
-    { label: '分发记录', value: todayStats.distributionRows },
-    { label: '阻塞', value: todayStats.blocked, danger: true },
-    { label: '今日任务', value: todayStats.todayTasks }
-  ])
+  const stats = computed(() => {
+    const s = overviewStats.value
+    return [
+      { label: '里程碑完成', value: `${s.milestonesDone}/${s.milestonesTotal}` },
+      { label: '脚本条目', value: s.scriptItems },
+      { label: '分发记录', value: s.distributionRows },
+      { label: '阻塞', value: s.blocked, danger: true },
+      { label: '今日任务', value: s.todayTasks }
+    ]
+  })
 
   function statusType(row: DojoTask) {
     if (row.status === 'blocked') return 'danger'

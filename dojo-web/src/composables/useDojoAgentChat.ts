@@ -12,9 +12,9 @@ import {
   demoProject,
   demoTasks,
   publishRecords,
-  todayStats,
   weeklyReportTemplate
 } from '@/mock/dojo/fixture'
+import { overviewStats } from '@/store/dojoOverview'
 import { formatAiText } from '@/utils/formatAiText'
 import { formatMenuTitle } from '@/utils/router'
 
@@ -38,7 +38,7 @@ export function useDojoAgentChat() {
         {
           page: pageLabel.value,
           project: demoProject,
-          stats: todayStats,
+          stats: overviewStats.value,
           tasks: demoTasks,
           accounts: demoAccounts,
           flow: contentFlowItems,

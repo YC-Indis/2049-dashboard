@@ -115,7 +115,7 @@ export const distributionProgressRows: DistributionProgressRow[] = distributionR
   syncSource: 'excel'
 }))
 
-/** 执行进度 — 由时间规划 9 阶段 + Excel 待办推导 */
+/** 执行进度 — 由时间规划里程碑 + Excel 待办推导 */
 export const executionProgressRows: ExecutionProgressRow[] = workflowStages.map((s, i) => {
   let progress = 0
   let status: ExecutionProgressRow['status'] = 'todo'
