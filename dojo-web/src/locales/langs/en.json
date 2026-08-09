@@ -220,7 +220,8 @@
       "adVideos": "Ad Videos",
       "adAccounts": "Ad Accounts",
       "accounts": "Retrospectives",
-      "accountReview": "All Accounts"
+      "accountReview": "All Accounts",
+      "accountIntake": "Account Intake"
     },
     "login": {
       "title": "Login"
