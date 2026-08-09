@@ -1,0 +1,430 @@
+{
+  "file": "dojo数据.xlsx",
+  "sheets": {
+    "工作表1": {
+      "nonempty_rows": 169,
+      "sample": [
+        {
+          "i": 0,
+          "cells": [
+            "账号链接",
+            "分发日期",
+            "视频链接",
+            "投流前自然流",
+            "投放播放量",
+            "截图",
+            "投放完成时间",
+            "备注",
+            "互动率",
+            "3s留存率",
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "i": 1,
+          "cells": [
+            "tiktok.com/@justdojoit",
+            "2026-02-12 00:00:00",
+            "https://www.tiktok.com/@user977543303451666/video/7605744864243797270?is_from_webapp=1&sender_device=pc&web_id=757311909",
+            null,
+            "25900.0",
+            null,
+            null,
+            "自然流+投流",
+            "0.0073"
+          ]
+        },
+        {
+          "i": 2,
+          "cells": [
+            "tiktok.com/@justdojoit",
+            "2026-02-14 00:00:00",
+            "https://www.tiktok.com/@user977543303451666/video/7606700315831799062?is_from_webapp=1&sender_device=pc&web_id=757311909",
+            null,
+            "17100.0",
+            null,
+            null,
+            "自然流+投流",
+            "0.0138"
+          ]
+        },
+        {
+          "i": 3,
+          "cells": [
+            "tiktok.com/@justdojoit",
+            "2026-02-18 00:00:00",
+            "https://www.tiktok.com/@user977543303451666/video/7608013973601930518?is_from_webapp=1&sender_device=pc&web_id=757311909",
+            null,
+            "950.0",
+            null,
+            null,
+            "纯自然流"
+          ]
+        },
+        {
+          "i": 4,
+          "cells": [
+            "tiktok.com/@justdojoit",
+            "2026-02-21 00:00:00",
+            "https://www.tiktok.com/@user977543303451666/video/7609136112933555478?is_from_webapp=1&sender_device=pc&web_id=757311909",
+            null,
+            "741.0",
+            null,
+            null,
+            "纯自然流"
+          ]
+        },
+        {
+          "i": 5,
+          "cells": [
+            "tiktok.com/@justdojoit",
+            "2026-03-02 00:00:00",
+            "https://www.tiktok.com/@user977543303451666/video/7611927373583322390?is_from_webapp=1&sender_device=pc&web_id=757311909",
+            null,
+            "325.0",
+            null,
+            null,
+            "纯自然流"
+          ]
+        },
+        {
+          "i": 6,
+          "cells": [
+            "tiktok.com/@justdojoit",
+            "2026-03-10 00:00:00",
+            "https://www.tiktok.com/@user977543303451666/video/7615080782259883286?is_from_webapp=1&sender_device=pc",
+            "1904.0",
+            "66100.0",
+            null,
+            "投放中",
+            "自然流+投流",
+            "互动增长中，暂时0.82%",
+            "0.13"
+          ]
+        },
+        {
+          "i": 7,
+          "cells": [
+            "tiktok.com/@justdojoit",
+            "2026-03-19 00:00:00",
+            "https://www.tiktok.com/@user977543303451666/video/7618983914844998934?is_from_webapp=1&sender_device=pc&web_id=757311909",
+            "255.0",
+            "282.0",
+            null,
+            "自然流",
+            "纯自然流",
+            null,
+            null
+          ]
+        },
+        {
+          "i": 8,
+          "cells": [
+            "tiktok.com/@justdojoit",
+            "2026-03-23 00:00:00",
+            "https://www.tiktok.com/@user977543303451666/video/7620457804352032022?is_from_webapp=1&sender_device=pc&web_id=757311909",
+            "0.0",
+            "20.0",
+            null,
+            "限流，后期已整改",
+            "纯自然流",
+            null,
+            null
+          ]
+        },
+        {
+          "i": 9,
+          "cells": [
+            "tiktok.com/@justdojoit",
+            "2026-03-30 00:00:00",
+            "https://www.tiktok.com/@user977543303451666/video/7623287318606007574?is_from_webapp=1&sender_device=pc&web_id=757311909",
+            "609.0",
+            "40700.0",
+            null,
+            "投放中",
+            "自然流+投流",
+            "等待",
+            null
+          ]
+        },
+        {
+          "i": 10,
+          "cells": [
+            "tiktok.com/@justdojoit",
+            "2026-04-01 00:00:00",
+            "https://www.tiktok.com/@user977543303451666/video/7623937846147091734?is_from_webapp=1&sender_device=pc&web_id=757311909",
+            "520.0",
+            "147300.0",
+            null,
+            "投放中",
+            "自然流+投流",
+            "等待",
+            null
+          ]
+        },
+        {
+          "i": 11,
+          "cells": [
+            "tiktok.com/@justdojoit",
+            "2026-04-05 00:00:00",
+            "https://www.tiktok.com/@user977543303451666/video/7625271708236156182?is_from_webapp=1&sender_device=pc&web_id=757311909",
+            "612.0",
+            "85900.0",
+            null,
+            "投放中",
+            "自然流+投流",
+            "等待",
+            null
+          ]
+        },
+        {
+          "i": 12,
+          "cells": [
+            "tiktok.com/@justdojoit",
+            "2026-04-08 00:00:00",
+            "https://www.tiktok.com/@user977543303451666/video/7626763426001374486?is_from_webapp=1&sender_device=pc&web_id=757311909",
+            "578.0",
+            "121100.0",
+            null,
+            "暂未开始投放",
+            "自然流+投流",
+            "等待",
+            null
+          ]
+        },
+        {
+          "i": 13,
+          "cells": [
+            "tiktok.com/@justdojoit",
+            "2026-04-13 00:00:00",
+            "https://vm.tiktok.com/ZNRVYRfWA/",
+            "2380.0",
+            "45500.0",
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "i": 14,
+          "cells": [
+            "tiktok.com/@justdojoit",
+            "2026-04-14 00:00:00",
+            "https://www.tiktok.com/@justdojoit/video/7628629078467267862?is_from_webapp=1&sender_device=pc&web_id=757311909554697167",
+            "618.0",
+            "52100.0",
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "i": 15,
+          "cells": [
+            "tiktok.com/@dojo.dailyfix",
+            "2026-02-12 00:00:00",
+            "https://www.tiktok.com/@user6815246510862/video/7605745470891150614?is_from_webapp=1&sender_device=pc&web_id=75731190955",
+            null,
+            "137500.0",
+            null,
+            null,
+            "自然流+投流",
+            "0.01"
+          ]
+        },
+        {
+          "i": 16,
+          "cells": [
+            "tiktok.com/@dojo.dailyfix",
+            "2026-02-14 00:00:00",
+            "https://www.tiktok.com/@user6815246510862/video/7606688937171488022?is_from_webapp=1&sender_device=pc&web_id=75731190955",
+            null,
+            "123000.0",
+            null,
+            null,
+            "自然流+投流",
+            "0.007"
+          ]
+        },
+        {
+          "i": 17,
+          "cells": [
+            "tiktok.com/@dojo.dailyfix",
+            "2026-02-18 00:00:00",
+            "https://www.tiktok.com/@user6815246510862/video/7608014738286578966?is_from_webapp=1&sender_device=pc&web_id=75731190955",
+            null,
+            "490.0",
+            null,
+            null,
+            "纯自然流"
+          ]
+        },
+        {
+          "i": 18,
+          "cells": [
+            "tiktok.com/@dojo.dailyfix",
+            "2026-02-21 00:00:00",
+            "https://www.tiktok.com/@user6815246510862/video/7609135928472341782?is_from_webapp=1&sender_device=pc&web_id=75731190955",
+            null,
+            "881.0",
+            null,
+            null,
+            "纯自然流"
+          ]
+        },
+        {
+          "i": 19,
+          "cells": [
+            "tiktok.com/@dojo.dailyfix",
+            "2026-03-02 00:00:00",
+            "https://www.tiktok.com/@user6815246510862/video/7611929185778519318?is_from_webapp=1&sender_device=pc&web_id=75731190955",
+            null,
+            "371.0",
+            null,
+            null,
+            "纯自然流"
+          ]
+        }
+      ]
+    },
+    "工作表3": {
+      "nonempty_rows": 18,
+      "sample": [
+        {
+          "i": 0,
+          "cells": [
+            "账号链接",
+            "内容主题"
+          ]
+        },
+        {
+          "i": 1,
+          "cells": [
+            "tiktok.com/@user977543303451666",
+            "meme"
+          ]
+        },
+        {
+          "i": 2,
+          "cells": [
+            "tiktok.com/@user6815246510862",
+            "日常生活"
+          ]
+        },
+        {
+          "i": 3,
+          "cells": [
+            "tiktok.com/@user6715211087363",
+            "收纳"
+          ]
+        },
+        {
+          "i": 4,
+          "cells": [
+            "tiktok.com/@user4873040286960",
+            "收纳展示"
+          ]
+        },
+        {
+          "i": 5,
+          "cells": [
+            "tiktok.com/@user5019163702024",
+            "花艺"
+          ]
+        },
+        {
+          "i": 6,
+          "cells": [
+            "tiktok.com/@user5091052716344",
+            "音乐卡点"
+          ]
+        },
+        {
+          "i": 7,
+          "cells": [
+            "tiktok.com/@user902265320907",
+            "擦边美女"
+          ]
+        },
+        {
+          "i": 8,
+          "cells": [
+            "tiktok.com/@user2203758625657",
+            "日常生活"
+          ]
+        },
+        {
+          "i": 9,
+          "cells": [
+            "tiktok.com/@user7618217981203",
+            "日常生活"
+          ]
+        },
+        {
+          "i": 10,
+          "cells": [
+            "tiktok.com/@user46175322766250",
+            "ai创意"
+          ]
+        },
+        {
+          "i": 11,
+          "cells": [
+            "tiktok.com/@user1869697697265",
+            "明星搭配"
+          ]
+        },
+        {
+          "i": 12,
+          "cells": [
+            "tiktok.com/@user62263606831226",
+            "影视共创"
+          ]
+        },
+        {
+          "i": 13,
+          "cells": [
+            "tiktok.com/@user3368618356303",
+            "翻包"
+          ]
+        },
+        {
+          "i": 14,
+          "cells": [
+            "tiktok.com/@user7525833607661",
+            "meme"
+          ]
+        },
+        {
+          "i": 15,
+          "cells": [
+            "tiktok.com/@user7210062825214",
+            "日常生活"
+          ]
+        },
+        {
+          "i": 16,
+          "cells": [
+            "tiktok.com/@user1741536653753",
+            "meme"
+          ]
+        },
+        {
+          "i": 17,
+          "cells": [
+            "tiktok.com/@user2375596902285",
+            "翻包"
+          ]
+        }
+      ]
+    }
+  }
+}

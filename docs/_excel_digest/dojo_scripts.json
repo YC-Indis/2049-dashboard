@@ -1,0 +1,2419 @@
+{
+  "file": "dojo 脚本.xlsx",
+  "sheets": {
+    "时间规划": {
+      "nonempty_rows": 11,
+      "sample": [
+        {
+          "i": 0,
+          "cells": [
+            "item",
+            "owner",
+            "Feb",
+            "Mar"
+          ]
+        },
+        {
+          "i": 1,
+          "cells": [
+            null,
+            null,
+            "13-26",
+            "27.0",
+            "28.0",
+            "1.0",
+            "2.0",
+            "3.0",
+            "4.0",
+            "5.0",
+            "6.0",
+            "7.0"
+          ]
+        },
+        {
+          "i": 2,
+          "cells": [
+            "产品寄送",
+            "客户",
+            "已完成"
+          ]
+        },
+        {
+          "i": 3,
+          "cells": [
+            "内容运营细化方案",
+            "2049.0",
+            null,
+            null,
+            null,
+            null,
+            "已完成"
+          ]
+        },
+        {
+          "i": 4,
+          "cells": [
+            "内容运营细化方案确认",
+            "客户",
+            null,
+            null,
+            null,
+            null,
+            "待确认"
+          ]
+        },
+        {
+          "i": 5,
+          "cells": [
+            "账号养号运营",
+            "2049.0",
+            "已完成"
+          ]
+        },
+        {
+          "i": 6,
+          "cells": [
+            "脚本撰写",
+            "2049.0",
+            "*11",
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "i": 7,
+          "cells": [
+            "脚本确认",
+            "客户",
+            "已完成"
+          ]
+        },
+        {
+          "i": 8,
+          "cells": [
+            "内容制作",
+            "2049.0",
+            "*11"
+          ]
+        },
+        {
+          "i": 9,
+          "cells": [
+            "发布内容确认",
+            "客户",
+            "已完成"
+          ]
+        },
+        {
+          "i": 10,
+          "cells": [
+            "结案报告输出",
+            "2049.0",
+            null
+          ]
+        }
+      ]
+    },
+    "账号规划": {
+      "nonempty_rows": 21,
+      "sample": [
+        {
+          "i": 0,
+          "cells": [
+            "内容细分",
+            "预估账号个数",
+            "现正常运营账号个数",
+            "场景示例",
+            "账号名称",
+            "对应账号链接",
+            "备注"
+          ]
+        },
+        {
+          "i": 1,
+          "cells": [
+            "日常生活植入",
+            "5.0",
+            "3.0",
+            "居家生活/夜生活/社交聚会/娱乐/户外健身/出行",
+            "tiktok.com/@dojo.dailyfix",
+            null
+          ]
+        },
+        {
+          "i": 2,
+          "cells": [
+            null,
+            null,
+            null,
+            null,
+            "tiktok.com/@life.with.dojo",
+            null
+          ]
+        },
+        {
+          "i": 3,
+          "cells": [
+            null,
+            null,
+            null,
+            null,
+            "tiktok.com/@mydojomoments",
+            null
+          ]
+        },
+        {
+          "i": 4,
+          "cells": [
+            null,
+            null,
+            null,
+            null,
+            "tiktok.com/@dojoeverywhere",
+            null
+          ]
+        },
+        {
+          "i": 5,
+          "cells": [
+            null,
+            null,
+            null,
+            null,
+            "dojoinmotion",
+            null
+          ]
+        },
+        {
+          "i": 6,
+          "cells": [
+            "小场景桌面摆件植入",
+            "4.0",
+            "2.0",
+            "美妆桌/饰品桌/居家角落/游戏桌面/办公角落等",
+            "tiktok.com/@aestheticdojo0",
+            null
+          ]
+        },
+        {
+          "i": 7,
+          "cells": [
+            null,
+            null,
+            null,
+            null,
+            "tiktok.com/@mydojocorner",
+            null
+          ]
+        },
+        {
+          "i": 8,
+          "cells": [
+            null,
+            null,
+            null,
+            null,
+            "tiktok.com/@.dojo.vibesonly",
+            null
+          ]
+        },
+        {
+          "i": 9,
+          "cells": [
+            null,
+            null,
+            null,
+            null,
+            "dojo.casual",
+            null
+          ]
+        },
+        {
+          "i": 10,
+          "cells": [
+            "装包",
+            "4.0",
+            "1.0",
+            "通勤/旅行/健身/户外/购物（Backpack / Tote / Wallet）",
+            "tiktok.com/@whatsinmydojo",
+            null
+          ]
+        },
+        {
+          "i": 11,
+          "cells": [
+            null,
+            null,
+            null,
+            null,
+            "tiktok.com/@lifeviadojo 热点",
+            null
+          ]
+        },
+        {
+          "i": 12,
+          "cells": [
+            null,
+            null,
+            null,
+            null,
+            "tiktok.com/@dojoinpieces",
+            null
+          ]
+        },
+        {
+          "i": 13,
+          "cells": [
+            null,
+            null,
+            null,
+            null,
+            "packwithdojo",
+            null
+          ]
+        },
+        {
+          "i": 14,
+          "cells": [
+            "Meme & Hot Stickers",
+            "1.0",
+            "1.0",
+            "模板二创 / 小贴纸植入",
+            "tiktok.com/@justdojoit",
+            null
+          ]
+        },
+        {
+          "i": 15,
+          "cells": [
+            "女生擦边",
+            "1.0",
+            "1.0",
+            "舞蹈类/擦边",
+            "tiktok.com/@thatdojogirl4"
+          ]
+        },
+        {
+          "i": 16,
+          "cells": [
+            "热点",
+            "1.0",
+            "1.0",
+            "热点视频二剪/桌面影视互动植入",
+            "tiktok.com/@dojo.now"
+          ]
+        },
+        {
+          "i": 17,
+          "cells": [
+            "ASMR",
+            "3.0",
+            "1.0",
+            "收纳 / 转盘 / 音效解压/换帽子等",
+            "tiktok.com/@dojo.relax"
+          ]
+        },
+        {
+          "i": 18,
+          "cells": [
+            null,
+            null,
+            null,
+            null,
+            "tiktok.com/@dojosatisfy"
+          ]
+        },
+        {
+          "i": 19,
+          "cells": [
+            null,
+            null,
+            null,
+            null,
+            "asoftdojo"
+          ]
+        },
+        {
+          "i": 20,
+          "cells": [
+            "艺术",
+            "1.0",
+            "1.0",
+            "生活艺术/花艺美学/ DIY",
+            "littlethingsdojo"
+          ]
+        }
+      ]
+    },
+    "第一周": {
+      "nonempty_rows": 17,
+      "sample": [
+        {
+          "i": 0,
+          "cells": [
+            "序号",
+            "内容方向",
+            "参考链接",
+            "截图",
+            "拍摄要求",
+            "音乐要求",
+            "场景要求",
+            "注意事项",
+            "视频文案",
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "i": 1,
+          "cells": [
+            "1.0",
+            "情人节惊喜",
+            "https://www.tiktok.com/@mccall_monson/video/7466542098125196590?is_from_webapp=1&sender_device=pc&web_id=757311909554697",
+            null,
+            "参考示例视频",
+            "TikTok英国热门音乐",
+            "参考案例视频在道具中插入产品",
+            "1. 前几秒不要出现电子烟画面； 2. 镜头取角度/遮挡住烟嘴，logo可以部分露出 类似Malone，禁止露出烟嘴和logo",
+            "-"
+          ]
+        },
+        {
+          "i": 2,
+          "cells": [
+            "2.0",
+            "情人节花束",
+            "https://vm.tiktok.com/ZNRUySsp2/",
+            null,
+            "参考示例视频",
+            "使用示例视频音乐",
+            "参考案例视频将产品倒着插入花中",
+            "1. 倒着插入花束尽量可以适当露出logo或者镜头取角度，logo不用给大特写 扫过即可 2. 与产品混在一起拍摄的道具尽量选颜色相近",
+            "-"
+          ]
+        },
+        {
+          "i": 3,
+          "cells": [
+            "3.0",
+            "开箱",
+            "https://vm.tiktok.com/ZNRUykyw3/",
+            null,
+            "参考示例视频",
+            "TikTok英国热门音乐",
+            "参考案例视频局部大特写开箱细节视频",
+            "1.前几秒不要出现电子烟画面； 2. 烟嘴和logo可以露出，就是不要完整的出现在镜头里，比如大特写扫logo“dojo”4个字母，不要4个字母全部露出的画面",
+            "-"
+          ]
+        },
+        {
+          "i": 4,
+          "cells": [
+            "4.0",
+            "morning in my life",
+            "https://www.tiktok.com/@hs.george/video/7485469500775746838?is_from_webapp=1&sender_device=pc&web_id=7573119095546971670",
+            null,
+            "参考示例视频",
+            "TikTok英国热门音乐",
+            "参考案例视频局部大特写使用细节视频",
+            "1. 前几秒不要出现电子烟画面； 2. 在各种转场中植入产品，不要露出烟嘴，穿插露出logo，可以频繁露出但是切换频次要高",
+            "morning in my life  selfcare coffe d~o~j~o~"
+          ]
+        },
+        {
+          "i": 5,
+          "cells": [
+            "5.0",
+            "口味ugc",
+            "https://www.tiktok.com/@starleights/video/7526855729559407894?is_from_webapp=1&sender_device=pc&web_id=74504156378784578",
+            null,
+            "参考示例视频（00:48-01:01)部分，从不同角度拍“straw-raspberry cherry ice” 口味（与其他道具搭配一起拿产品，比如第二条参考视频拿的咖啡）",
+            "TikTok英国热门音乐",
+            "1. 6个不同场景（留3个场景切片做备用）；  2. 不要露出中文以及相关背景，可以选择咖啡厅/户外等可与产品色彩融合的背景",
+            "1. 前几秒不要出现电子烟画面； 2. 镜头取角度/手握住烟嘴/logo 类似Malone，禁止露出烟嘴和logo； 3. 与产品混在一起拍摄的道具尽量选颜色/大小相近的",
+            "Sweet strawberry 🍓 + tangy raspberry + juicy cherry 🍒 + icy finish ❄️ = perfectly balanced, super refreshing, seriously "
+          ]
+        },
+        {
+          "i": 6,
+          "cells": [
+            "6.0",
+            "收纳ASMR",
+            "https://vm.tiktok.com/ZNRUPjSFX/",
+            null,
+            "拍摄方法参考示例视频32s-54s，把产品与其他妆品或者相似道具一起摆放",
+            "麦克风收音",
+            "室内",
+            "1. 前几秒不要出现电子烟画面； 2. 禁止露出烟嘴，logo适当短期穿插露出"
+          ]
+        },
+        {
+          "i": 7,
+          "cells": [
+            "7.0",
+            "what does love tatst like",
+            "https://vm.tiktok.com/ZNRyPw85d/",
+            null,
+            "镜头1: 水果先入镜（青苹果 / 红苹果），UGC 扫拍，桌面零散玫瑰花瓣和红丝带随意摆放，心形贴纸点缀，，突出情人节氛围，最后虚焦带到产品“double apple\"（不直拍） 配文案：What does love taste like?",
+            "TikTok英国热门音乐",
+            "5个不同室内/室外场景，具体要求按照D列",
+            "1. 前几秒不要出现电子烟画面 2. 禁止露出烟嘴，logo适当短期穿插露出",
+            "D列"
+          ]
+        },
+        {
+          "i": 8,
+          "cells": [
+            "8.0",
+            null,
+            "https://vm.tiktok.com/ZNRyP73an/ https://vm.tiktok.com/ZNRyPEWps/",
+            null,
+            "镜头1: 玫瑰花瓣从上方慢慢飘落，落在产品周围扫拍（镜头一定要跟随花瓣移动，前2s产品不要入镜） 配文案：What does love taste like?  - Straw-Raspberry Cherry Ice  以下是5个快速的u",
+            "TikTok英国热门音乐",
+            "6个不同室内/室外场景，具体要求按照D列",
+            "1. 前几秒不要出现电子烟画面 2. 禁止露出烟嘴，logo适当短期穿插露出",
+            "D列"
+          ]
+        },
+        {
+          "i": 9,
+          "cells": [
+            "9.0",
+            null,
+            "https://vm.tiktok.com/ZNRy5YyU3/ https://www.tiktok.com/@starleights/video/7526855729559407894?is_from_webapp=1&sender_d",
+            null,
+            "镜头1: 暗色、温暖灯光下情人节氛围氛围，与香水，木质调摆件堆叠，红色干花或者花枝/ 心形小卡片（LOVE、Be Mine、XOXO 等字样）点缀（前2s产品不要入镜） 配文案：What does love taste like?   - ",
+            "TikTok英国热门音乐",
+            "室内场景，具体要求按照D列",
+            "1. 前几秒不要出现电子烟画面 2. 禁止露出烟嘴，logo适当短期穿插露出",
+            "D列"
+          ]
+        },
+        {
+          "i": 10,
+          "cells": [
+            "10.0",
+            null,
+            "https://vm.tiktok.com/ZNRyHFUp2/ https://vm.tiktok.com/ZNRyHr4e1/https://www.tiktok.com/@starleights/video/7526855729559",
+            null,
+            "镜头1: 参考第1/2条案例视频开场画面，四个产品全部植入花束里（情人节花束，突出情人节氛围），轻轻扫拍/推进（前2s产品不要入镜） 配文案：What does love taste like? 🌹  以下是4个产品ugc转场，每个3s，参",
+            "TikTok英国热门音乐",
+            "室外场景，具体要求按照D列",
+            "1. 前几秒不要出现电子烟画面 2. 禁止露出烟嘴，logo适当短期穿插露出",
+            "D列"
+          ]
+        },
+        {
+          "i": 11,
+          "cells": [
+            "11.0",
+            null,
+            "https://vm.tiktok.com/ZNRy8EStC/ https://vm.tiktok.com/ZNRyg5LED/  https://www.tiktok.com/@starleights/video/75268557295",
+            null,
+            "镜头1: 参考第一条案例视频开场画面，四个产品全部植入情人节basket里，扫拍/推进（道具参考示例视频中情人节相关元素，比如心形气球/巧克力/花瓣等，前2s产品不要入镜） 配文案：What does love taste like? ❤️",
+            "TikTok英国热门音乐",
+            "室外场景，具体要求按照D列",
+            "1. 前几秒不要出现电子烟画面 2. 禁止露出烟嘴，logo适当短期穿插露出",
+            "D列"
+          ]
+        },
+        {
+          "i": 12,
+          "cells": [
+            "12.0",
+            "客供混剪",
+            "https://drive.google.com/drive/folders/1pN-xVdt8tpJH7kRQdCa6cHbzHngNilAc?usp=drive_link",
+            "-",
+            "使用提供的Google视频素材，采访视频混剪1条，每条时长20-30s，多采访环节转场切换",
+            "视频原音+背景TikTok 热门音乐",
+            "Birmingham showed up. ❤️ Good vibes, good people, great flavours. Dojo brought the energy."
+          ]
+        },
+        {
+          "i": 13,
+          "cells": [
+            null,
+            null,
+            null,
+            null,
+            "使用提供的Google视频素材，采访视频混剪1条，每条时长20-30s，多采访环节转场切换",
+            null,
+            "Dojo in Birmingham. ✨ Sharing love, sharing flavours. 💋 This is how we do it.",
+            "Valentine’s night with Dojo. ✨ Love. Flavours. Good vibes. Birmingham did not disappoint.",
+            "Valentine’s day with Dojo. ✨ Love. Flavours. Good vibes. Birmingham did not disappoint."
+          ]
+        },
+        {
+          "i": 14,
+          "cells": [
+            "13.0",
+            "客供混剪",
+            "https://drive.google.com/drive/folders/1Juvv_MTqlClZQmEzXwV5qUPsHIOjsyMA?usp=drive_link",
+            "-",
+            "使用提供的Google视频素材编号“2105-2096/ 4058等（从素材里面再找一下） 相关的游戏环节”，采访视频混剪1条，时长15-20s，游戏环节转场",
+            "TikTok 热门音乐",
+            "Cupid aimed… 🎯 Dojo delivered. Bullseye = prize. 💘"
+          ]
+        },
+        {
+          "i": 15,
+          "cells": [
+            null,
+            null,
+            null,
+            null,
+            "使用提供的Google视频素材编号“20260214_120200/ 20260214_114949/ 20260214_112815/ 20260214_112143/ 4122/ 4121/ 4062/ 4054/ 4052”，采访视频",
+            "TikTok 热门音乐"
+          ]
+        },
+        {
+          "i": 16,
+          "cells": [
+            "13.5",
+            "客供混剪",
+            "https://drive.google.com/drive/folders/1G80JIE0IMNdmxwf5OLamKmqCn6UW8Os9?usp=drive_link",
+            null,
+            "根据提供的Google图片素材，套capcut模版（选15个图以上的）活动混剪1条",
+            "TikTok 热门音乐",
+            "Cupid’s in the air 💘  Love. Flavours. Dojo."
+          ]
+        }
+      ]
+    },
+    "第二周": {
+      "nonempty_rows": 13,
+      "sample": [
+        {
+          "i": 0,
+          "cells": [
+            "序号",
+            "内容方向",
+            "参考链接",
+            "截图",
+            "拍摄要求",
+            "封面要求",
+            "音乐要求",
+            "场景要求",
+            "注意事项",
+            "视频文案",
+            "审批结果",
+            "Hashtag"
+          ]
+        },
+        {
+          "i": 1,
+          "cells": [
+            "1.0",
+            "day in life",
+            "https://www.tiktok.com/@isabelajuliana_/video/7504707799780166943?is_from_webapp=1&sender_device=pc&web_id=7573119095546",
+            null,
+            "参考案例视频拍摄方法（产品植入部分，不用特意给特写，自然扫拍） 镜头1: 视频整体加速，时长3s ✨ Day in a Dojo girl’s life  镜头2: 早起化妆/穿搭准备，植入产品到化妆品/背包，时长3-4s  8:00am ",
+            "视频做一个封面，整体视频中不带产品的整体画面质感最好的实拍图",
+            "TikTok英国热门音乐",
+            null,
+            "不要露出烟嘴",
+            "E列",
+            "通过",
+            "#vlog #dailyvlog #dayinmylife"
+          ]
+        },
+        {
+          "i": 2,
+          "cells": [
+            "2.0",
+            "小场景桌面摆件植入",
+            "https://www.tiktok.com/@baeeeyonce/video/7425821516933106987?is_from_webapp=1&sender_device=pc",
+            null,
+            "参考示例视频拍摄方法，15-20s",
+            "视频做一个封面，整体视频中不带产品的整体画面质感最好的实拍图",
+            "TikTok英国热门音乐",
+            "室内",
+            "不要露出烟嘴",
+            "Everything mini, everything cute — even my Dojo. 💄🪞💅✨",
+            "通过",
+            "#minivlog #aestheticvibes #cutethings"
+          ]
+        },
+        {
+          "i": 3,
+          "cells": [
+            "3.0",
+            "日常生活植入",
+            "https://www.tiktok.com/@pridiary/video/7415193820318436640?is_from_webapp=1&sender_device=pc&web_id=7573119095546971670",
+            null,
+            "参考示例视频拍摄方法，把产品嵌入契合的场景（色调/风格与产品一致）。切换3-4个转场，每个转场4-5s",
+            "视频做一个封面，整体视频中不带产品的整体画面质感最好的实拍图",
+            "TikTok英国热门音乐",
+            null,
+            "不要露出烟嘴",
+            "To be a Dojo girl  💄👛👠💅🪞✨💎",
+            "通过",
+            "#girltherapy #daily #dailylife #dailyroutine"
+          ]
+        },
+        {
+          "i": 4,
+          "cells": [
+            "4.0",
+            "小场景桌面摆件植入",
+            "https://www.tiktok.com/@lifewith.aless/video/7365261539110161670?is_from_webapp=1&sender_device=pc&web_id=75731190955469",
+            null,
+            "参考示例视频拍摄方法，主要参考桌面场景部分，切换3个转场（其中一个场景要纳入转盘），布景搭建契合背景音乐蓝色氛围为主",
+            "视频做一个封面，整体视频中不带产品的整体画面质感最好的实拍图",
+            "使用示例视频音乐",
+            "室内",
+            "不要露出烟嘴",
+            "All about blue… even my Dojo 💙🌀🌊🧢💎✨💧",
+            "通过",
+            "#fyp #aestheticvibes #blueaesthetic #foryoupage"
+          ]
+        },
+        {
+          "i": 5,
+          "cells": [
+            "5.0",
+            "便携装包",
+            "https://www.tiktok.com/@veg_meg/video/7607910991606713622?is_from_webapp=1&sender_device=pc",
+            null,
+            "参考示例视频拍摄方法，重点突出产品小巧便携，切换4种不同与产品风格一致的穿搭（比如：健身，休闲，通勤等），每个场景时长3-4s，选择其中2个给拉个特写",
+            "视频做一个封面，整体视频中不带产品的整体画面质感最好的实拍图",
+            "TikTok英国热门音乐",
+            "室内+室外",
+            "不要露出烟嘴",
+            "When someone asks what I like to do for fun… chill with Dojo 💨✨",
+            "通过",
+            "#fyp #lifestylevibes #dailyvibes #foryoupage"
+          ]
+        },
+        {
+          "i": 6,
+          "cells": [
+            "6.0",
+            "lizard meme 热点",
+            "https://www.tiktok.com/@igreenscreenthings/video/7607180014978665759?is_from_webapp=1&sender_device=pc",
+            null,
+            "背景放产品实拍图，契合meme风格, 比如可以小蜥蜴抓捏 ⚠️实拍图要先给客户过了再做视频.",
+            "视频做一个封面，整体视频中不带产品的整体画面质感最好的实拍图",
+            "使用示例视频音乐",
+            "室内",
+            "不要露出烟嘴",
+            "POV: when i find my friend have a new dojo",
+            "通过，画面加点文字描述某个情景/剧情，产品和表情包需要有一些动作互动",
+            null
+          ]
+        },
+        {
+          "i": 7,
+          "cells": [
+            "7.0",
+            "dance & flavour",
+            "https://vm.tiktok.com/ZNRurELbb/",
+            null,
+            "视频二剪 参考案例图片做口味标注,配一些emoji",
+            "视频做一个封面，整体视频中不带产品的整体画面质感最好的实拍图",
+            "TikTok英国热门音乐",
+            "室内",
+            null,
+            "Rating this flavour I just tried 👀💨 Product: Dojo Blast10K — 9/10 ⭐️🔥 Flavour: Straw-Raspberry Cherry Ice 🍓🍒❄️🧊 Sweetnes",
+            null,
+            "#dojo #blast10k #vape #vapetok #fyp #viral #flavourreview"
+          ]
+        },
+        {
+          "i": 8,
+          "cells": [
+            "8.0",
+            "ASMR & slime",
+            "Antarctica Slimes Launching Tomorrow at 7 PM EST | TikTok",
+            null,
+            "参考示例视频拍摄方法（从封面拍摄到视频整体拍摄光效），选择与产品主色调匹配的道具，用dojo代替视频中的勺子",
+            "视频做一个封面，整体视频中不带产品的整体画面质感最好的实拍图",
+            "麦克风收音",
+            "室内",
+            "不要露出烟嘴",
+            "no rating, no music. just dojo asmr. 💨",
+            null,
+            null
+          ]
+        },
+        {
+          "i": 9,
+          "cells": [
+            "9.0",
+            "零食场景植入",
+            "https://www.tiktok.com/@puffproject_/video/7600891727125187871?is_from_webapp=1&sender_device=pc&web_id=7573119095546971",
+            null,
+            "参考示例视频拍摄方法，选择与产品主色调匹配的饮料，切换3个不同场景做转场，每个转场4s",
+            "视频做一个封面，整体视频中不带产品的整体画面质感最好的实拍图",
+            "TikTok英国热门音乐",
+            "室外",
+            "不要露出烟嘴",
+            "Unbeatable combo? Always got my Dojo 💨",
+            "通过",
+            "#fyp #dailyvibes #lifestylevlog #foryoupage"
+          ]
+        },
+        {
+          "i": 10,
+          "cells": [
+            "10.0",
+            "lisa 热点",
+            "https://vm.tiktok.com/ZNRuhTbHu/",
+            null,
+            "参考案例视频剪辑手法，选择lisa最近比较火热穿搭，与道具/包/发型等其他配饰结合，切换5个转场",
+            "视频做封面，整体质感最好的，可以尝试露出电子烟",
+            "TikTok英国热门音乐",
+            "室内",
+            null,
+            null,
+            null,
+            "#dojo #outfitinspo #lisa #fashionaesthetic #ootd #minimalstyle #fashiontok #styleinspo #fyp"
+          ]
+        },
+        {
+          "i": 11,
+          "cells": [
+            "11.0",
+            "Real → AI",
+            "https://www.tiktok.com/@cartoon.realism/video/7585672755778030870?q=human%20version&t=1772594252800",
+            null,
+            "实拍+AI 视频 （参考示例视频，切换不同口味抓机在不同场景下的dojo AI 成像）",
+            "视频做一个封面，整体视频中不带产品的整体画面质感最好的实拍图",
+            "TikTok英国热门音乐",
+            "室内",
+            "不要露出烟嘴",
+            "Pick your favourite DOJO flavour! 🎁💨",
+            "不通过，原视频播放量多来自品牌知名度，内容不够有意思，画面也不抓人，一些有意思的ai  物品拟人（真人风格，服饰上需要口味水果的元素）https://www.tiktok.com/@cartoon.realism/video/7585672",
+            null
+          ]
+        },
+        {
+          "i": 12,
+          "cells": [
+            "12.0",
+            "艺术",
+            "https://www.tiktok.com/@_ffaatimaa__/video/7466391616178244910?is_from_webapp=1&sender_device=pc&web_id=7573119095546971",
+            null,
+            "参考示例视频拍摄方法，不要切快门时给爆闪画面，切换5个快门，每个快门在花束5个不同位置纳入不同产品；⚠️5个快门画面换5个不同滤镜的各种花，明媚的，雾化感的）",
+            "视频做一个封面，整体视频中不带产品的整体画面质感最好的实拍图",
+            "使用示例视频音乐",
+            "室内/室外",
+            "不要露出烟嘴",
+            "-",
+            "待修改，要更有意思（比如花当泳池，产品是跳水运动员（烟嘴可以用小泳帽遮住）），照相机是高速监测器，甚至画面上还能出现每个产品跳水的评分/或者丰富画面的内容，比如不同滤镜下的各种花，明媚的，雾化感的）",
+            null
+          ]
+        }
+      ]
+    },
+    "第三周": {
+      "nonempty_rows": 22,
+      "sample": [
+        {
+          "i": 0,
+          "cells": [
+            "序号",
+            "类别",
+            "内容细分",
+            "参考链接",
+            "截图",
+            "拍摄要求",
+            "视频文案",
+            "封面要求",
+            "音乐要求",
+            "场景要求",
+            "注意事项",
+            null
+          ]
+        },
+        {
+          "i": 1,
+          "cells": [
+            "1.0",
+            "日常生活植入",
+            "day in life",
+            "https://www.tiktok.com/@isabelajuliana_/video/7504707799780166943?is_from_webapp=1&sender_device=pc&web_id=7573119095546",
+            null,
+            "镜头1: 视频整体加速，时长3s ✨ A busy day in a Dojo girl’s life 💨  镜头2: 早晨起床、化妆/穿搭准备，产品放入包或化妆包，时长3-4s 8:00am morning prep Dojo ready",
+            "E列",
+            "视频做一个封面，整体视频中不带产品的整体画面质感最好的实拍图",
+            "TikTok英国热门音乐",
+            "室内",
+            "不要露出烟嘴",
+            null
+          ]
+        },
+        {
+          "i": 2,
+          "cells": [
+            "2.0",
+            null,
+            "weekend in life",
+            "https://www.tiktok.com/@oppsy.bibby/video/7567544125206088968?is_from_webapp=1&sender_device=pc&web_id=75731190955469716",
+            null,
+            "镜头1: 视频整体加速，时长3s ✨ A weekend in a DOJO girl’s life  镜头2: 周末早晨起床、简单穿搭/化妆准备，产品放入背包或化妆包，时长3-4s 9:00am lazy morning vibes Do",
+            "E列",
+            "视频做一个封面，整体视频中不带产品的整体画面质感最好的实拍图",
+            "使用示例视频背景音乐",
+            "室内",
+            "不要露出烟嘴",
+            null
+          ]
+        },
+        {
+          "i": 3,
+          "cells": [
+            "3.0",
+            null,
+            "harry style 演唱会",
+            "Harry Styles' Least Favorite Track Revealed | TikTok",
+            null,
+            "参考案例视频拍摄模式,dojo 放在电脑上即可，15-20s",
+            "Late night,Dojo in hand 💨🌙",
+            "封面带产品实拍图",
+            "使用示例视频背景音乐",
+            "室内",
+            "不要露出烟嘴",
+            null
+          ]
+        },
+        {
+          "i": 4,
+          "cells": [
+            "4.0",
+            null,
+            "mini perfume oorganize",
+            "https://www.tiktok.com/@ytg_2x/video/7497833803600137488?is_from_webapp=1&sender_device=pc&web_id=7573119095546971670",
+            null,
+            "参考示例视频拍摄方法，15-20s",
+            "Mini vibes, maximum cute — that’s my Dojo. 💅🪞💨",
+            "视频做一个封面，整体视频中不带产品的整体画面质感最好的实拍图",
+            "TikTok英国热门音乐",
+            "室内",
+            "不要露出烟嘴",
+            null
+          ]
+        },
+        {
+          "i": 5,
+          "cells": [
+            "5.0",
+            null,
+            "favourite color",
+            "https://www.tiktok.com/@mondayhaircare/video/7506886678494317870?is_from_webapp=1&sender_device=pc&web_id=75731190955469",
+            null,
+            "参考示例视频拍摄方法，主要参考桌面场景部分，切换3个转场（其中一个场景要纳入转盘），布景搭建契合背景音乐粉色氛围为主",
+            "Pink everything… my Dojo included 💕💖🩷🌷💅✨",
+            "视频做一个封面，整体视频中不带产品的整体画面质感最好的实拍图",
+            "使用示例视频音乐",
+            "室内",
+            "不要露出烟嘴",
+            null
+          ]
+        },
+        {
+          "i": 6,
+          "cells": [
+            "6.0",
+            null,
+            "follow that tune 二创",
+            "https://www.tiktok.com/@wealthy_.edits/video/7611699725259001102?is_from_webapp=1&sender_device=pc&web_id=75731190955469",
+            null,
+            "参考案例视频拍摄模式但不是布景，背景放“gymskin flow that tune“占主要画面，手持dojo入镜，15-20s",
+            "flow that tune? no with dojo",
+            "gymskin 做封面",
+            "使用示例视频音乐",
+            "室内",
+            "不要露出烟嘴",
+            null
+          ]
+        },
+        {
+          "i": 7,
+          "cells": [
+            "7.0",
+            null,
+            "Straw-Raspberry Cherry Ice口味ASMR",
+            "https://www.tiktok.com/@kochi_asmr/video/7603272401857695006?is_from_webapp=1&sender_device=pc&web_id=757311909554697167",
+            null,
+            "参考示例视频拍摄方法（从封面拍摄到视频整体拍摄光效），选择与产品主色调匹配的道具，用dojo代替视频中的碾压工具，对应口味买对应水果",
+            "-",
+            null,
+            "TikTok英国热门音乐",
+            "室内",
+            "不要露出烟嘴",
+            null
+          ]
+        },
+        {
+          "i": 8,
+          "cells": [
+            "8.0",
+            null,
+            "水果口味ASMR",
+            "https://www.tiktok.com/@caitliniola/video/7607932380761869576?is_from_webapp=1&sender_device=pc&web_id=75731190955469716",
+            null,
+            "参考示例视频拍摄方法（从封面拍摄到视频整体拍摄光效），选择与产品主色调匹配的道具，用dojo代替视频中的勺子（选取两款水果口味），对应口味买对应水果",
+            "When I’m craving something sweet, Dojo never disappoints 🍬💨",
+            null,
+            "TikTok英国热门音乐",
+            "室内",
+            "不要露出烟嘴",
+            null
+          ]
+        },
+        {
+          "i": 9,
+          "cells": [
+            "9.0",
+            null,
+            "harry style 演唱会穿搭1",
+            "https://vm.tiktok.com/ZNRuhoMuF/",
+            null,
+            "参考案例视频剪辑手法，选择harry style演唱会火热穿搭（亮片裙），与道具/包/发型等其他配饰结合",
+            "轮播harry style歌曲歌词",
+            null,
+            "harry style 热门 参考音乐https://www.tiktok.com/@toptokrankings/video/7615706713278123286?is_from_webapp=1&sender_device=pc&we",
+            "室内",
+            "不要露出烟嘴",
+            null
+          ]
+        },
+        {
+          "i": 10,
+          "cells": [
+            "10.0",
+            null,
+            "harry style 演唱会穿搭2",
+            "https://www.tiktok.com/@whoiseamy/video/7599804018445126932?is_from_webapp=1&sender_device=pc&web_id=7573119095546971670",
+            null,
+            "参考案例视频剪辑手法，选择harry style演唱会穿搭植入产品，5-6种搭配切片",
+            "Harry Styles 2026 tour got me like… me, my squad, and my Dojo 💄💨🎶",
+            null,
+            "harry style 热门 参考音乐https://www.tiktok.com/@toptokrankings/video/7615706713278123286?is_from_webapp=1&sender_device=pc&we",
+            "室内",
+            "不要露出烟嘴",
+            null
+          ]
+        },
+        {
+          "i": 11,
+          "cells": [
+            "11.0",
+            null,
+            "演唱会氛围",
+            "https://www.tiktok.com/@seraphinemonicaeva/video/7601193576487259424?is_from_webapp=1&sender_device=pc&web_id=7573119095",
+            null,
+            "参考案例视频剪辑手法，选择harry style演唱会短裙特写，植入产品，5-6种搭配切片",
+            "Picking dress, taking Dojo 💖💃💨",
+            null,
+            "harry style 热门 参考音乐https://www.tiktok.com/@toptokrankings/video/7615706713278123286?is_from_webapp=1&sender_device=pc&we",
+            "室内",
+            "不要露出烟嘴",
+            "harry style内容太多了，追下一个热点"
+          ]
+        },
+        {
+          "i": 12,
+          "cells": [
+            "12.0",
+            "便携装包",
+            "pack minibag",
+            "https://www.tiktok.com/@jayemesdee/video/7511581026225884459?is_from_webapp=1&sender_device=pc",
+            null,
+            "参考示例视频，如果没有透明包，就把道具放在包周围扫一下镜头，产品隐藏在道具中",
+            "My minibag packed with my fav Dojo— ready for anything 💨🎒✨",
+            "参考案例视频封面",
+            "tiktok 英国热门音乐",
+            "室内/室外",
+            "不要露出烟嘴",
+            null
+          ]
+        },
+        {
+          "i": 13,
+          "cells": [
+            "13.0",
+            null,
+            "tirp bagpack org",
+            "https://www.tiktok.com/@easypackusa_/video/7539675950036946231?is_from_webapp=1&sender_device=pc&web_id=7573119095546971",
+            null,
+            "参考案例视频拍摄方法，在化妆品装包部分植入dojo，10-15s",
+            "Pack with me for a trip… Dojo comes too! 💼💨✨",
+            "参考案例视频封面",
+            "TikTok英国热门音乐",
+            "室内",
+            "不要露出烟嘴",
+            null
+          ]
+        },
+        {
+          "i": 14,
+          "cells": [
+            "14.0",
+            "美女/擦边相关",
+            "spring break",
+            "https://www.tiktok.com/@marissaayerss/video/7480703816090946862?is_from_webapp=1&sender_device=pc&web_id=757311909554697",
+            null,
+            "视频二剪 参考案例图片做口味标注,配一些emoji",
+            "Just tried this flavour 👀💨 Product: Dojo Blast10K — 9/10 ⭐️🔥 Flavour: Straw-Raspberry Cherry Ice 🍓🍒❄️🧊💖 Sweetness: 8/10 ",
+            "视频做一个封面，整体视频中不带产品的整体画面质感最好的实拍图",
+            "TikTok英国热门音乐",
+            "室内",
+            "不要露出烟嘴",
+            null
+          ]
+        },
+        {
+          "i": 15,
+          "cells": [
+            "15.0",
+            "meme",
+            "cat meme",
+            "https://www.tiktok.com/@igreenscreenthings/video/7531844867605990686?is_from_webapp=1&sender_device=pc&web_id=7573119095",
+            "cat meme",
+            "背景放产品实拍图，契合meme风格, 比如可以小蜥蜴拍到dojo ⚠️实拍图要先给客户过了再做视频",
+            "When you keep missing your fav Dojo 💨🫠🦎",
+            "视频做一个封面，整体画面质感最好的实拍图（可尝试露出一部分产品",
+            "使用案例视频音乐",
+            "室内",
+            "不要露出烟嘴",
+            null
+          ]
+        },
+        {
+          "i": 16,
+          "cells": [
+            "16.0",
+            null,
+            "lizard meme2",
+            "https://www.tiktok.com/@.memescreens/video/7608999557107682567?is_from_webapp=1&sender_device=pc&web_id=7573119095546971",
+            null,
+            "背景放产品实拍图，契合meme风格, 小蜥蜴围着dojo ⚠️实拍图要先给客户过了再做视频",
+            "Me with my top Dojo flavour 💖💨💫",
+            "视频做一个封面，整体画面质感最好的实拍图（可尝试露出一部分产品",
+            "使用案例视频音乐",
+            "室内",
+            "不要露出烟嘴",
+            null
+          ]
+        },
+        {
+          "i": 17,
+          "cells": [
+            "17.0",
+            null,
+            "dance meme1",
+            "https://www.tiktok.com/@.memescreens/video/7577294413056068882?is_from_webapp=1&sender_device=pc&web_id=7573119095546971",
+            null,
+            "背景放产品实拍图，契合meme风格 ⚠️实拍图要先给客户过了再做视频",
+            "Mood: just grabbed my favourite Dojo 💖🪞💨✨",
+            "视频做一个封面，整体画面质感最好的实拍图（可尝试露出一部分产品",
+            "使用案例视频音乐",
+            "室内",
+            "不要露出烟嘴",
+            null
+          ]
+        },
+        {
+          "i": 18,
+          "cells": [
+            "18.0",
+            null,
+            "dance meme2",
+            "https://www.tiktok.com/@viralgreenscreenhub/video/7607199019416259862?is_from_webapp=1&sender_device=pc&web_id=757311909",
+            null,
+            "背景放产品实拍图，契合meme风格 ⚠️实拍图要先给客户过了再做视频",
+            "Me: obsessed with this Dojo flavour … finally mine! 🎶",
+            "视频做一个封面，整体画面质感最好的实拍图（可尝试露出一部分产品",
+            "使用案例视频音乐",
+            "室内",
+            "不要露出烟嘴",
+            null
+          ]
+        },
+        {
+          "i": 19,
+          "cells": [
+            "19.0",
+            null,
+            "AI 2",
+            "https://www.tiktok.com/@.sloppy.cat/video/7611001761699990797?is_from_webapp=1&sender_device=pc",
+            null,
+            "猫为主角去玩dojo",
+            "Me: using Dojo… My cat: challenge accepted 🐱💨💖",
+            null,
+            "使用案例视频音乐",
+            "室内",
+            "不要露出烟嘴",
+            null
+          ]
+        },
+        {
+          "i": 20,
+          "cells": [
+            "20.0",
+            "艺术",
+            "花&dojo",
+            "https://www.tiktok.com/@_ffaatimaa__/video/7466391616178244910?is_from_webapp=1&sender_device=pc&web_id=7573119095546971",
+            null,
+            "参考示例视频拍摄方法，不要切快门时给爆闪画面，切换5个快门，花当泳池，产品是跳水运动员（烟嘴可以用小泳帽遮住）），照相机是高速监测器，甚至画面上还能出现每个产品跳水的评分/或者丰富画面的内容",
+            "1. 对应口味 + 9/10 ⭐️💨         2. 对应口味 + 8.5/10 🌸✨    3. 对应口味 + 9.5/10 🔥💫         4. 对应口味 + 8/10 🍬👌",
+            "视频做一个封面，整体视频中不带产品的整体画面质感最好的实拍图",
+            "使用示例视频音乐",
+            "室内/室外",
+            "不要露出烟嘴",
+            null
+          ]
+        },
+        {
+          "i": 26,
+          "cells": [
+            "13.0",
+            null,
+            "演唱会氛围",
+            "https://www.tiktok.com/@seraphinemonicaeva/video/7601193576487259424?is_from_webapp=1&sender_device=pc&web_id=7573119095",
+            null,
+            "参考案例视频剪辑手法，选择harry style演唱会短裙特写，植入产品，5-6种搭配切片",
+            "Picking dress, taking Dojo 💖💃💨",
+            null,
+            "harry style 热门 参考音乐https://www.tiktok.com/@toptokrankings/video/7615706713278123286?is_from_webapp=1&sender_device=pc&we",
+            "室内",
+            "不要露出烟嘴",
+            "harry style内容太多了，追下一个热点"
+          ]
+        }
+      ]
+    },
+    "第四周": {
+      "nonempty_rows": 48,
+      "sample": [
+        {
+          "i": 0,
+          "cells": [
+            "序号",
+            "类别",
+            "内容细分",
+            "参考链接",
+            "截图",
+            "拍摄要求",
+            "视频文案",
+            "音乐要求",
+            "场景要求",
+            "注意事项",
+            null,
+            "Hashtag"
+          ]
+        },
+        {
+          "i": 1,
+          "cells": [
+            "1.0",
+            "ASMR",
+            "特写开箱ASMR1",
+            "https://www.tiktok.com/@pocofactory0/video/7549115287321201975?is_from_webapp=1&sender_device=pc",
+            null,
+            "参考案例视频拍摄方法，道具以电子烟为主",
+            "Wait— this Dojo Blast 10K is actually way nicer than I expected👀✨",
+            "麦克风卡点收音 + 使用tk热门音乐",
+            null,
+            null,
+            null,
+            "#unboxing #fyp#unboxwithme"
+          ]
+        },
+        {
+          "i": 2,
+          "cells": [
+            "2.0",
+            null,
+            "特写开箱ASMR2",
+            "https://www.tiktok.com/@chloe.asmr.nails/video/7444266082514275606?is_from_webapp=1&sender_device=pc&web_id=757311909554",
+            null,
+            "参考案例视频拍摄方法，道具以电子烟为主",
+            "His Dojo Blast 10K?? yeah I get the hype now🔥",
+            "麦克风卡点收音 + 使用tk热门音乐",
+            null,
+            null,
+            null,
+            "#unboxing #fyp#unboxwithme"
+          ]
+        },
+        {
+          "i": 3,
+          "cells": [
+            "3.0",
+            null,
+            "收纳1",
+            "https://www.tiktok.com/@mevol_official/video/7526835542785395998?is_from_webapp=1&sender_device=pc",
+            null,
+            "参考案例视频拍摄方法，道具以电子烟为主",
+            "Compact enough to store anywhere — Dojo Blast 10K 💨",
+            "麦克风卡点收音 + 使用案例视频音乐",
+            null,
+            null,
+            null,
+            "#asmr #oddlysatisfying #cleaning #fyp"
+          ]
+        },
+        {
+          "i": 4,
+          "cells": [
+            "4.0",
+            null,
+            "收纳2",
+            "https://www.tiktok.com/@lordseyes.official/video/7555015464003341582?is_from_webapp=1&sender_device=pc",
+            null,
+            "参考案例视频拍摄方法，道具以电子烟为主",
+            "I love how easy this is to store 💨 Dojo Blast 10K",
+            "麦克风卡点收音 + 使用tk热门音乐",
+            null,
+            null,
+            null,
+            "#asmr #satisfying #reset #foryou"
+          ]
+        },
+        {
+          "i": 5,
+          "cells": [
+            "5.0",
+            null,
+            "bag asmr",
+            "Whats in my bag ASMR edition~✨🤍 @Burberry @touchland @YSL Beauty @JOO...",
+            null,
+            "参考案例视频拍摄方法，道具以电子烟为主",
+            "Putting my Dojo Blast 10K back in my bag… so satisfying 🎒✨",
+            "麦克风卡点收音 + 使用示例视频音乐 https://vm.tiktok.com/ZNR9Ty962/",
+            null,
+            null,
+            null,
+            "#asmr #reset #satisfying #foryou"
+          ]
+        },
+        {
+          "i": 6,
+          "cells": [
+            "6.0",
+            null,
+            "日常使用",
+            "https://www.tiktok.com/@mevol_official/video/7586878404805365022?is_from_webapp=1&sender_device=pc",
+            null,
+            "参考案例视频拍摄方法，道具以电子烟为主",
+            "Everything in place, including my Dojo Blast 10K ✨",
+            "麦克风卡点收音 + 使用tk热门音乐",
+            null,
+            null,
+            null,
+            "#asmr #organizewithme #oddlysatisfying #viral"
+          ]
+        },
+        {
+          "i": 7,
+          "cells": [
+            "7.0",
+            "装包",
+            "whats in my bag （3条）",
+            "https://www.tiktok.com/@bookswithgray/video/7497146699945757974?is_from_webapp=1&sender_device=pc&web_id=757311909554697",
+            null,
+            "参考案例视频拍摄方法，装包部分植入dojo，10-15s",
+            "Essentials only… and yeah, my Dojo Blast 10K 💨",
+            "TikTok英国热门音乐",
+            null,
+            null,
+            null,
+            "#whatsinmybag #essentials #fyp #tiktok"
+          ]
+        },
+        {
+          "i": 8,
+          "cells": [
+            "8.0",
+            null,
+            null,
+            null,
+            null,
+            "参考案例视频拍摄方法，装包部分植入dojo，10-15s",
+            "What’s in my bag lately? this Dojo Blast 10K hasn’t left my side",
+            "TikTok英国热门音乐",
+            null,
+            null,
+            null,
+            "#whatsinmybag #dailyessentials #foryou #viral"
+          ]
+        },
+        {
+          "i": 9,
+          "cells": [
+            "9.0",
+            null,
+            null,
+            null,
+            null,
+            "参考案例视频拍摄方法，装包部分植入dojo，10-15s",
+            "Quick bag check — and yeah, my Dojo Blast 10K is in there 🎒",
+            "TikTok英国热门音乐",
+            null,
+            null,
+            null,
+            "#whatsinmybag #pov #foryou #viral"
+          ]
+        },
+        {
+          "i": 10,
+          "cells": [
+            "10.0",
+            null,
+            "today's load out",
+            "https://www.tiktok.com/@sarahkathleenfrancis/video/7531178331765558536?is_from_webapp=1&sender_device=pc&web_id=75731190",
+            null,
+            "参考案例视频拍摄方法，装包部分植入dojo，10-15s",
+            "Quick loadout check 👀 yep, my Dojo Blast 10K is in there",
+            "TikTok英国热门音乐",
+            null,
+            null,
+            null,
+            "#todaysloadout #essentials #fyp #tiktok"
+          ]
+        },
+        {
+          "i": 11,
+          "cells": [
+            "11.0",
+            null,
+            null,
+            null,
+            null,
+            "参考案例视频拍摄方法，装包部分植入dojo，10-15s",
+            "Guess what I’m not forgetting… my Dojo Blast 10K 💨",
+            "TikTok英国热门音乐",
+            null,
+            null,
+            null,
+            "#todaysloadout #dailycarry #foryou #viral"
+          ]
+        },
+        {
+          "i": 12,
+          "cells": [
+            "12.0",
+            null,
+            null,
+            null,
+            null,
+            "参考案例视频拍摄方法，装包部分植入dojo，10-15s",
+            "Bag check— Dojo Blast 10K? always 💨👀",
+            "TikTok英国热门音乐",
+            null,
+            null,
+            null,
+            "#todaysloadout #essentials #foryou #viral"
+          ]
+        },
+        {
+          "i": 13,
+          "cells": [
+            "13.0",
+            null,
+            "my uni bag",
+            "https://www.tiktok.com/@sarahkathleenfrancis/video/7539110410096479508?is_from_webapp=1&sender_device=pc&web_id=75731190",
+            null,
+            "参考案例视频拍摄方法，装包部分植入dojo，10-15s",
+            "Wait… I almost forgot my Dojo Blast 10K 😭",
+            "TikTok英国热门音乐",
+            null,
+            null,
+            null,
+            "#myunibag #studentlife #fyp #tiktok"
+          ]
+        },
+        {
+          "i": 14,
+          "cells": [
+            "14.0",
+            null,
+            null,
+            null,
+            null,
+            "参考案例视频拍摄方法，装包部分植入dojo，10-15s",
+            "My uni bag lately… yeah my Dojo Blast 10K stays",
+            "TikTok英国热门音乐",
+            null,
+            null,
+            null,
+            "#myunibag #whatsinmybag #foryou #viral"
+          ]
+        },
+        {
+          "i": 15,
+          "cells": [
+            "15.0",
+            null,
+            null,
+            null,
+            null,
+            "参考案例视频拍摄方法，装包部分植入dojo，10-15s",
+            "My bag packed with my Dojo Blast 10K— ready for anything 💨🎒✨",
+            "TikTok英国热门音乐",
+            null,
+            null,
+            null,
+            "#myunibag #uniessentials #fyp #tiktok"
+          ]
+        },
+        {
+          "i": 16,
+          "cells": [
+            "16.0",
+            "小场景道具",
+            "pink is pretty1 (增添花艺）",
+            "https://www.tiktok.com/@i.amsherlyngarcia/video/7488764489748270367?is_from_webapp=1&sender_device=pc&web_id=75731190955",
+            null,
+            "参考示例视频拍摄方法，主要参考桌面场景部分，切换3个转场（其中一个场景要纳入转盘），布景搭建契合背景音乐粉色氛围为主",
+            "Everything feels pink today… even my Dojo Blast 10K is matching 💕🩷🌷✨💅",
+            "使用案例视频音乐",
+            null,
+            null,
+            null,
+            "#pinkaesthetic #lifestyle #fyp #viral"
+          ]
+        },
+        {
+          "i": 17,
+          "cells": [
+            "17.0",
+            null,
+            "black is my fav colo",
+            "https://www.tiktok.com/@starxnyaa/video/7376216045238897938?is_from_webapp=1&sender_device=pc&web_id=7573119095546971670",
+            null,
+            "参考示例视频拍摄方法，主要参考桌面场景部分，切换3个转场（其中一个场景要纳入转盘），布景搭建契合背景音乐黑色氛围为主",
+            "It’s a black mood… my Dojo Blast 10K fits right in 🖤🕶️⚫️✨",
+            "使用案例视频音乐",
+            null,
+            null,
+            null,
+            "#blackvibes #aesthetic #fyp #viral"
+          ]
+        },
+        {
+          "i": 18,
+          "cells": [
+            "18.0",
+            null,
+            "green is my fav colo  (增添花艺）",
+            "https://www.tiktok.com/@meeh_softn/video/7334459876174761221?is_from_webapp=1&sender_device=pc&web_id=757311909554697167",
+            "https://www.tiktok.com/@meeh_softn/video/7334459876174761221?is_from_webapp=1&sender_device=pc&web_id=757311909554697167",
+            "参考示例视频拍摄方法，主要参考桌面场景部分，切换3个转场（其中一个场景要纳入转盘），布景搭建契合背景音乐绿色氛围为主",
+            "Staying in my green era… Dojo Blast 10K included 💚🌿🍃✨",
+            "使用案例视频音乐",
+            null,
+            null,
+            null,
+            "#greenvibes #aesthetic #foryou #tiktok"
+          ]
+        },
+        {
+          "i": 19,
+          "cells": [
+            "19.0",
+            null,
+            "purple is my fav colo  (增添花艺）",
+            "https://www.tiktok.com/@meeh_softn/video/7334459876174761221?is_from_webapp=1&sender_device=pc&web_id=757311909554697167",
+            null,
+            "参考示例视频拍摄方法，主要参考桌面场景部分，切换3个转场（其中一个场景要纳入转盘），布景搭建契合背景音乐绿色氛围为主",
+            "Keeping it all green… Dojo Blast 10K matches the vibe 💚🌿✨",
+            "使用案例视频音乐",
+            null,
+            null,
+            null,
+            "#purpleaesthetic #lifestyle #fyp #viral"
+          ]
+        },
+        {
+          "i": 20,
+          "cells": [
+            "20.0",
+            null,
+            "mini perfume oorganize1",
+            "https://www.tiktok.com/@ytg_2x/video/7497833803600137488?is_from_webapp=1&sender_device=pc&web_id=7573119095546971670",
+            null,
+            "参考示例视频拍摄方法，15-20s",
+            "Fits anywhere, super easy to store 💄💨 Dojo Blast 10K",
+            "TikTok英国热门音乐",
+            null,
+            null,
+            null,
+            "#asmr #makeupasmr #oddlysatisfying #viral"
+          ]
+        },
+        {
+          "i": 21,
+          "cells": [
+            "21.0",
+            null,
+            "mini perfume oorganize2",
+            null,
+            null,
+            "参考示例视频拍摄方法，15-20s",
+            "Me thinking it’s “just small” Dojo Blast 10K: full flavour mode 💨😮‍💨",
+            "TikTok英国热门音乐",
+            null,
+            null,
+            null,
+            "#asmr #aesthetic #makeupasmr #foryou"
+          ]
+        },
+        {
+          "i": 22,
+          "cells": [
+            "22.0",
+            null,
+            "mini perfume oorganize3",
+            null,
+            null,
+            "参考示例视频拍摄方法，15-20s",
+            "Small enough, but Dojo Blast 10K flavour still hits 🔥",
+            "TikTok英国热门音乐",
+            null,
+            null,
+            null,
+            "#asmr #oddlysatisfying #makeuporganizer #fyp"
+          ]
+        },
+        {
+          "i": 23,
+          "cells": [
+            "23.0",
+            null,
+            "mini perfume1",
+            "https://www.tiktok.com/@ytg_2x/video/7473788622873972023?is_from_webapp=1&sender_device=pc&web_id=7573119095546971670",
+            null,
+            "参考示例视频拍摄方法，15-20s",
+            "Easy to store, easy to enjoy — that’s Dojo Blast 10K ✨",
+            "TikTok英国热门音乐",
+            null,
+            null,
+            null,
+            "#asmr #beautycollection #aesthetic #fyp"
+          ]
+        },
+        {
+          "i": 24,
+          "cells": [
+            "24.0",
+            null,
+            "mini perfume2",
+            null,
+            null,
+            "参考示例视频拍摄方法，15-20s",
+            "Fits perfectly in my space, no stress 💨 Dojo Blast 10K",
+            "TikTok英国热门音乐",
+            null,
+            null,
+            null,
+            "#beauty #perfume #aesthetic #viral"
+          ]
+        },
+        {
+          "i": 25,
+          "cells": [
+            "25.0",
+            null,
+            "mini perfume3",
+            null,
+            null,
+            "参考示例视频拍摄方法，15-20s",
+            "When something is cute AND space-friendly 💨✨ Dojo Blast 10K",
+            "TikTok英国热门音乐",
+            null,
+            null,
+            null,
+            "#beautyfavorites #perfumeaddict #foryou #tiktok  4️⃣"
+          ]
+        },
+        {
+          "i": 26,
+          "cells": [
+            "26.0",
+            "日常生活场景",
+            "day in life  (增添花艺）",
+            "https://www.tiktok.com/@isabelajuliana_/video/7504707799780166943?is_from_webapp=1&sender_device=pc&web_id=7573119095546",
+            null,
+            "镜头1: 视频整体加速，时长3s ✨ a day in my life with Dojo Blast 10K 💨 镜头2: 早晨起床、化妆/穿搭准备，产品放入包或化妆包，时长3-4s 8:00am getting ready Dojo B",
+            "参考F列",
+            "TikTok英国热门音乐",
+            null,
+            null,
+            null,
+            "#dayinmylife #dailyvlog #lifestyle #fyp"
+          ]
+        },
+        {
+          "i": 27,
+          "cells": [
+            "27.0",
+            null,
+            "my weekend so far 📸  (增添花艺）",
+            null,
+            null,
+            "镜头1: 视频整体加速，时长3s ✨ a cozy weekend with Dojo Blast 10K 💨  镜头2: 10:30am 起床/赖床/拉开窗帘，时长3-4s 10:30am slow weekend morning ☀️ ",
+            "参考F列",
+            "TikTok英国热门音乐",
+            null,
+            null,
+            null,
+            "#vlog #lifestyle #aesthetic #foryou"
+          ]
+        },
+        {
+          "i": 28,
+          "cells": [
+            "28.0",
+            null,
+            "gym day with me 🖤",
+            null,
+            null,
+            "镜头1: 视频整体加速，时长3s ✨ a balanced day with Dojo Blast 10K 💨  镜头2: 8:00am 起床/穿搭/准备出门，时长3-4s 8:00am slow morning start Dojo Bl",
+            "参考F列",
+            "TikTok英国热门音乐",
+            null,
+            null,
+            null,
+            "#dayinmylife #dailyvlog #fyp #lifestyle"
+          ]
+        },
+        {
+          "i": 29,
+          "cells": [
+            "29.0",
+            null,
+            "coffee moment ☁️  (增添花艺）",
+            null,
+            null,
+            "镜头1: 视频整体加速，时长3s ✨ a busy day in the city with Dojo Blast 10K 💨  镜头2: 7:30am 通勤准备/出门前整理，时长3-4s 7:30am rush hour prep ⚡ D",
+            "参考F列",
+            "TikTok英国热门音乐",
+            null,
+            null,
+            null,
+            "#vlog #lifestyle #foryou #viral"
+          ]
+        }
+      ]
+    },
+    "第五周": {
+      "nonempty_rows": 59,
+      "sample": [
+        {
+          "i": 0,
+          "cells": [
+            "序号",
+            "类别",
+            "内容细分",
+            "参考链接",
+            "截图",
+            "拍摄要求",
+            "视频文案",
+            "音乐要求",
+            "场景要求",
+            "注意事项",
+            null,
+            "Hashtag"
+          ]
+        },
+        {
+          "i": 1,
+          "cells": [
+            "1.0",
+            "daily dojo",
+            "where is my dojo 1",
+            "https://vm.tiktok.com/ZNR9gG4Lu/",
+            null,
+            "参考案例视频，选择3个比较刁钻的场景（抽屉/车里/柜子）找dojo",
+            "Where did I put my Dojo Blast 10K?👀",
+            "使用kanye west 专辑音乐",
+            "室内",
+            "体现寻找的过程，比如抽屉，被子下，枕头下",
+            "1. 我的dojo在哪：到处找，终于在某处找到dojo 2. 美食集合：桌面摆放美食，旁边有产品，转场不同美食（比如开盖各种饮料的气泡声） 3. 春日出行：dojo和各类户外植物的合影 4. 娃衣：dojo穿着各类mini衣服 5. 饮料调",
+            "#VapeCommunity#fy#CommentBelow"
+          ]
+        },
+        {
+          "i": 2,
+          "cells": [
+            "2.0",
+            null,
+            "where is my dojo 2",
+            null,
+            null,
+            "参考案例视频，选择3个比较刁钻的场景（沙发/床上/包包/化妆间）找dojo",
+            "Looking everywhere at home for Dojo Blast 10K.👀👣",
+            "使用kanye west 专辑音乐",
+            "室内",
+            "正常dojo即可",
+            null,
+            "#CommentBelow #HelpMe #VapeCommunity"
+          ]
+        },
+        {
+          "i": 3,
+          "cells": [
+            "3.0",
+            null,
+            "dojo&snack 1",
+            "https://www.tiktok.com/@lizxiqmoyo/video/7616768719410187533?is_from_webapp=1&sender_device=pc&web_id=757311909554697167",
+            null,
+            "参考案例视频拍摄方法，把dojo与其他零食混合",
+            "Home life hits different with Dojo & snacks.💕",
+            "使用kanye west 专辑音乐",
+            "室内",
+            null,
+            null,
+            "#Serotonin #WeekendVibes #ForyouPage"
+          ]
+        },
+        {
+          "i": 4,
+          "cells": [
+            "4.0",
+            "pubg",
+            "pubg snack",
+            "https://vm.tiktok.com/ZNRQoVryj/",
+            null,
+            "参考案例视频,dojo与其他零食道具一起,做实拍镜头",
+            "My loadout: PUBG + Dojo Blast 10K 💨🫶",
+            "使用kanye west 专辑音乐",
+            "室内",
+            "视频格式，不要图片",
+            null,
+            "#PUBGMobile #GamingLoadout #WinnerWinnerChickenDinner"
+          ]
+        },
+        {
+          "i": 5,
+          "cells": [
+            "5.0",
+            null,
+            "pubg energy",
+            "https://vm.tiktok.com/ZNRQo7J1n/",
+            null,
+            "参考案例视频，功能饮料替换成dojo",
+            "Victor + Dojo Blast 10K = reaching new heights 🎮💨",
+            "使用kanye west 专辑音乐",
+            "室内",
+            null,
+            null,
+            "#VibeCheck #PUBGMemes #GamingCommunity"
+          ]
+        },
+        {
+          "i": 6,
+          "cells": [
+            "6.0",
+            "movietok",
+            "movie night",
+            "https://vm.tiktok.com/ZNRC1hbnf/",
+            null,
+            "参考案例视频拍摄方法，dojo与其他道具混在一起，平板播放最近流行电影",
+            "Quick moments with Dojo Blast 10K 💨💭",
+            "使用kanye west 专辑音乐",
+            "室内/室外",
+            null,
+            null,
+            "#VibeCheck #DailyRoutine #NoCap"
+          ]
+        },
+        {
+          "i": 7,
+          "cells": [
+            "7.0",
+            "yuta",
+            "yuta 二创",
+            "https://www.tiktok.com/@hanrbrt/video/7621613905625763079?is_from_webapp=1&sender_device=pc&web_id=7573119095546971670",
+            null,
+            "参考案例视频拍摄模式,背景放ipad 播放案例视频，桌面堆放dojo与其他零食道具，15-20s",
+            "Vibing with Yuta + Dojo Blast 10K 💨💭",
+            "tiktok 英国热门歌曲",
+            "室内",
+            null,
+            null,
+            "#dailyvibes #fyp #relax #mood"
+          ]
+        },
+        {
+          "i": 8,
+          "cells": [
+            "8.0",
+            null,
+            "decoration",
+            "https://vm.tiktok.com/ZNRC1MCDm/ https://vm.tiktok.com/ZNRC1Uf7g/ https://vm.tiktok.com/ZNR9gG4Lu/",
+            null,
+            "参考案例视频，钻石贴装饰dojo",
+            "When my friends ask if it’s a Dojo… no, it’s a masterpiece 💨✨",
+            "tiktok 英国热门歌曲",
+            "室内",
+            null,
+            null,
+            "#musthave #fyp #vibing #cool"
+          ]
+        },
+        {
+          "i": 9,
+          "cells": [
+            "9.0",
+            "easter day",
+            "DIY easter basket goodies",
+            "https://vm.tiktok.com/ZNRQoTxrB/",
+            null,
+            "参考案例视频，把dojo按照视频中进行装饰，制作复活节礼物",
+            "My Easter basket just got upgraded 💐💨 Dojo Blast 10K included!",
+            "tiktok 英国热门歌曲",
+            "室内",
+            "产品做背景，DIY过程中不要大面积露出dojo 或者怼镜头大特写",
+            null,
+            null
+          ]
+        },
+        {
+          "i": 10,
+          "cells": [
+            "10.0",
+            null,
+            null,
+            null,
+            null,
+            "参考案例视频，把dojo按照视频中进行装饰，制作复活节礼物",
+            "Easter surprise delivered: Dojo Blast 10K, all mine ✨💐",
+            "tiktok 英国热门歌曲",
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "i": 11,
+          "cells": [
+            "11.0",
+            null,
+            "mini easter bouquet",
+            "https://vm.tiktok.com/ZNRQop2dU/",
+            null,
+            "参考案例视频，把dojo与其他复活节小礼物道具一起制作小礼品",
+            "Mini Easter + Dojo Blast 10K 💨🌸",
+            "tiktok 英国热门歌曲",
+            "室内",
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "i": 12,
+          "cells": [
+            "12.0",
+            null,
+            "easter basket for bestie",
+            "https://vm.tiktok.com/ZNRQo9yxt/",
+            null,
+            "参考案例视频拍摄方法，融入dojo",
+            "Easter basket moments fueled by Dojo Blast 10K 💨🌸",
+            "tiktok 英国热门歌曲",
+            "室内",
+            null,
+            null,
+            "#easter #easterbasket #fyp #vibes"
+          ]
+        },
+        {
+          "i": 13,
+          "cells": [
+            "13.0",
+            null,
+            "easter basket inspro",
+            "https://vm.tiktok.com/ZNRQobkkM/",
+            null,
+            "参考案例视频拍摄方法，融入dojo，按色系去分类",
+            "Easter basket inspo with Dojo Blast 10K vibes 💨🌸",
+            "tiktok 英国热门歌曲",
+            "室内",
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "i": 14,
+          "cells": [
+            "14.0",
+            null,
+            "mini easter bag",
+            "https://vm.tiktok.com/ZNRQoCWqW/",
+            null,
+            "参考案例视频拍摄方法，融入dojo，摆放物品卡点加速",
+            "Little Easter bag, whole Dojo Blast 10K mood 💨💖",
+            "麦克风收音+英国热门歌曲",
+            "室内",
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "i": 15,
+          "cells": [
+            "15.0",
+            null,
+            "easter egg",
+            "https://vm.tiktok.com/ZNRQoVbcS/",
+            null,
+            "参考案例视频拍摄方法，把dojo与其他道具塞入复活节彩蛋",
+            "Hidden treasures + Dojo Blast 10K magic 💨🌸",
+            "麦克风收音+英国热门歌曲",
+            "室内",
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "i": 16,
+          "cells": [
+            "16.0",
+            null,
+            null,
+            "https://vm.tiktok.com/ZNRQonNM3/",
+            null,
+            "参考案例视频拍摄方法，把dojo/mini化妆品/小玩具等，各自塞入复活节彩蛋",
+            "Packing Easter eggs with Dojo Blast 10K vibes 💨🌸",
+            "tiktok 英国热门歌曲",
+            "室内",
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "i": 17,
+          "cells": [
+            "17.0",
+            null,
+            "easter basket for friends",
+            "https://vm.tiktok.com/ZNRQoCm3w/ https://vm.tiktok.com/ZNRQoCWqW/ https://vm.tiktok.com/ZNRQop2dU/",
+            null,
+            "参考案例视频拍摄方法，结合脚本14/ 11的迷你复活节礼盒成品 运镜",
+            "Gifting vibes: friends’ Easter basket + Dojo Blast 10K 💨✨",
+            "tiktok 英国热门歌曲",
+            "室内",
+            null,
+            "#easter #easterbasket #gifting  #fyp",
+            "made this just for them 🌸✨ Dojo Blast 10K included 💨"
+          ]
+        },
+        {
+          "i": 18,
+          "cells": [
+            "18.0",
+            null,
+            null,
+            "https://vm.tiktok.com/ZNRQoCm3w/ https://vm.tiktok.com/ZNRQoVbcS/ https://vm.tiktok.com/ZNRQo9yxt/",
+            null,
+            "参考案例视频拍摄方法，结合脚本12/ 15 的复活节礼盒成品 运镜",
+            "Friends’ Easter basket goals with Dojo Blast 10K 💨🌸",
+            "tiktok 英国热门歌曲",
+            "室内",
+            null,
+            "#easterbasket #musthave  #fyp #viral",
+            "best thing in the basket? 👀 Dojo Blast 10K 💨"
+          ]
+        },
+        {
+          "i": 19,
+          "cells": [
+            "19.0",
+            "花艺",
+            "dojo bouquet 1",
+            "https://www.tiktok.com/@bouquets.bylv/video/7614242243498577165?is_from_webapp=1&sender_device=pc&web_id=757311909554697",
+            null,
+            "参考案例视频拍摄手法，使用普通dojo 植入花卉",
+            "Fresh flowers + Dojo Blast 10K = perfect day ✨",
+            "tiktok 英国热门歌曲",
+            "室内",
+            "正常dojo即可，不要贴钻",
+            "#flowers #musthave #fyp #viral",
+            "pretty flowers, pretty Dojo Blast 10K 🌸💖 can’t ask for more 💨"
+          ]
+        },
+        {
+          "i": 20,
+          "cells": [
+            "20.0",
+            null,
+            "dojo bouquet 2",
+            null,
+            null,
+            "参考案例视频拍摄手法，使用普通dojo 植入花卉",
+            "Pretty flowers, pretty Dojo Blast 10K 🌸💖",
+            "tiktok 英国热门歌曲",
+            "室内",
+            null,
+            "#flowers#fyp #aesthetic #vibes",
+            "fresh flowers, soft vibes 🌸✨ Dojo Blast 10K makes it perfect 💨"
+          ]
+        },
+        {
+          "i": 21,
+          "cells": [
+            "21.0",
+            null,
+            "decoration dojo bouquet 1",
+            null,
+            null,
+            "参考案例视频拍摄手法，使用普通dojo 植入花卉",
+            "Floral vibes with my Dojo Blast 10K 🌸💨",
+            "tiktok 英国热门歌曲",
+            "室内",
+            null,
+            "#flowerday  #fyp #relax #mood",
+            "just flowers and good energy 🌸💭 with Dojo Blast 10K 💨"
+          ]
+        },
+        {
+          "i": 22,
+          "cells": [
+            "22.0",
+            null,
+            "decoration dojo bouquet 2",
+            null,
+            null,
+            "参考案例视频拍摄手法，使用普通dojo 植入花卉",
+            "Catch me in my floral era with Dojo Blast 10K 🌸",
+            "tiktok 英国热门歌曲",
+            null,
+            "正常dojo即可，不要贴钻",
+            "#bouquet  #fyp #aesthetic #soft",
+            "a little bouquet moment 🌸✨ Dojo Blast 10K by my side 💨"
+          ]
+        },
+        {
+          "i": 23,
+          "cells": [
+            "23.0",
+            "日常生活",
+            "workday study motivation",
+            "https://www.tiktok.com/@aswmarie_/video/7427932229847960878?is_from_webapp=1&sender_device=pc&web_id=7573119095546971670",
+            null,
+            "参考案例视频拍摄方法，融入dojo",
+            "Workday mode fueled by Dojo Blast 10K 💨💻",
+            "使用案例视频音乐",
+            "室内",
+            null,
+            "#workday #fyp #routine #vibes",
+            "just another workday 💻✨ Dojo Blast 10K keeping me going 💨"
+          ]
+        },
+        {
+          "i": 24,
+          "cells": [
+            "24.0",
+            null,
+            "make up",
+            "https://www.tiktok.com/@oppsy.bibby/video/7567544125206088968?is_from_webapp=1&sender_device=pc&web_id=75731190955469716",
+            null,
+            "参考示例视频拍摄方法，把产品嵌入契合的C列主题场景（色调/风格与产品一致）。切换3-4个转场，每个转场4-5s",
+            "Makeup essentials fueled by Dojo Blast 10K 💨🔥",
+            "英国tik热门音乐",
+            "室内",
+            null,
+            "#makeupessentials#fyp #grwm #beauty",
+            "getting ready with my essentials 💄✨ Dojo Blast 10K always with me 💨"
+          ]
+        },
+        {
+          "i": 25,
+          "cells": [
+            "25.0",
+            null,
+            "brunch",
+            null,
+            null,
+            "参考示例视频拍摄方法，把产品嵌入契合的C列主题场景（色调/风格与产品一致）。切换3-4个转场，每个转场4-5s",
+            "Coffee & bites fueled by Dojo Blast 10K 💨☕",
+            "英国tik热门音乐",
+            "室内",
+            null,
+            "#coffeetime #fyp #relax #aesthetic",
+            "little coffee break ☕💭 with Dojo Blast 10K 💨"
+          ]
+        },
+        {
+          "i": 26,
+          "cells": [
+            "26.0",
+            null,
+            "cafe",
+            null,
+            null,
+            "参考示例视频拍摄方法，把产品嵌入契合的C列主题场景（色调/风格与产品一致）。切换3-4个转场，每个转场4-5s",
+            "Cozy cafe moments with Dojo Blast 10K 💨💖",
+            "英国tik热门音乐",
+            "室内",
+            null,
+            "#cafevibes #fyp #cozy #aesthetic",
+            "cozy corners & warm drinks ☕✨ Dojo Blast 10K kind of day 💨"
+          ]
+        },
+        {
+          "i": 27,
+          "cells": [
+            "27.0",
+            null,
+            "rest day",
+            null,
+            null,
+            "参考示例视频拍摄方法，把产品嵌入契合的C列主题场景（色调/风格与产品一致）。切换3-4个转场，每个转场4-5s",
+            "Lazy moments, big Dojo Blast 10K energy 💨💖",
+            "英国tik热门音乐",
+            "室内",
+            null,
+            "#lazyvibes #fyp #chill #energy",
+            "just me, chilling 💭✨ powered by Dojo Blast 10K 💨"
+          ]
+        },
+        {
+          "i": 28,
+          "cells": [
+            "28.0",
+            "翻包",
+            "my bag essential",
+            "https://vm.tiktok.com/ZNRQEao88/",
+            null,
+            "参考案例视频拍摄方法，装包部分植入dojo，选其中一个dojo 一直放在旁边最后收纳进去",
+            "Daily bag must-haves + Dojo Blast 10K 💨💖",
+            "麦克风收音+TikTok热门音乐",
+            "室内",
+            "增加产品存在感，比如有个产品一直在旁边，最后收进去",
+            "#dailybag #fyp #essentials #vibes",
+            "my essentials, always 💼✨ Dojo Blast 10K included 💨"
+          ]
+        },
+        {
+          "i": 29,
+          "cells": [
+            "29.0",
+            null,
+            null,
+            null,
+            null,
+            "参考案例视频拍摄方法，装包部分植入dojo，选其中一个dojo 一直放在旁边最后收纳进去",
+            "What's in my bag? Dojo Blast 10K included 💨🌸",
+            "麦克风收音+TikTok热门音乐",
+            "室内",
+            null,
+            "#musthave #fyp #daily #chill",
+            "small bag, big vibes 💖 Dojo Blast 10K by my side 💨"
+          ]
+        }
+      ]
+    },
+    "工作表10": {
+      "nonempty_rows": 0,
+      "sample": []
+    },
+    "工作表9": {
+      "nonempty_rows": 11,
+      "sample": [
+        {
+          "i": 0,
+          "cells": [
+            "6.0",
+            "kanye",
+            "kanye bully 二创",
+            "https://www.tiktok.com/@dvsn.fx/video/7622051578249252104?is_from_webapp=1&sender_device=pc&web_id=7573119095546971670",
+            null,
+            "参考案例视频拍摄模式,背景放ipad 播放案例视频，桌面堆放dojo与其他零食道具，15-20s",
+            "POV: you just played Kanye Bully and grabbed your Dojo Blast 10K 💨🔥",
+            "使用案例视频音乐",
+            "室内",
+            "表现力差，替换脚本"
+          ]
+        },
+        {
+          "i": 1,
+          "cells": [
+            "7.0",
+            null,
+            null,
+            null,
+            null,
+            "参考案例视频拍摄模式,背景放ipad 播放kanye目前专辑其他爆款视频，桌面堆放dojo与其他零食道具，15-20s",
+            "Meme mode: Bully on the speakers, Dojo Blast 10K in hand 💨✨",
+            "使用案例视频音乐",
+            "室内",
+            "表现力差，替换脚本"
+          ]
+        },
+        {
+          "i": 2,
+          "cells": [
+            "35.0",
+            "ASMR",
+            "whats in my bag",
+            "https://vm.tiktok.com/ZNRQEroQS/",
+            null,
+            "参考案例视频拍摄方法，装包部分植入dojo",
+            "My bag, my vibe: Dojo Blast 10K 💨🔥",
+            "使用案例视频音乐",
+            "室内",
+            "替换为收纳展示类，注意存在感",
+            null,
+            null
+          ]
+        },
+        {
+          "i": 3,
+          "cells": [
+            "36.0",
+            null,
+            null,
+            null,
+            null,
+            "参考案例视频拍摄方法，装包部分植入dojo",
+            "Daily bag essentials powered by Dojo Blast 10K 💨💖",
+            "使用案例视频音乐",
+            "室内",
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "i": 4,
+          "cells": [
+            "37.0",
+            null,
+            null,
+            null,
+            null,
+            "参考案例视频拍摄方法，装包部分植入dojo",
+            "Bag check: Dojo Blast 10K energy 💨💫",
+            "使用案例视频音乐",
+            "室内",
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "i": 5,
+          "cells": [
+            "38.0",
+            null,
+            null,
+            null,
+            null,
+            "参考案例视频拍摄方法，装包部分植入dojo",
+            "My bag must-haves + Dojo Blast 10K 💨💐",
+            "使用案例视频音乐",
+            "室内",
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "i": 6,
+          "cells": [
+            "39.0",
+            null,
+            null,
+            null,
+            null,
+            "参考案例视频拍摄方法，装包部分植入dojo",
+            "Everyday bag essentials fueled by Dojo Blast 10K 💨✨",
+            "使用案例视频音乐",
+            "室内",
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "i": 7,
+          "cells": [
+            "4.0",
+            null,
+            "收纳2",
+            "https://www.tiktok.com/@lordseyes.official/video/7555015464003341582?is_from_webapp=1&sender_device=pc",
+            null,
+            "参考案例视频拍摄方法，道具以电子烟为主",
+            "I love how easy this is to store 💨 Dojo Blast 10K",
+            "麦克风卡点收音 + 使用tk热门音乐",
+            null,
+            null,
+            null,
+            "#asmr #satisfying #reset #foryou"
+          ]
+        },
+        {
+          "i": 8,
+          "cells": [
+            "5.0",
+            null,
+            "bag asmr",
+            "Whats in my bag ASMR edition~✨🤍 @Burberry @touchland @YSL Beauty @JOO...",
+            null,
+            "参考案例视频拍摄方法，道具以电子烟为主",
+            "Putting my Dojo Blast 10K back in my bag… so satisfying 🎒✨",
+            "麦克风卡点收音 + 使用示例视频音乐 https://vm.tiktok.com/ZNR9Ty962/",
+            null,
+            null,
+            null,
+            "#asmr #reset #satisfying #foryou"
+          ]
+        },
+        {
+          "i": 9,
+          "cells": [
+            "6.0",
+            null,
+            "日常使用",
+            "https://www.tiktok.com/@mevol_official/video/7586878404805365022?is_from_webapp=1&sender_device=pc",
+            null,
+            "参考案例视频拍摄方法，道具以电子烟为主",
+            "Everything in place, including my Dojo Blast 10K ✨",
+            "麦克风卡点收音 + 使用tk热门音乐",
+            null,
+            null,
+            null,
+            "#asmr #organizewithme #oddlysatisfying #viral"
+          ]
+        },
+        {
+          "i": 10,
+          "cells": [
+            "48.0",
+            "uni bag essential",
+            "essay related",
+            "https://vm.tiktok.com/ZNRQEUqdt/",
+            null,
+            "参考示例视频剪辑方法，把产品嵌入契合的C列主题场景（色调/风格与产品一致），出3个图",
+            "Uni bag essentials powered by Dojo Blast 10K 💨📚",
+            "英国tik热门音乐",
+            "此类太多，替换生活方式类",
+            null,
+            null,
+            null
+          ]
+        }
+      ]
+    }
+  }
+}

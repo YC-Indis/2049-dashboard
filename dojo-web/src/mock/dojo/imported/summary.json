@@ -1,0 +1,20 @@
+{
+  "importedAt": "2026-08-07T17:07:58.565Z",
+  "scriptFile": "dojo 脚本.xlsx",
+  "dataFile": "dojo数据.xlsx",
+  "counts": {
+    "workflowStages": 9,
+    "accountPlans": 8,
+    "weeklyScripts": {
+      "W1": 14,
+      "W2": 12,
+      "W3": 21,
+      "W4": 47,
+      "W5": 58
+    },
+    "distributionRecords": 166,
+    "accountMonitor": 20,
+    "timelineStart": "2026-02-13",
+    "timelineEnd": "2026-03-23"
+  }
+}

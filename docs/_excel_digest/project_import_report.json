@@ -1,0 +1,35 @@
+{
+  "at": "2026-08-08T02:54:00.000Z",
+  "source": "DeepSeek + project_lib 人工合并",
+  "deepseekStatus": "成功调用，已补全 aliases 与 active 标记",
+  "projectCount": 17,
+  "entered": [
+    { "id": "blast-10k-v1", "name": "blast 10k v1.0", "region": "英国", "status": "已完结" },
+    { "id": "blast-10k-v2", "name": "blast 10k v2.0", "region": "英国", "status": "已完结" },
+    { "id": "purex-60k-v1", "name": "purex 60k v1.0", "region": "美国", "status": "已达标" },
+    { "id": "xros6-v1-us", "name": "xros6 v1.0 · 美国", "region": "美国", "status": "已完结" },
+    { "id": "xros6-v1-pl", "name": "xros6 v1.0 · 波兰", "region": "波兰", "status": "已完结" },
+    { "id": "xros6-v1-uk", "name": "xros6 v1.0 · 英国", "region": "英国", "status": "进行中" },
+    { "id": "matrix-blast-10k-v3", "name": "垂类矩阵 · blast 10k v3.0", "region": "英国", "status": "结案中" },
+    { "id": "matrix-purex-60k-v2", "name": "垂类矩阵 · purex 60k v2.0", "region": "美国", "status": "结案中" },
+    { "id": "matrix-blast-x", "name": "垂类矩阵 · blast X", "region": "德国", "status": "结案中" },
+    { "id": "matrix-blast-15k", "name": "垂类矩阵 · blast 15k", "region": "法国", "status": "结案中" },
+    { "id": "matrix-xros6-us", "name": "垂类矩阵 · Xros 6 · 美国", "region": "美国", "status": "结案中" },
+    { "id": "matrix-xros6-uk", "name": "垂类矩阵 · Xros 6 · 英国", "region": "英国", "status": "进行中" },
+    { "id": "matrix-xros6-de", "name": "垂类矩阵 · Xros 6 · 德国", "region": "德国", "status": "进行中" }
+  ],
+  "issues": [
+    "DeepSeek 初稿将 dojo/elfbar/vibe 标为 inactive，已人工修正为 active",
+    "DeepSeek aliases 偏少，已按 project_lib + ads.ts 投放键名补全",
+    "docs/source 缺少 dojo脚本.xlsx / dojo数据.xlsx，无法重跑 import:excel",
+    "docs/source 缺少 PEN 项目涨粉.xlsx",
+    "battery-posts-export (6).csv 需 Velix 后端，前端 mock 未合并",
+    "历史 CSV 已解析脚本就绪，本机无 node 未能执行 import-history-csv.mjs"
+  ],
+  "historyCsv": {
+    "账号粉丝量-2026-08-04.csv": "100 账号 → historyImport.json",
+    "账号发布内容-2026-08-04.csv": "137 帖子 → 已合并到总账号预览",
+    "battery-posts-export (6).csv": "跳过（需 Velix 后端）"
+  },
+  "historyImportStatus": "成功（PowerShell 解析）",
+}
