@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="dojo-page ad-videos">
     <header class="dojo-page__head">
       <div>
@@ -60,13 +60,7 @@
         {{ dojoAccountStore.accounts.length ? '暂无投放视频，请先同步投放账号' : '暂无投放账号' }}
       </p>
 
-      <ElTable
-        v-else-if="viewMode === 'list'"
-        :data="displayVideos"
-        stripe
-        row-key="videoId"
-        @row-click="goDetail"
-      >
+      <ElTable v-if="viewMode === 'list'" :data="displayVideos" stripe row-key="videoId">
         <ElTableColumn label="发布日期" width="120" prop="publishDate" />
         <ElTableColumn label="所属账号" min-width="140">
           <template #default="{ row }">
@@ -93,18 +87,13 @@
         </ElTableColumn>
         <ElTableColumn label="操作" width="110" fixed="right">
           <template #default="{ row }">
-            <ElButton link type="primary" @click.stop="goDetail(row)">查看详情 →</ElButton>
+            <ElButton link type="primary" @click.stop="goDetail(row)">查看数据与视频</ElButton>
           </template>
         </ElTableColumn>
       </ElTable>
 
       <div v-else class="video-grid">
-        <article
-          v-for="row in displayVideos"
-          :key="row.videoId"
-          class="vid-card"
-          @click="goDetail(row)"
-        >
+        <article v-for="row in displayVideos" :key="row.videoId" class="vid-card">
           <div class="vid-card__cover">
             <img v-if="row.cover" :src="row.cover" alt="" loading="lazy" />
             <div v-else class="vid-card__placeholder">
@@ -133,6 +122,10 @@
                 <dd>{{ num(row.shares) }}</dd>
               </div>
             </dl>
+            <button class="vid-card__preview" type="button" @click="goDetail(row)">
+              <Icon icon="ph:play-circle" width="16" />
+              查看数据与视频
+            </button>
           </div>
         </article>
       </div>
@@ -142,13 +135,11 @@
 
 <script setup lang="ts">
   import { computed, ref } from 'vue'
+  import { Icon } from '@iconify/vue'
   import { useRouter } from 'vue-router'
   import { ElMessage } from 'element-plus'
   import DojoProjectSelect from '@/components/dojo/DojoProjectSelect.vue'
-  import {
-    adMonitorVideos,
-    type AdMonitorVideo
-  } from '@/store/dojoAdMonitorStore'
+  import { adMonitorVideos, type AdMonitorVideo } from '@/store/dojoAdMonitorStore'
   import { dojoAccountStore, syncAccounts } from '@/store/dojoAccountStore'
   import { dojoProjectStore } from '@/store/dojoProjectStore'
   import { exportCsv } from '@/utils/dojoExport'
@@ -164,8 +155,14 @@
 
   const filteredVideos = computed(() => {
     const ids = selectedProjectIds.value
+    const activeProjectIds = new Set(
+      dojoProjectStore.projects
+        .filter((project) => project.active !== false)
+        .map((project) => project.id)
+    )
     const q = keyword.value.trim().toLowerCase()
     return adMonitorVideos.value.filter((v) => {
+      if (v.projectId && !activeProjectIds.has(v.projectId)) return false
       if (ids.length && v.projectId && !ids.includes(v.projectId)) return false
       if (ids.length && !v.projectId) return false
       if (!q) return true
@@ -183,7 +180,8 @@
     list.sort((a, b) => {
       if (sortBy.value === 'views-desc') return b.views - a.views
       if (sortBy.value === 'views-asc') return a.views - b.views
-      if (sortBy.value === 'date-asc') return (a.publishDate || '').localeCompare(b.publishDate || '')
+      if (sortBy.value === 'date-asc')
+        return (a.publishDate || '').localeCompare(b.publishDate || '')
       return (b.publishDate || '').localeCompare(a.publishDate || '')
     })
     return list
@@ -243,7 +241,7 @@
 </script>
 
 <style scoped lang="scss">
-  @use '../dojo-page.scss';
+  @use '../dojo-page';
 
   .accent {
     color: var(--el-color-primary);
@@ -258,16 +256,16 @@
   }
 
   .muted {
-    color: var(--el-text-color-secondary);
     font-size: 13px;
+    color: var(--el-text-color-secondary);
   }
 
   .empty-hint {
-    margin: 0;
     padding: 32px 16px;
-    text-align: center;
-    color: var(--el-text-color-secondary);
+    margin: 0;
     font-size: 14px;
+    color: var(--el-text-color-secondary);
+    text-align: center;
   }
 
   .video-grid {
@@ -278,10 +276,9 @@
 
   .vid-card {
     overflow: hidden;
+    background: var(--el-bg-color);
     border: 1px solid var(--el-border-color-lighter);
     border-radius: 12px;
-    background: var(--el-bg-color);
-    cursor: pointer;
     transition:
       border-color 0.15s ease,
       box-shadow 0.15s ease;
@@ -291,10 +288,15 @@
       box-shadow: 0 4px 16px rgb(0 0 0 / 4%);
     }
 
+    &.is-active {
+      border-color: var(--dojo-accent-soft);
+      box-shadow: 0 0 0 2px rgb(47 111 237 / 10%);
+    }
+
     &__cover {
       aspect-ratio: 16 / 9;
-      background: var(--el-fill-color-light);
       overflow: hidden;
+      background: var(--el-fill-color-light);
 
       img {
         width: 100%;
@@ -308,8 +310,8 @@
       align-items: center;
       justify-content: center;
       height: 100%;
+      font-size: 18px;
       color: var(--el-text-color-secondary);
-      font-size: 28px;
     }
 
     &__body {
@@ -324,14 +326,14 @@
     }
 
     h3 {
+      display: -webkit-box;
       margin: 0 0 6px;
+      overflow: hidden;
       font-size: 14px;
       font-weight: 600;
       line-height: 1.4;
-      display: -webkit-box;
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
-      overflow: hidden;
     }
 
     &__date {
@@ -346,8 +348,8 @@
       margin: 0;
 
       dt {
-        color: var(--el-text-color-secondary);
         font-size: 11px;
+        color: var(--el-text-color-secondary);
       }
 
       dd {
@@ -356,6 +358,29 @@
         font-weight: 600;
       }
     }
+  }
+
+  .vid-card__preview {
+    display: flex;
+    gap: 7px;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 34px;
+    margin-top: 12px;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--dojo-accent);
+    cursor: pointer;
+    background: #e8f0fb;
+    border: 0;
+    border-radius: 8px;
+  }
+
+  .vid-card__preview:hover,
+  .vid-card__preview:focus-visible {
+    background: #dfeafb;
+    outline: none;
   }
 
   :deep(.el-table__row) {

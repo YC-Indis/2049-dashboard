@@ -1,22 +1,17 @@
-<template>
+﻿<template>
   <div class="dojo-page project-overview">
     <header class="dojo-page__head">
       <div>
-        <h1>项目总览</h1>
-        <p>
-          点「编辑」直接在卡片上改 KPI；账号数 / 分发 / 曝光可由台账与 Rapid
-          回写。新建仍用手填表单。
-        </p>
+        <h1>项目管理</h1>
+        <p
+          >创建项目并持续校准 KPI
+          与当前进度；这里的数据会同步进入时间规划、执行日历和运营驾驶舱。</p
+        >
       </div>
       <div class="head-ops">
-        <ElButton
-          v-if="endedVisibleCount"
-          plain
-          @click="hideAllEnded"
-        >
+        <ElButton v-if="endedVisibleCount" plain @click="hideAllEnded">
           隐藏已结束（{{ endedVisibleCount }}）
         </ElButton>
-        <ElButton @click="router.push('/backup')">数据备份</ElButton>
         <ElButton @click="refreshAllMetrics" :loading="refreshing">刷新现状</ElButton>
         <ElButton @click="importVisible = true">AI 导入</ElButton>
         <ElButton type="primary" @click="openCreate">新建项目</ElButton>
@@ -42,7 +37,12 @@
             <ElInput v-model="draft.name" size="large" class="inline-name" />
             <div class="inline-meta">
               <ElInput v-model="draft.brand" size="small" placeholder="品牌" style="width: 120px" />
-              <ElInput v-model="draft.region" size="small" placeholder="地区" style="width: 100px" />
+              <ElInput
+                v-model="draft.region"
+                size="small"
+                placeholder="地区"
+                style="width: 100px"
+              />
               <ElSelect v-model="draft.priority" size="small" style="width: 88px">
                 <ElOption label="高" value="high" />
                 <ElOption label="中" value="medium" />
@@ -58,6 +58,16 @@
                 · {{ card.project.region }}
               </span>
             </p>
+            <dl class="project-people">
+              <div>
+                <dt>负责人</dt>
+                <dd>{{ card.runtime.owner || '未设置' }}</dd>
+              </div>
+              <div>
+                <dt>客户对接</dt>
+                <dd>{{ card.runtime.clientContact || '未设置' }}</dd>
+              </div>
+            </dl>
           </template>
         </div>
         <div class="project-card__tags">
@@ -72,28 +82,66 @@
             <ElButton size="small" @click="cancelInline">取消</ElButton>
           </template>
           <template v-else>
-            <ElButton size="small" type="primary" plain @click="startInline(card.project.id)">
-              编辑
-            </ElButton>
-            <ElButton size="small" plain @click="duplicateCard(card.project.id)">复制</ElButton>
-            <ElButton size="small" @click="syncToCalendar(card.project.id)">同步到日历</ElButton>
-            <ElButton
-              size="small"
-              plain
-              :loading="refreshingId === card.project.id"
-              @click="refreshOne(card.project.id)"
-            >
-              拉现状
-            </ElButton>
-            <ElButton size="small" plain @click="hideCard(card.project.id)">
-              {{ isEndedStatus(card.runtime.runStatus) ? '隐藏（已结束）' : '隐藏' }}
-            </ElButton>
-            <ElButton size="small" type="danger" plain @click="removeCard(card.project.id)">
-              删除
-            </ElButton>
+            <ProjectQuickControls
+              :project="card.project"
+              :runtime="card.runtime"
+              :refreshing="refreshingId === card.project.id"
+              @edit="startInline"
+              @duplicate="duplicateCard"
+              @sync="syncToCalendar"
+              @refresh="refreshOne"
+              @hide="hideCard"
+              @remove="removeCard"
+            />
           </template>
         </div>
       </header>
+
+      <section
+        v-if="card.execution"
+        class="project-execution"
+        :class="`is-${card.execution.timing}`"
+        aria-label="当前执行重点"
+      >
+        <button
+          type="button"
+          class="project-execution__phase"
+          @click="openProjectExecution(card.project.id)"
+        >
+          <span>{{ card.execution.phaseLabel.slice(0, 1) }}</span>
+          <span>
+            <small>当前执行</small>
+            <strong>{{ card.execution.phaseLabel }} · {{ card.execution.timingLabel }}</strong>
+            <em>{{ card.execution.scheduleLabel }}</em>
+          </span>
+        </button>
+
+        <dl>
+          <div>
+            <dt>阶段动作</dt>
+            <dd>{{ card.execution.actions.join(' · ') }}</dd>
+          </div>
+          <div>
+            <dt>重点监看</dt>
+            <dd>{{ card.execution.monitorSummary }}</dd>
+            <span>{{ card.execution.monitors.join(' / ') }}</span>
+          </div>
+          <div class="project-execution__kpi">
+            <dt>对齐 KPI</dt>
+            <dd>{{ card.execution.kpiLabel }} {{ card.execution.kpiText }}</dd>
+            <span><i :style="{ width: `${card.execution.progressPct}%` }" /></span>
+          </div>
+        </dl>
+
+        <button
+          type="button"
+          class="project-execution__open"
+          aria-label="打开项目时间规划"
+          @click="openProjectExecution(card.project.id)"
+        >
+          <Icon icon="ph:arrow-up-right" width="16" />
+        </button>
+      </section>
 
       <!-- 进度：只读，跟 KPI/现状自动算 -->
       <div class="metric-grid">
@@ -174,7 +222,7 @@
                 size="small"
                 class="cell-num"
               />
-              <span>分发目标</span>
+              <span>视频目标</span>
             </div>
             <div class="metric-grid__cell is-input">
               <ElInputNumber
@@ -184,7 +232,7 @@
                 size="small"
                 class="cell-num"
               />
-              <span>曝光目标</span>
+              <span>播放目标</span>
             </div>
           </template>
           <template v-else>
@@ -192,15 +240,19 @@
               v-for="cell in card.kpi"
               :key="`k-${cell.label}`"
               class="metric-grid__cell"
+              :class="{ 'is-cycle': cell.label === '周期' }"
               :title="cell.tip"
             >
               <strong>{{ cell.text ?? formatNum(cell.value) }}</strong>
               <span>{{ cell.label }}</span>
+              <div v-if="cell.label === '周期'" class="cycle-progress" aria-label="KPI 周期进度">
+                <i :style="{ width: `${timeProgress(card.runtime.kpi)}%` }" />
+              </div>
             </div>
           </template>
         </div>
 
-        <!-- 现状：脚本/成片/过审可手改；账号/分发/曝光优先台账+Rapid -->
+        <!-- 现状：脚本/成片/过审可手改；账号/已发视频/播放量与账号矩阵、视频监控同源 -->
         <div class="metric-grid__row" :class="{ 'is-live': editingId === card.project.id }">
           <span class="metric-grid__label">现状</span>
           <template v-if="editingId === card.project.id">
@@ -248,7 +300,7 @@
               />
               <span>过审数</span>
             </div>
-            <div class="metric-grid__cell is-input" title="Rapid 已发视频条数，可手改临时覆盖">
+            <div class="metric-grid__cell is-input" title="与视频监控条数同源，可手改临时覆盖">
               <ElInputNumber
                 v-model="draft.curDistributed"
                 :min="0"
@@ -256,9 +308,9 @@
                 size="small"
                 class="cell-num"
               />
-              <span>分发量</span>
+              <span>已发视频</span>
             </div>
-            <div class="metric-grid__cell is-input" title="Rapid 视频播放合计，可手改临时覆盖">
+            <div class="metric-grid__cell is-input" title="与视频监控播放合计同源，可手改临时覆盖">
               <ElInputNumber
                 v-model="draft.curExposure"
                 :min="0"
@@ -266,7 +318,7 @@
                 size="small"
                 class="cell-num"
               />
-              <span>曝光量</span>
+              <span>播放量</span>
             </div>
           </template>
           <template v-else>
@@ -274,9 +326,25 @@
               v-for="cell in card.current"
               :key="`c-${cell.label}`"
               class="metric-grid__cell"
+              :class="{ 'is-editable': currentField(cell.label) }"
               :title="cell.tip"
+              @dblclick="startCurrentEdit(card.project.id, cell.label, cell.value)"
             >
-              <strong>{{ cell.text ?? formatNum(cell.value) }}</strong>
+              <ElInputNumber
+                v-if="
+                  editingCurrent?.projectId === card.project.id &&
+                  editingCurrent.field === currentField(cell.label)
+                "
+                v-model="editingCurrent.value"
+                :min="0"
+                :controls="false"
+                size="small"
+                class="cell-num"
+                autofocus
+                @blur="saveCurrentEdit"
+                @keyup.enter="saveCurrentEdit"
+              />
+              <strong v-else>{{ cell.text ?? formatNum(cell.value) }}</strong>
               <span>{{ cell.label }}</span>
             </div>
           </template>
@@ -284,7 +352,7 @@
       </div>
 
       <p v-if="editingId === card.project.id" class="edit-hint">
-        改完点「完成」保存。账号数 ← 导入账号；分发/曝光 ← Rapid 同步作品（可用「拉现状」重算）。
+        改完点「完成」保存。账号数 ← 账号矩阵；已发视频 / 播放量 ← 视频监控同步数据（可用「拉现状」重算）。
       </p>
     </article>
 
@@ -365,7 +433,7 @@
         <ElFormItem label="成片数">
           <ElInputNumber v-model="form.videos" :min="0" :controls="false" style="width: 100%" />
         </ElFormItem>
-        <ElFormItem label="曝光量">
+        <ElFormItem label="播放目标">
           <ElInputNumber v-model="form.exposure" :min="0" :controls="false" style="width: 100%" />
         </ElFormItem>
         <ElFormItem label="同步日历">
@@ -404,6 +472,7 @@
 <script setup lang="ts">
   import { computed, onMounted, reactive, ref } from 'vue'
   import { useRouter } from 'vue-router'
+  import { onBeforeRouteLeave } from 'vue-router'
   import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'element-plus'
   import {
     createProject,
@@ -424,9 +493,11 @@
     priorityLabel,
     progressRows,
     projectRuntimeRevision,
+    timeProgress,
     type ProjectRuntime
   } from '@/store/dojoProjectRuntime'
   import { syncProjectKpiToSchedule } from '@/store/dojoKpiSchedule'
+  import { projectExecutionBrief } from '@/store/dojoExecutionGuide'
   import {
     syncAllProjectsCurrentFromLedger,
     syncProjectCurrentFromLedger
@@ -434,6 +505,7 @@
   import { dojoAccountStore } from '@/store/dojoAccountStore'
   import { DOJO_TODAY, formatMonthDay } from '@/utils/dojoDates'
   import { parseProjectImportText } from '@/utils/dojoProjectImport'
+  import ProjectQuickControls from '@/components/dojo/ProjectQuickControls.vue'
 
   defineOptions({ name: 'DojoProject' })
 
@@ -447,6 +519,11 @@
   const editingId = ref('')
   const refreshing = ref(false)
   const refreshingId = ref('')
+  const editingCurrent = ref<{
+    projectId: string
+    field: keyof ProjectRuntime['current']
+    value: number
+  } | null>(null)
 
   const draft = reactive({
     name: '',
@@ -495,6 +572,7 @@
     return {
       project,
       runtime,
+      execution: projectExecutionBrief(project.id, DOJO_TODAY),
       progress: progressRows(runtime),
       kpi: kpiRows(runtime),
       current: currentRows(runtime)
@@ -532,6 +610,11 @@
     ElMessage.success('已隐藏，今日待办不再显示该项目')
   }
 
+  function openProjectExecution(projectId: string) {
+    setSelectedProjects([projectId])
+    void router.push({ path: '/today', query: { project: projectId } })
+  }
+
   function restoreCard(id: string) {
     setProjectActive(id, true)
     ElMessage.success('已恢复显示')
@@ -554,6 +637,44 @@
   function formatNum(n: number) {
     return Number.isFinite(n) ? n.toLocaleString() : '—'
   }
+
+  function currentField(label: string): keyof ProjectRuntime['current'] | null {
+    return (
+      (
+        {
+          账号数: 'accounts',
+          脚本产出: 'scripts',
+          成片数: 'edited',
+          过审数: 'approved',
+          分发量: 'distributed',
+          已发视频: 'distributed',
+          曝光量: 'exposure',
+          播放量: 'exposure'
+        } as Record<string, keyof ProjectRuntime['current']>
+      )[label] || null
+    )
+  }
+
+  function startCurrentEdit(projectId: string, label: string, value: number) {
+    const field = currentField(label)
+    if (!field) return
+    saveCurrentEdit()
+    editingCurrent.value = { projectId, field, value }
+  }
+
+  function saveCurrentEdit() {
+    const current = editingCurrent.value
+    if (!current) return
+    updateProject(current.projectId, {
+      current: { [current.field]: Math.max(0, Number(current.value) || 0) }
+    })
+    editingCurrent.value = null
+  }
+
+  onBeforeRouteLeave(() => {
+    saveCurrentEdit()
+    if (editingId.value) saveInline(editingId.value)
+  })
 
   function startInline(id: string) {
     const runtime = getProjectRuntime(id)
@@ -632,7 +753,7 @@
         return
       }
       ElMessage.success(
-        `已回写：账号 ${m.accounts} · 分发 ${m.distributed} · 曝光 ${m.exposure.toLocaleString()}`
+        `已回写：账号 ${m.accounts} · 已发视频 ${m.distributed} · 播放 ${m.exposure.toLocaleString()}`
       )
     } finally {
       refreshingId.value = ''
@@ -653,9 +774,7 @@
   function syncToCalendar(projectId: string) {
     const n = syncProjectKpiToSchedule(projectId)
     ElMessage.success(
-      n
-        ? `已同步项目周期到排期/日历（细项条请在「项目排期」里按需添加）`
-        : '缺少周期，请先编辑 KPI'
+      n ? `已同步项目周期到排期/日历（细项条请在「项目排期」里按需添加）` : '缺少周期，请先编辑 KPI'
     )
   }
 
@@ -797,9 +916,7 @@
       importVisible.value = false
       importText.value = ''
       const via = source === 'ai' ? 'DeepSeek' : '本地规则'
-      ElMessage.success(
-        `已导入 ${createdIds.length} 个项目（${via}）${hint ? ` · ${hint}` : ''}`
-      )
+      ElMessage.success(`已导入 ${createdIds.length} 个项目（${via}）${hint ? ` · ${hint}` : ''}`)
       if (createdIds[0]) startInline(createdIds[0])
     } finally {
       importing.value = false
@@ -811,31 +928,33 @@
 
 <style scoped lang="scss">
   .empty-state {
-    margin: 0;
     padding: 28px 20px;
-    color: var(--el-text-color-secondary);
+    margin: 0;
     font-size: 14px;
     line-height: 1.6;
+    color: var(--el-text-color-secondary);
     text-align: center;
+    background: var(--el-fill-color-blank);
     border: 1px dashed var(--el-border-color);
     border-radius: 12px;
-    background: var(--el-fill-color-blank);
   }
 
   .import-tip {
     margin: 0 0 10px;
-    color: var(--el-text-color-secondary);
     font-size: 13px;
     line-height: 1.5;
+    color: var(--el-text-color-secondary);
   }
 
   .project-card {
-    margin-top: 16px;
     padding: 18px 20px 16px;
+    margin-top: 16px;
+    background: var(--el-bg-color);
     border: 1px solid var(--el-border-color-lighter);
     border-radius: 12px;
-    background: var(--el-bg-color);
-    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    transition:
+      border-color 0.15s ease,
+      box-shadow 0.15s ease;
 
     &.is-editing {
       border-color: var(--el-color-primary-light-5);
@@ -858,8 +977,8 @@
 
       p {
         margin: 0;
-        color: var(--el-text-color-secondary);
         font-size: 13px;
+        color: var(--el-text-color-secondary);
       }
     }
 
@@ -874,6 +993,30 @@
       gap: 8px;
       align-items: center;
     }
+  }
+
+  .project-people {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin: 11px 0 0;
+  }
+
+  .project-people div {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    font-size: 11px;
+  }
+
+  .project-people dt {
+    color: var(--dojo-muted);
+  }
+
+  .project-people dd {
+    margin: 0;
+    font-weight: 650;
+    color: var(--dojo-ink);
   }
 
   .inline-name {
@@ -893,9 +1036,146 @@
 
   .edit-hint {
     margin: 12px 0 0;
-    color: var(--el-text-color-secondary);
     font-size: 12px;
     line-height: 1.4;
+    color: var(--el-text-color-secondary);
+  }
+
+  .project-execution {
+    display: grid;
+    grid-template-columns: minmax(180px, 0.8fr) minmax(0, 2fr) 32px;
+    gap: 16px;
+    align-items: center;
+    min-height: 74px;
+    padding: 10px 12px;
+    margin-bottom: 14px;
+    background: #f4f7fb;
+    border: 1px solid #dce4ee;
+    border-radius: 10px;
+
+    &.is-overdue {
+      background: #fff7f7;
+      border-color: #f0d5d8;
+    }
+
+    &.is-complete {
+      background: #f2f8f6;
+      border-color: #d7ebe4;
+    }
+
+    &__phase {
+      display: grid;
+      grid-template-columns: 34px minmax(0, 1fr);
+      gap: 10px;
+      align-items: center;
+      min-width: 0;
+      padding: 0;
+      color: inherit;
+      text-align: left;
+      cursor: pointer;
+      background: transparent;
+      border: 0;
+
+      > span:first-child {
+        display: grid;
+        width: 32px;
+        height: 32px;
+        place-items: center;
+        color: var(--dojo-accent);
+        background: color-mix(in srgb, var(--dojo-accent) 14%, var(--dojo-paper));
+        border-radius: 9px;
+        font-size: 10px;
+        font-weight: 750;
+      }
+
+      > span:last-child {
+        display: grid;
+        min-width: 0;
+        gap: 2px;
+      }
+
+      small,
+      em {
+        color: var(--dojo-muted);
+        font-size: 11px;
+        font-style: normal;
+      }
+
+      strong,
+      em {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      strong {
+        color: var(--dojo-ink);
+        font-size: 11px;
+      }
+    }
+
+    dl {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr 0.8fr;
+      gap: 20px;
+      min-width: 0;
+      margin: 0;
+    }
+
+    dl > div {
+      display: grid;
+      min-width: 0;
+      gap: 3px;
+    }
+
+    dt,
+    dl span {
+      color: var(--dojo-muted);
+      font-size: 11px;
+    }
+
+    dd {
+      overflow: hidden;
+      margin: 0;
+      color: var(--dojo-ink);
+      font-size: 10px;
+      font-weight: 650;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    &__kpi > span {
+      height: 4px;
+      overflow: hidden;
+      background: #dfe6f0;
+      border-radius: 3px;
+
+      i {
+        display: block;
+        height: 100%;
+        background: var(--dojo-accent);
+        border-radius: inherit;
+      }
+    }
+
+    &__open {
+      display: grid;
+      width: 30px;
+      height: 30px;
+      place-items: center;
+      padding: 0;
+      color: var(--dojo-accent);
+      cursor: pointer;
+      background: transparent;
+      border: 0;
+      border-radius: 8px;
+
+      &:hover,
+      &:focus-visible {
+        background: color-mix(in srgb, var(--dojo-accent) 14%, var(--dojo-paper));
+        outline: none;
+      }
+    }
   }
 
   .metric-grid {
@@ -910,8 +1190,8 @@
       align-items: stretch;
 
       &.is-live .metric-grid__cell {
-        border-color: var(--el-color-primary-light-7);
         background: var(--el-color-primary-light-9);
+        border-color: var(--el-color-primary-light-7);
       }
     }
 
@@ -932,9 +1212,9 @@
       gap: 2px;
       min-height: 52px;
       padding: 8px 6px;
+      text-align: center;
       border: 1px solid var(--el-border-color-extra-light);
       border-radius: 8px;
-      text-align: center;
 
       strong {
         font-size: 14px;
@@ -944,15 +1224,49 @@
       }
 
       span {
-        color: var(--el-text-color-secondary);
         font-size: 11px;
         line-height: 1.2;
+        color: var(--el-text-color-secondary);
       }
 
       &.is-input {
         justify-content: center;
         padding: 6px 4px;
       }
+
+      &.is-editable {
+        cursor: text;
+      }
+
+      &.is-editable:hover {
+        background: var(--el-color-primary-light-9);
+        border-color: var(--el-color-primary-light-7);
+      }
+
+      &.is-cycle {
+        justify-content: center;
+
+        strong {
+          font-size: 12px;
+          word-break: normal;
+          white-space: nowrap;
+        }
+      }
+    }
+  }
+
+  .cycle-progress {
+    height: 4px;
+    margin-top: 4px;
+    overflow: hidden;
+    background: var(--el-fill-color);
+    border-radius: 3px;
+
+    i {
+      display: block;
+      height: 100%;
+      background: var(--el-color-primary);
+      border-radius: inherit;
     }
   }
 
@@ -960,31 +1274,63 @@
     width: 100%;
 
     :deep(.el-input__inner) {
-      text-align: center;
-      font-weight: 650;
-      padding-left: 4px;
       padding-right: 4px;
+      padding-left: 4px;
+      font-weight: 650;
+      text-align: center;
     }
   }
 
-  @media (max-width: 1100px) {
+  @media (width <= 1100px) {
+    .project-execution {
+      grid-template-columns: minmax(180px, 0.8fr) minmax(0, 1.4fr) 32px;
+
+      dl {
+        grid-template-columns: 1fr 0.8fr;
+      }
+
+      dl > div:first-child {
+        display: none;
+      }
+    }
+
     .metric-grid__row {
       grid-template-columns: 52px repeat(4, minmax(0, 1fr));
     }
   }
 
-  @media (max-width: 720px) {
+  @media (width <= 720px) {
+    .project-execution {
+      grid-template-columns: minmax(0, 1fr) 30px;
+
+      dl {
+        grid-column: 1 / -1;
+        grid-template-columns: 1fr;
+        gap: 10px;
+        padding-left: 44px;
+      }
+
+      dl > div:first-child {
+        display: grid;
+      }
+
+      &__open {
+        grid-row: 1;
+        grid-column: 2;
+      }
+    }
+
     .metric-grid__row {
       grid-template-columns: 52px repeat(2, minmax(0, 1fr));
     }
   }
 
   .hidden-panel {
-    margin-top: 28px;
     padding: 16px 18px;
+    margin-top: 28px;
+    background: var(--el-fill-color-blank);
     border: 1px dashed var(--el-border-color);
     border-radius: 12px;
-    background: var(--el-fill-color-blank);
 
     &__head {
       display: flex;
@@ -1000,8 +1346,8 @@
   }
 
   .hidden-list {
-    margin: 0;
     padding: 0;
+    margin: 0;
     list-style: none;
 
     li {
@@ -1013,8 +1359,8 @@
       border-top: 1px solid var(--el-border-color-extra-light);
 
       &:first-child {
-        border-top: 0;
         padding-top: 0;
+        border-top: 0;
       }
 
       strong {
@@ -1029,8 +1375,8 @@
   }
 
   .muted {
-    color: var(--el-text-color-secondary);
     font-size: 13px;
     font-weight: 400;
+    color: var(--el-text-color-secondary);
   }
 </style>

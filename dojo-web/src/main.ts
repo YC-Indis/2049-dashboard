@@ -5,8 +5,10 @@ import { initRouter } from './router'               // Router
 import language from './locales'                    // 国际化
 import '@styles/core/tailwind.css'                  // tailwind
 import '@styles/index.scss'                         // 样式
+import '@styles/dojo-warm-editorial.css'            // Warm editorial tokens
 import '@styles/dojo-velix.scss'                    // Velix Agent tokens
 import '@utils/sys/console.ts'                      // 控制台输出内容
+import '@/utils/ui/iconify-loader'                  // 离线 Iconify（ph / ri）
 import { setupGlobDirectives } from './directives'
 import { setupErrorHandle } from './utils/sys/error-handle'
 

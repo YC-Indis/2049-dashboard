@@ -11,30 +11,116 @@ export const dojoRoutes: AppRouteRecord[] = [
   {
     name: 'DojoToday',
     path: '/today',
-    component: '/dojo/today',
+    component: '/dojo/creator/timeline',
     meta: { title: 'menus.dojo.today', icon: 'ri:sun-line', roles }
+  },
+  {
+    name: 'DojoInspirationCollection',
+    path: '/inspiration-collection',
+    component: '/dojo/inspiration',
+    meta: { title: 'menus.dojo.inspirationCollection', icon: 'ri:radar-line', roles }
+  },
+  {
+    name: 'DojoInspiration',
+    path: '/inspiration',
+    component: '/dojo/inspiration',
+    meta: { title: 'menus.dojo.inspiration', icon: 'ri:lightbulb-flash-line', roles }
+  },
+  {
+    name: 'DojoScriptWorkshop',
+    path: '/script-workshop',
+    component: '/dojo/inspiration',
+    meta: {
+      title: 'menus.dojo.inspiration',
+      icon: 'ri:file-edit-line',
+      roles,
+      isHide: true,
+      activePath: '/inspiration'
+    },
+    redirect: '/inspiration'
+  },
+  {
+    name: 'DojoBenchmarkLibrary',
+    path: '/benchmark-library',
+    component: '/dojo/inspiration',
+    meta: { title: 'menus.dojo.benchmarkLibrary', icon: 'ri:user-star-line', roles }
+  },
+  {
+    name: 'DojoOperations',
+    path: '/operations',
+    component: '/dojo/operations',
+    meta: { title: 'menus.dojo.operations', icon: 'ri:dashboard-2-line', roles }
+  },
+  {
+    name: 'DojoCreator',
+    path: '/creator',
+    component: '/index/index',
+    redirect: '/creator/today',
+    meta: { title: 'menus.dojo.creator', icon: 'ri:sparkling-2-line', roles, isHide: true },
+    children: [
+      {
+        name: 'DojoCreatorToday',
+        path: 'today',
+        component: '/dojo/creator',
+        meta: { title: 'menus.dojo.creatorToday', icon: 'ri:focus-3-line', roles }
+      },
+      {
+        name: 'DojoCreatorCalendar',
+        path: 'calendar',
+        component: '/dojo/creator/calendar',
+        meta: { title: 'menus.dojo.creatorCalendar', icon: 'ri:calendar-event-line', roles }
+      },
+      {
+        name: 'DojoCreatorTimeline',
+        path: 'timeline',
+        component: '/dojo/creator/timeline',
+        meta: {
+          title: 'menus.dojo.creatorTimeline',
+          icon: 'ri:git-commit-line',
+          roles,
+          isHide: true,
+          activePath: '/today'
+        }
+      },
+      {
+        name: 'DojoCreatorReview',
+        path: 'review',
+        component: '/dojo/creator/review',
+        meta: { title: 'menus.dojo.creatorReview', icon: 'ri:flask-line', roles }
+      }
+    ]
   },
   {
     name: 'DojoProject',
     path: '/project',
     component: '/dojo/project',
-    meta: { title: 'menus.dojo.project', icon: 'ri:dashboard-3-line', roles, fixedTab: true }
+    meta: {
+      title: 'menus.dojo.project',
+      icon: 'ri:dashboard-3-line',
+      roles
+    }
   },
   {
     name: 'DojoTimeline',
     path: '/timeline',
     component: '/dojo/timeline',
-    meta: { title: 'menus.dojo.timeline', icon: 'ri:calendar-schedule-line', roles }
+    meta: {
+      title: 'menus.dojo.timeline',
+      icon: 'ri:calendar-schedule-line',
+      roles,
+      isHide: true,
+      activePath: '/today'
+    }
   },
   {
     name: 'DojoCalendar',
     path: '/calendar',
-    component: '/dojo/calendar',
+    component: '/dojo/creator/calendar',
     meta: { title: 'menus.dojo.calendar', icon: 'ri:calendar-2-line', roles }
   },
   {
     name: 'DojoAccountReview',
-    path: '/accounts/review',
+    path: '/account-matrix',
     component: '/dojo/accounts/review',
     meta: { title: 'menus.dojo.accountReview', icon: 'ri:tiktok-line', roles }
   },
@@ -51,7 +137,7 @@ export const dojoRoutes: AppRouteRecord[] = [
     meta: { title: 'menus.dojo.adVideos', icon: 'ri:play-circle-line', roles }
   },
   // 注意：一级路由只会取 path 第一段做 Layout 父路径。
-  // 不能再用 /accounts，否则会和 /accounts/review 抢同一父路由，复盘页空白且标题变成「总账号预览」。
+  // 账号相关路径必须彼此第一段不同，否则会互相覆盖导致空白页。
   {
     name: 'DojoWorklog',
     path: '/worklog',
@@ -68,13 +154,13 @@ export const dojoRoutes: AppRouteRecord[] = [
   // —— 侧栏隐藏，卡片/旧链接仍可进入 ——
   {
     name: 'DojoAccountDetail',
-    path: '/accounts/detail/:handle',
+    path: '/account-detail/:handle',
     component: '/dojo/accounts/detail',
     meta: {
       title: 'menus.dojo.accountDetail',
       roles,
       isHide: true,
-      activePath: '/accounts/review'
+      activePath: '/account-matrix'
     }
   },
   {
@@ -91,7 +177,7 @@ export const dojoRoutes: AppRouteRecord[] = [
   },
   {
     name: 'DojoAccountIntake',
-    path: '/accounts/intake',
+    path: '/account-intake',
     component: '/dojo/accounts/intake',
     meta: { title: 'menus.dojo.accountIntake', icon: 'ri:inbox-archive-line', roles, isHide: true }
   },
@@ -113,18 +199,24 @@ export const dojoRoutes: AppRouteRecord[] = [
     meta: { title: 'menus.dojo.ads', icon: 'ri:rocket-2-line', roles, isHide: true }
   },
 
-  // 旧路径重定向
+  // 旧路径重定向（单段 path，避免 /accounts/* 互相抢 Layout 父路由）
   {
     name: 'DojoMonitorRedirect',
     path: '/monitor',
     component: '/dojo/accounts/review',
-    meta: { title: 'menus.dojo.accountReview', roles, isHide: true, activePath: '/accounts/review' }
+    meta: {
+      title: 'menus.dojo.accountReview',
+      roles,
+      isHide: true,
+      activePath: '/account-matrix'
+    },
+    redirect: '/account-matrix'
   },
   {
     name: 'DojoFlowRedirect',
     path: '/flow',
-    component: '/dojo/timeline',
-    meta: { title: 'menus.dojo.timeline', roles, isHide: true, activePath: '/timeline' }
+    component: '/dojo/creator/calendar',
+    meta: { title: 'menus.dojo.calendar', roles, isHide: true, activePath: '/calendar' }
   },
   {
     name: 'DojoProgressRedirect',
@@ -141,7 +233,7 @@ export const dojoRoutes: AppRouteRecord[] = [
   {
     name: 'DojoConfirmRedirect',
     path: '/confirm',
-    component: '/dojo/today',
+    component: '/dojo/creator/timeline',
     meta: { title: 'menus.dojo.today', roles, isHide: true, activePath: '/today' }
   }
 ]

@@ -44,7 +44,7 @@ export const overviewStats = computed(() => ({
 export const todayAdvice = computed(
   () =>
     `dojo脚本 ${milestonesTotal.value} 阶段中 ${milestonesDone.value} 项已完成。` +
-    `今天优先处理「${pendingStage.value}」，并在内容流转页同步分发指标。`
+    `今天优先处理「${pendingStage.value}」，并在执行日历同步制作节奏。`
 )
 
 export const topActions = computed(() => {

@@ -102,7 +102,25 @@ export async function rapidSearch(query: string, cursor = 0) {
 }
 
 export function stripHandle(handle: string) {
-  return handle.trim().replace(/^@/, '')
+  const value = handle.trim()
+  const urlMatch = value.match(
+    /(?:https?:\/\/)?(?:www\.)?tiktok\.com\/@([A-Za-z0-9._]{2,24})/i
+  )
+  if (urlMatch?.[1]) return urlMatch[1]
+
+  const plain = value.replace(/^@/, '')
+  const handleMatch = plain.match(/^([A-Za-z0-9._]{2,24})/)
+  return handleMatch?.[1] || plain
+}
+
+export function extractAccountHandle(author?: string, url?: string) {
+  const fromUrl = url ? stripHandle(url) : ''
+  if (fromUrl && /^[A-Za-z0-9._]{2,24}$/.test(fromUrl) && /tiktok\.com/i.test(url || '')) {
+    return fromUrl
+  }
+  const fromAuthor = author ? stripHandle(author) : ''
+  if (fromAuthor && /^[A-Za-z0-9._]{2,24}$/.test(fromAuthor)) return fromAuthor
+  return ''
 }
 
 interface RapidUserDetails {
@@ -116,6 +134,106 @@ interface RapidUserDetails {
   verified?: boolean
   bio_link?: string
   is_private?: boolean
+}
+
+function asRecord(value: unknown): Record<string, unknown> | null {
+  return value && typeof value === 'object' && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : null
+}
+
+function pickNumber(...values: unknown[]) {
+  for (const value of values) {
+    const number = Number(value)
+    if (Number.isFinite(number) && number >= 0) return number
+  }
+  return undefined
+}
+
+function pickString(...values: unknown[]) {
+  for (const value of values) {
+    if (typeof value === 'string' && value.trim()) return value.trim()
+    if (typeof value === 'number' && Number.isFinite(value)) return String(value)
+  }
+  return undefined
+}
+
+/** 兼容 Rapid / 嵌套 user / stats / follower_count 等字段别名 */
+function normalizeUserDetails(payload: unknown, fallbackHandle: string): TikTokAccountSnapshot | null {
+  const root = asRecord(payload)
+  if (!root) return null
+  const data = asRecord(root.data) || root
+  const user = asRecord(data.user) || asRecord(data.userInfo) || asRecord(data.user_info) || data
+  const stats =
+    asRecord(user.stats) ||
+    asRecord(user.statistics) ||
+    asRecord(data.stats) ||
+    asRecord(data.statistics) ||
+    user
+
+  const username = pickString(
+    user.username,
+    user.unique_id,
+    user.uniqueId,
+    data.username,
+    root.username
+  )
+  const followers = pickNumber(
+    user.followers,
+    stats.followers,
+    stats.follower_count,
+    stats.followerCount,
+    user.follower_count,
+    user.followerCount,
+    data.followers,
+    data.follower_count
+  )
+  if (followers === undefined) return null
+
+  const handle = username ? `@${username.replace(/^@/, '')}` : `@${fallbackHandle.replace(/^@/, '')}`
+  return {
+    handle,
+    followers,
+    following: pickNumber(
+      user.following,
+      stats.following,
+      stats.following_count,
+      stats.followingCount,
+      user.following_count
+    ),
+    likes: pickNumber(
+      user.total_heart,
+      user.likes,
+      stats.heart_count,
+      stats.heartCount,
+      stats.total_heart,
+      stats.likes_count,
+      user.likes_count
+    ),
+    posts: pickNumber(
+      user.total_videos,
+      user.video_count,
+      stats.video_count,
+      stats.videoCount,
+      user.videoCount
+    ),
+    nickname: pickString(user.nickname, user.display_name, user.displayName, data.nickname),
+    region: pickString(user.region, data.region),
+    verified: Boolean(user.verified ?? user.is_verified ?? data.verified),
+    bioLink: pickString(user.bio_link, user.bioLink, user.bio_url),
+    isPrivate: Boolean(user.is_private ?? user.private_account ?? user.isPrivate),
+    syncedAt: nowStamp(),
+    source: 'rapidapi'
+  }
+}
+
+function isValidSnapshot(snapshot: TikTokAccountSnapshot | null | undefined): snapshot is TikTokAccountSnapshot {
+  return Boolean(
+    snapshot &&
+      Number.isFinite(snapshot.followers) &&
+      snapshot.followers >= 0 &&
+      snapshot.handle
+  )
 }
 
 interface RapidUserVideo {
@@ -212,9 +330,9 @@ export async function fetchAllAccountVideos(handle: string, maxPages = 10) {
 
 /** RapidAPI TikTok 账号现状 */
 export async function syncTikTokAccount(handle: string): Promise<TikTokAccountSnapshot> {
-  const clean = handle.replace(/^@/, '')
+  const clean = stripHandle(handle)
 
-  // 1) Dojo / Velix 后端代理
+  // 1) Dojo / Velix 后端代理（必须带有效粉丝数字才采信）
   try {
     const res = await fetch(`${DOJO_API}/tiktok/account/sync`, {
       method: 'POST',
@@ -222,8 +340,9 @@ export async function syncTikTokAccount(handle: string): Promise<TikTokAccountSn
       body: JSON.stringify({ handle: clean })
     })
     if (res.ok) {
-      const data = (await res.json()) as TikTokAccountSnapshot
-      return { ...data, source: 'rapidapi' }
+      const data = await res.json()
+      const normalized = normalizeUserDetails(data, clean)
+      if (isValidSnapshot(normalized)) return normalized
     }
   } catch {
     /* next */
@@ -231,25 +350,11 @@ export async function syncTikTokAccount(handle: string): Promise<TikTokAccountSn
 
   // 2) RapidAPI /user/details：按用户名精确查，比搜索猜作者可靠
   try {
-    const d = await rapidGet<RapidUserDetails>(
+    const d = await rapidGet<RapidUserDetails | Record<string, unknown>>(
       `/user/details?username=${encodeURIComponent(clean)}`
     )
-    if (d?.username) {
-      return {
-        handle: `@${d.username}`,
-        followers: d.followers ?? 0,
-        following: d.following,
-        likes: d.total_heart,
-        posts: d.total_videos,
-        nickname: d.nickname,
-        region: d.region,
-        verified: d.verified,
-        bioLink: d.bio_link,
-        isPrivate: d.is_private,
-        syncedAt: nowStamp(),
-        source: 'rapidapi'
-      }
-    }
+    const normalized = normalizeUserDetails(d, clean)
+    if (isValidSnapshot(normalized)) return normalized
   } catch {
     /* mock */
   }

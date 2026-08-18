@@ -14,28 +14,16 @@
       </div>
     </div>
 
-    <RouterView v-if="isRefresh" v-slot="{ Component, route }" :style="contentStyle">
-      <!-- 缓存路由动画 -->
-      <Transition :name="showTransitionMask ? '' : actualTransition" mode="out-in" appear>
-        <KeepAlive :max="10" :exclude="keepAliveExclude">
-          <component
-            class="art-page-view"
-            :is="Component"
-            :key="route.path"
-            v-if="route.meta.keepAlive"
-          />
-        </KeepAlive>
-      </Transition>
-
-      <!-- 非缓存路由动画 -->
-      <Transition :name="showTransitionMask ? '' : actualTransition" mode="out-in" appear>
-        <component
-          class="art-page-view"
-          :is="Component"
-          :key="route.path"
-          v-if="!route.meta.keepAlive"
-        />
-      </Transition>
+    <RouterView v-if="isRefresh" v-slot="{ Component, route: viewRoute }" :style="contentStyle">
+      <KeepAlive v-if="viewRoute.meta.keepAlive" :max="10" :exclude="keepAliveExclude">
+        <component :is="Component" class="art-page-view" :key="viewRoute.fullPath" />
+      </KeepAlive>
+      <component
+        v-else
+        :is="Component"
+        class="art-page-view"
+        :key="viewRoute.fullPath"
+      />
     </RouterView>
 
     <!-- 全屏页面切换过渡遮罩（用于提升页面切换视觉体验） -->
@@ -58,7 +46,7 @@
 
   const route = useRoute()
   const { containerMinHeight } = useAutoLayoutHeight()
-  const { pageTransition, containerWidth, refresh } = storeToRefs(useSettingStore())
+  const { containerWidth, refresh } = storeToRefs(useSettingStore())
   const { keepAliveExclude } = storeToRefs(useWorktabStore())
 
   const isRefresh = shallowRef(true)
@@ -71,13 +59,6 @@
   // 检查当前路由是否需要使用无基础布局模式
   const isFullPage = computed(() => route.matched.some((r) => r.meta?.isFullPage))
   const prevIsFullPage = ref(isFullPage.value)
-
-  // 切换动画名称：首次加载、从全屏返回时不使用动画
-  const actualTransition = computed(() => {
-    if (isFirstLoad.value) return ''
-    if (prevIsFullPage.value && !isFullPage.value) return ''
-    return pageTransition.value
-  })
 
   // 监听全屏状态变化，显示过渡遮罩
   watch(isFullPage, (val, oldVal) => {

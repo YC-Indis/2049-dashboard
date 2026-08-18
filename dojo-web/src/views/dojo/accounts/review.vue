@@ -139,13 +139,7 @@
             <ElTag size="small" type="danger" effect="plain">TikTok</ElTag>
           </template>
         </ElTableColumn>
-        <ElTableColumn
-          prop="videos"
-          label="已发布视频"
-          width="120"
-          align="right"
-          sortable="custom"
-        >
+        <ElTableColumn prop="videos" label="已发布视频" width="120" align="right" sortable="custom">
           <template #default="{ row }">{{ videoCount(row) }}</template>
         </ElTableColumn>
         <ElTableColumn prop="followers" label="粉丝" width="110" align="right" sortable="custom">
@@ -368,19 +362,23 @@
   } from '@/store/dojoAccountStore'
   import { dojoProjectStore, getProjectById } from '@/store/dojoProjectStore'
   import {
+    extractBareHandlesFromText,
     extractAccountsFromFiles,
     extractHandlesFromText,
     type AccountCandidate
   } from '@/utils/dojoAccountExtract'
   import { exportCsv } from '@/utils/dojoExport'
-  import { loadTable, saveTable } from '@/utils/dojoPersist'
   import { stripHandle } from '@/api/tiktok'
+  import {
+    dojoAccountAutoSyncStore,
+    recordFullAccountSyncCompleted,
+    setAccountAutoSyncInterval
+  } from '@/store/dojoAccountAutoSync'
 
   defineOptions({ name: 'DojoAccountReview' })
 
   const HOUR = 3600 * 1000
   const DAY = 24 * HOUR
-  const TABLE_AUTO_REFRESH = 'accountAutoRefresh'
   const autoRefreshOptions = [
     { label: '关闭', value: 0 },
     { label: '1 小时', value: HOUR },
@@ -391,11 +389,6 @@
     { label: '1 周', value: 7 * DAY }
   ] as const
 
-  interface AutoRefreshPersist {
-    intervalMs: number
-    lastRunAt?: string
-  }
-
   const router = useRouter()
   const viewMode = ref<'list' | 'card'>('list')
   const selectedProjectIds = ref<string[]>([...dojoProjectStore.selectedIds])
@@ -404,10 +397,11 @@
   const sortOrder = ref<'asc' | 'desc'>('desc')
   const syncingAll = ref(false)
   const syncingSelected = ref(false)
-  const persistedAuto = loadTable<AutoRefreshPersist>(TABLE_AUTO_REFRESH)
-  const autoRefreshMs = ref(persistedAuto?.intervalMs ?? 0)
-  const autoLastRunAt = ref(persistedAuto?.lastRunAt || '')
-  let autoRefreshTimer: ReturnType<typeof setInterval> | null = null
+  const autoRefreshMs = computed({
+    get: () => dojoAccountAutoSyncStore.intervalMs,
+    set: (value: number) => setAccountAutoSyncInterval(value)
+  })
+  const autoLastRunAt = computed(() => dojoAccountAutoSyncStore.lastRunAt)
   let autoTickTimer: ReturnType<typeof setInterval> | null = null
   const nowTick = ref(Date.now())
   const tableRef = ref<TableInstance>()
@@ -444,14 +438,23 @@
 
   watch(importVisible, (open) => {
     if (open && !importProjectId.value) {
-      importProjectId.value = selectedProjectIds.value[0] || dojoProjectStore.projects[0]?.id || ''
+      importProjectId.value =
+        selectedProjectIds.value[0] ||
+        dojoProjectStore.projects.find((project) => project.active !== false)?.id ||
+        ''
     }
   })
 
   const projectAccounts = computed(() => {
     void dojoAccountStore.revision
     const ids = selectedProjectIds.value
+    const activeProjectIds = new Set(
+      dojoProjectStore.projects
+        .filter((project) => project.active !== false)
+        .map((project) => project.id)
+    )
     return dojoAccountStore.accounts.filter((a) => {
+      if (a.projectId && !activeProjectIds.has(a.projectId)) return false
       if (!ids.length) return true
       return a.projectId ? ids.includes(a.projectId) : false
     })
@@ -476,17 +479,9 @@
     const dir = sortOrder.value === 'asc' ? 1 : -1
     list.sort((a, b) => {
       const va =
-        sortKey.value === 'followers'
-          ? a.followers == null
-            ? -1
-            : a.followers
-          : videoCount(a)
+        sortKey.value === 'followers' ? (a.followers == null ? -1 : a.followers) : videoCount(a)
       const vb =
-        sortKey.value === 'followers'
-          ? b.followers == null
-            ? -1
-            : b.followers
-          : videoCount(b)
+        sortKey.value === 'followers' ? (b.followers == null ? -1 : b.followers) : videoCount(b)
       if (va === vb) return a.handle.localeCompare(b.handle)
       return (va - vb) * dir
     })
@@ -533,50 +528,12 @@
         parts.push('下次自动：即将执行')
       }
     }
+    if (dojoAccountAutoSyncStore.running) parts.push('后台正在检查新发布视频')
+    if (dojoAccountAutoSyncStore.lastNewVideoCount > 0) {
+      parts.push(`最近新增视频：${dojoAccountAutoSyncStore.lastNewVideoCount} 条`)
+    }
     return parts.join(' · ')
   })
-
-  function persistAutoRefresh() {
-    saveTable(TABLE_AUTO_REFRESH, {
-      intervalMs: autoRefreshMs.value,
-      lastRunAt: autoLastRunAt.value || undefined
-    } satisfies AutoRefreshPersist)
-  }
-
-  function clearAutoRefreshTimer() {
-    if (autoRefreshTimer) {
-      clearInterval(autoRefreshTimer)
-      autoRefreshTimer = null
-    }
-  }
-
-  async function runAutoRefresh(silent = true) {
-    const handles = filteredAccounts.value.map((a) => a.handle)
-    if (!handles.length || syncingAll.value) return
-    syncingAll.value = true
-    try {
-      await syncAccounts(handles)
-      autoLastRunAt.value = new Date().toISOString()
-      persistAutoRefresh()
-      if (!silent) ElMessage.success(`自动刷新完成：${handles.length} 个账号`)
-    } finally {
-      syncingAll.value = false
-    }
-  }
-
-  function setupAutoRefresh() {
-    clearAutoRefreshTimer()
-    persistAutoRefresh()
-    if (autoRefreshMs.value <= 0) return
-    // 若已到期（含刚打开页面），立刻补一次
-    const last = autoLastRunAt.value ? new Date(autoLastRunAt.value).getTime() : 0
-    if (!last || Date.now() - last >= autoRefreshMs.value) {
-      void runAutoRefresh(true)
-    }
-    autoRefreshTimer = setInterval(() => {
-      void runAutoRefresh(true)
-    }, autoRefreshMs.value)
-  }
 
   function onAutoRefreshChange() {
     if (autoRefreshMs.value > 0) {
@@ -586,18 +543,15 @@
     } else {
       ElMessage.info('已关闭自动刷新')
     }
-    setupAutoRefresh()
   }
 
   onMounted(() => {
     autoTickTimer = setInterval(() => {
       nowTick.value = Date.now()
     }, 30_000)
-    setupAutoRefresh()
   })
 
   onUnmounted(() => {
-    clearAutoRefreshTimer()
     if (autoTickTimer) {
       clearInterval(autoTickTimer)
       autoTickTimer = null
@@ -626,7 +580,7 @@
   }
 
   function detailPath(row: MatrixAccount) {
-    return `/accounts/detail/${encodeURIComponent(stripHandle(row.handle))}`
+    return `/account-detail/${encodeURIComponent(stripHandle(row.handle))}`
   }
 
   function goDetail(row: MatrixAccount) {
@@ -699,9 +653,7 @@
   }
 
   function exportVideoContent() {
-    const source = selectedAccounts.value.length
-      ? selectedAccounts.value
-      : filteredAccounts.value
+    const source = selectedAccounts.value.length ? selectedAccounts.value : filteredAccounts.value
     const rows: Array<Array<string | number>> = []
     source.forEach((a) => {
       accountVideos(a.handle).forEach((v) => {
@@ -786,7 +738,9 @@
   }
 
   async function syncAll() {
-    const handles = filteredAccounts.value.map((a) => a.handle)
+    const handles = dojoAccountStore.accounts
+      .filter((account) => account.status === 'active')
+      .map((account) => account.handle)
     if (!handles.length) {
       ElMessage.info('没有可同步的账号')
       return
@@ -794,9 +748,17 @@
     syncingAll.value = true
     try {
       await syncAccounts(handles)
-      autoLastRunAt.value = new Date().toISOString()
-      persistAutoRefresh()
-      ElMessage.success(`已刷新 ${handles.length} 个账号`)
+      recordFullAccountSyncCompleted()
+      const mockCount = dojoAccountStore.accounts.filter(
+        (account) => handles.includes(account.handle) && account.syncSource === 'mock'
+      ).length
+      if (mockCount) {
+        ElMessage.warning(
+          `已刷新 ${handles.length} 个账号，其中 ${mockCount} 个未拿到真实粉丝（请检查 RapidAPI）`
+        )
+      } else {
+        ElMessage.success(`已刷新 ${handles.length} 个账号的真实粉丝数据`)
+      }
     } finally {
       syncingAll.value = false
     }
@@ -814,9 +776,7 @@
   async function submitCreate() {
     await formRef.value?.validate().catch(() => Promise.reject())
     const handle = form.value.handle.trim()
-    const link =
-      form.value.link.trim() ||
-      `https://www.tiktok.com/@${stripHandle(handle)}`
+    const link = form.value.link.trim() || `https://www.tiktok.com/@${stripHandle(handle)}`
     upsertAccount({
       handle,
       projectId: form.value.projectId,
@@ -826,7 +786,26 @@
     })
     createVisible.value = false
     await nextTick()
-    ElMessage.success('已添加账号')
+    ElMessage.success('已添加账号，正在后台同步资料与发布视频')
+    syncNewAccountsInBackground([handle])
+  }
+
+  function syncNewAccountsInBackground(handles: string[]) {
+    if (!handles.length) return
+    syncingAll.value = true
+    void syncAccounts(handles)
+      .then(() => {
+        const videoTotal = handles.reduce(
+          (total, handle) => total + accountVideos(handle).length,
+          0
+        )
+        ElMessage.success(
+          `同步完成：${handles.length} 个账号 · ${videoTotal} 条发布视频已进入视频监控`
+        )
+      })
+      .finally(() => {
+        syncingAll.value = false
+      })
   }
 
   function resetImport() {
@@ -846,18 +825,38 @@
   }
 
   function extractFromPaste() {
-    const list = extractHandlesFromText(pasteText.value)
+    const list = [
+      ...extractHandlesFromText(pasteText.value),
+      ...extractBareHandlesFromText(pasteText.value)
+    ]
     mergeCandidates(list)
     if (!list.length) ElMessage.warning('未识别到账号')
     else ElMessage.success(`识别到 ${list.length} 个账号`)
   }
 
   function mergeCandidates(list: AccountCandidate[]) {
-    const map = new Map(candidates.value.map((c) => [c.handle.toLowerCase(), { ...c }]))
+    const map = new Map<string, AccountCandidate>()
+    candidates.value.forEach((candidate) => {
+      const clean = stripHandle(candidate.handle || candidate.link)
+      if (!/^[A-Za-z0-9._]{2,24}$/.test(clean)) return
+      map.set(`@${clean.toLowerCase()}`, {
+        ...candidate,
+        handle: `@${clean}`,
+        link: `https://www.tiktok.com/@${clean}`
+      })
+    })
     list.forEach((c) => {
-      const key = c.handle.toLowerCase()
+      const clean = stripHandle(c.handle || c.link)
+      if (!/^[A-Za-z0-9._]{2,24}$/.test(clean)) return
+      const key = `@${clean.toLowerCase()}`
       const existing = map.get(key)
-      if (!existing) map.set(key, { ...c })
+      if (!existing) {
+        map.set(key, {
+          ...c,
+          handle: `@${clean}`,
+          link: `https://www.tiktok.com/@${clean}`
+        })
+      }
       else {
         existing.hits += c.hits
         if (c.confidence === 'high' && existing.confidence === 'low') {
@@ -899,19 +898,18 @@
         status: 'active' as const
       }))
       const { added, updated } = importAccounts(payload)
-      ElMessage.success(`已归入「${projectName(projectId)}」：新增 ${added} · 更新 ${updated}`)
-
       const handles = selectedCandidates.value.map((c) => c.handle)
-      if (importAutoSync.value && handles.length) {
-        syncingAll.value = true
-        try {
-          await syncAccounts(handles)
-          ElMessage.success('已同步账号指标与作品')
-        } finally {
-          syncingAll.value = false
-        }
-      }
+      selectedProjectIds.value = []
+      keyword.value = ''
       importVisible.value = false
+      await nextTick()
+      ElMessage.success(
+        `已归入「${projectName(projectId)}」：新增 ${added} · 更新 ${updated} · 账号池共 ${dojoAccountStore.accounts.length}`
+      )
+
+      if (importAutoSync.value && handles.length) {
+        syncNewAccountsInBackground(handles)
+      }
     } finally {
       importing.value = false
     }

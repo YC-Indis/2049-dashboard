@@ -7,7 +7,8 @@
     "pnpm": ">=8.8.0"
   },
   "scripts": {
-    "dev": "vite --open",
+    "dev": "node --use-env-proxy node_modules/vite/bin/vite.js --open",
+    "dev:local": "node --use-env-proxy node_modules/vite/bin/vite.js --host 127.0.0.1 --port 5191",
     "import:excel": "node scripts/import-excel.mjs",
     "gen:imported": "node scripts/gen-imported.mjs",
     "import:ads": "node scripts/import-ads.mjs",

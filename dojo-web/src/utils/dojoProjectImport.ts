@@ -2,7 +2,7 @@
  * 项目导入：优先 DeepSeek 理解自然语言，失败时用本地规则兜底。
  * 整段 brief 视为「一个或多个完整项目」，绝不把每一行当成项目名。
  */
-import { DOJO_TODAY } from '@/utils/dojoDates'
+import { DOJO_TODAY, extractDateRange } from '@/utils/dojoDates'
 import type { ProjectKpi, ProjectRuntime } from '@/store/dojoProjectRuntime'
 
 export interface ParsedProjectImport {
@@ -61,39 +61,12 @@ export function parseCompactNumber(raw: string): number | null {
   return Math.round(base)
 }
 
-/** 7.1-8.20 / 7/1-8/20 / 2026-07-01~2026-08-20 */
+/** 7.1-8.20 / 8月二十到9月一号 / 2026-07-01~2026-08-20 */
 export function parseFlexibleRange(
   raw: string,
   refYear = Number(DOJO_TODAY.slice(0, 4))
-): { start: string; end: string } | null {
-  const s = raw.trim().replace(/[～~—–]/g, '-')
-  const iso = s.match(/(\d{4}-\d{1,2}-\d{1,2})\s*[-至到]\s*(\d{4}-\d{1,2}-\d{1,2})/)
-  if (iso) return { start: normYmd(iso[1]), end: normYmd(iso[2]) }
-
-  const short = s.match(/(\d{1,2})[.\/月](\d{1,2})日?\s*[-至到]\s*(\d{1,2})[.\/月](\d{1,2})日?/)
-  if (short) {
-    let y1 = refYear
-    let y2 = refYear
-    const m1 = Number(short[1])
-    const d1 = Number(short[2])
-    const m2 = Number(short[3])
-    const d2 = Number(short[4])
-    if (m2 < m1) y2 = refYear + 1
-    return {
-      start: `${y1}-${pad(m1)}-${pad(d1)}`,
-      end: `${y2}-${pad(m2)}-${pad(d2)}`
-    }
-  }
-  return null
-}
-
-function pad(n: number) {
-  return String(n).padStart(2, '0')
-}
-
-function normYmd(s: string) {
-  const [y, m, d] = s.split('-').map(Number)
-  return `${y}-${pad(m)}-${pad(d)}`
+) {
+  return extractDateRange(raw, refYear)
 }
 
 function pickField(text: string, keys: string[]): string | null {

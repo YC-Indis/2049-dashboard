@@ -277,6 +277,10 @@
   justify-content: center !important;
 }
 
+.art-loading-fix.el-loading-fade-leave-active {
+  pointer-events: none;
+}
+
 .art-loading-fix .el-loading-spinner {
   position: static !important;
   top: auto !important;

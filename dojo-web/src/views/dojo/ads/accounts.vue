@@ -436,7 +436,7 @@
   }
 
   function goDetail(row: MatrixAccount) {
-    router.push(`/accounts/detail/${encodeURIComponent(stripHandle(row.handle))}`)
+    router.push(`/account-detail/${encodeURIComponent(stripHandle(row.handle))}`)
   }
 
   function onTableSelectionChange(rows: MatrixAccount[]) {

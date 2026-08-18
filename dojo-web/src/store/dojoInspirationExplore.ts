@@ -73,7 +73,7 @@ function createId(prefix: string) {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`
 }
 
-function mergeBoards(saved?: InspirationHotBoard[]) {
+function mergeBoards(saved?: InspirationHotBoard[]): InspirationHotBoard[] {
   const byId = new Map<string, InspirationHotBoard>()
   for (const board of saved || []) {
     const nextId = LEGACY_HOT_BOARD_IDS[board.id] || board.id

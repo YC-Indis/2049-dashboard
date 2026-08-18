@@ -88,7 +88,7 @@
   import { useI18n } from 'vue-i18n'
   import { HttpError } from '@/utils/http/error'
   import { fetchLogin } from '@/api/auth'
-  import { ElNotification, type FormInstance, type FormRules } from 'element-plus'
+  import { ElMessage, ElNotification, type FormInstance, type FormRules } from 'element-plus'
 
   defineOptions({ name: 'Login' })
 
@@ -199,8 +199,7 @@
       if (error instanceof HttpError) {
         // console.log(error.code)
       } else {
-        // 处理非 HttpError
-        // ElMessage.error('登录失败，请稍后重试')
+        ElMessage.error(error instanceof Error ? error.message : '登录失败，请稍后重试')
         console.error('[Login] Unexpected error:', error)
       }
     } finally {

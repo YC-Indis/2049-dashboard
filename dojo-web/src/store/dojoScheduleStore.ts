@@ -20,6 +20,8 @@ export interface ScheduleBlock {
   done?: number
   /** 目标量 */
   target?: number
+  /** 同一项目内的可视轨道；只影响时间线排布，不改变日期。 */
+  lane?: number
 }
 
 const TABLE = 'scheduleBlocks'
@@ -61,7 +63,11 @@ export function moveLane(id: string, delta: -1 | 1) {
   dojoScheduleStore.laneOrder = ids
 }
 
-export function reorderLane(dragId: string, targetId: string, place: 'before' | 'after' = 'before') {
+export function reorderLane(
+  dragId: string,
+  targetId: string,
+  place: 'before' | 'after' = 'before'
+) {
   if (dragId === targetId) return
   const ids = dojoScheduleStore.laneOrder.length
     ? [...dojoScheduleStore.laneOrder]

@@ -25,13 +25,7 @@ import { addDays, daysBetween } from '@/utils/dojoDates'
 const KPI_NOTE = '[kpi-sync]'
 
 /** 可规划细项（导入不必全开，甘特里按需加条） */
-export type PlanPhaseKey =
-  | 'scripts'
-  | 'accounts'
-  | 'shoot'
-  | 'edit'
-  | 'distribute'
-  | 'ads'
+export type PlanPhaseKey = 'scripts' | 'accounts' | 'shoot' | 'edit' | 'distribute' | 'ads'
 
 /** 含历史过审块，便于进度刷新 */
 type PhaseKey = PlanPhaseKey | 'approve'
@@ -119,10 +113,7 @@ function phaseTitle(label: string, done: number, target: number) {
   return `${label} ${fmtQty(done)}/${fmtQty(target)}`
 }
 
-export function phaseKeyFromBlockId(
-  id: string,
-  projectId: string
-): PhaseKey | 'cycle' | null {
+export function phaseKeyFromBlockId(id: string, projectId: string): PhaseKey | 'cycle' | null {
   if (id === cycleBlockId(projectId)) return 'cycle'
   const prefix = 'KPI-'
   const suffix = `-${projectId}`
@@ -145,8 +136,7 @@ export function phaseKeyFromBlockId(
 function cycleProgress(runtime: ProjectRuntime) {
   const phases = phaseDefs(runtime).filter((p) => p.target > 0)
   if (!phases.length) return { done: 0, target: 100 }
-  const avg =
-    phases.reduce((a, p) => a + Math.min(1, p.done / p.target), 0) / phases.length
+  const avg = phases.reduce((a, p) => a + Math.min(1, p.done / p.target), 0) / phases.length
   return { done: Math.round(avg * 100), target: 100 }
 }
 
@@ -192,6 +182,24 @@ export function availablePhasesToAdd(projectId: string): PlanPhaseDef[] {
   return phaseDefs(runtime).filter((p) => !existing.has(p.key))
 }
 
+export function suggestProjectPhaseRange(projectId: string): { start: string; end: string } | null {
+  const runtime = getProjectRuntime(projectId)
+  if (!runtime) return null
+  const cycleStart = runtime.kpi.cycleStart
+  const cycleEnd = runtime.kpi.cycleEnd
+  if (!cycleStart || !cycleEnd) return null
+
+  const existing = listProjectPhaseBlocks(projectId)
+  const latestEnd = existing.reduce(
+    (latest, block) => (block.end > latest ? block.end : latest),
+    ''
+  )
+  const naturalStart = latestEnd ? addDays(latestEnd, 1) : cycleStart
+  const start = naturalStart > cycleEnd ? cycleEnd : naturalStart
+  const end = addDays(start, Math.min(6, daysBetween(start, cycleEnd)))
+  return { start, end }
+}
+
 /**
  * 在项目下新增一条细项时间条（同一步骤只允许一条）。
  * 默认落在周期内前 7 天（或整段周期）。
@@ -217,8 +225,9 @@ export function addProjectPhaseBar(
   const cycleEnd = runtime.kpi.cycleEnd
   if (!cycleStart || !cycleEnd) return null
 
-  let start = range?.start || cycleStart
-  let end = range?.end || addDays(cycleStart, Math.min(6, daysBetween(cycleStart, cycleEnd)))
+  const suggestedRange = suggestProjectPhaseRange(projectId)
+  let start = range?.start || suggestedRange?.start || cycleStart
+  let end = range?.end || suggestedRange?.end || start
   if (start > end) [start, end] = [end, start]
   if (start < cycleStart) start = cycleStart
   if (end > cycleEnd) end = cycleEnd
@@ -232,6 +241,7 @@ export function addProjectPhaseBar(
     type: phase.type,
     start,
     end,
+    lane: nextOpenLane(projectId, start, end),
     note: `${KPI_NOTE} phase=${phase.key}`,
     source: 'timeline',
     owner: runtime.owner,
@@ -241,6 +251,17 @@ export function addProjectPhaseBar(
   })
 
   return dojoScheduleStore.blocks.find((b) => b.id === id) || null
+}
+
+function nextOpenLane(projectId: string, start: string, end: string) {
+  const occupied = new Set(
+    listProjectPhaseBlocks(projectId)
+      .filter((block) => start <= block.end && end >= block.start)
+      .map((block) => Math.max(0, Math.floor(block.lane ?? 0)))
+  )
+  let lane = 0
+  while (occupied.has(lane)) lane += 1
+  return lane
 }
 
 /** 删除细项时间条（不影响项目周期） */
@@ -317,10 +338,7 @@ export function reconcileCycleFromSchedule(projectId: string): boolean {
   if (!project || !runtime) return false
   const cycleBlock = dojoScheduleStore.blocks.find((b) => b.id === cycleBlockId(projectId))
   if (!cycleBlock?.start || !cycleBlock.end) return false
-  if (
-    cycleBlock.start === runtime.kpi.cycleStart &&
-    cycleBlock.end === runtime.kpi.cycleEnd
-  ) {
+  if (cycleBlock.start === runtime.kpi.cycleStart && cycleBlock.end === runtime.kpi.cycleEnd) {
     return false
   }
   const next = upsertProjectRuntime(projectId, {

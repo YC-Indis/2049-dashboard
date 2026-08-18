@@ -1,13 +1,10 @@
-# Pack Dojo redesign release for Ubuntu deploy → Desktop\dojo-web-release.tgz
+# Pack Dojo release for Ubuntu deploy → Desktop\dojo-web-release.tgz
 $ErrorActionPreference = 'Stop'
 $OutputEncoding = [Console]::OutputEncoding = [Text.Encoding]::UTF8
 
 $deployDir = $PSScriptRoot
 $root = (Resolve-Path (Join-Path $deployDir '..\..')).Path
-$web = Join-Path $root 'dojo-web-redesign'
-if (-not (Test-Path (Join-Path $web 'package.json'))) {
-  $web = Join-Path $root 'dojo-web'
-}
+$web = Join-Path $root 'dojo-web'
 $release = Join-Path $root 'release'
 $stage = Join-Path $release 'dojo-web-release'
 $desktop = [Environment]::GetFolderPath('Desktop')

@@ -1,8 +1,8 @@
-<template>
+﻿<template>
   <div class="dojo-page account-detail">
     <header class="dojo-page__head">
       <div>
-        <ElButton link type="primary" class="back" @click="router.push('/accounts/review')">
+        <ElButton link type="primary" class="back" @click="router.push('/account-matrix')">
           ← 返回账号池
         </ElButton>
         <h1>账号分析</h1>
@@ -458,7 +458,7 @@
     })
     removeAccount(account.value.handle)
     ElMessage.success('已删除')
-    router.push('/accounts/review')
+    router.push('/account-matrix')
   }
 </script>
 
@@ -490,7 +490,7 @@
       gap: 8px;
       align-items: center;
       margin: 0 0 6px;
-      font-size: 22px;
+      font-size: 18px;
       font-weight: 650;
     }
 

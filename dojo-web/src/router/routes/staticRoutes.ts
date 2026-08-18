@@ -42,6 +42,13 @@ export const staticRoutes: AppRouteRecordRaw[] = [
     component: () => import('@views/exception/403/index.vue'),
     meta: { title: '403', isHideTab: true }
   },
+  // 兼容旧账号路径（须在 404 catch-all 之前）
+  { path: '/accounts/review', redirect: '/account-matrix' },
+  { path: '/accounts/intake', redirect: '/account-intake' },
+  {
+    path: '/accounts/detail/:handle',
+    redirect: (to) => `/account-detail/${encodeURIComponent(String(to.params.handle || ''))}`
+  },
   {
     path: '/:pathMatch(.*)*',
     name: 'Exception404',

@@ -11,6 +11,20 @@ import * as XLSX from 'xlsx'
 const HANDLE_CHARS = '[A-Za-z0-9._]{2,24}'
 const LINK_RE = new RegExp(`tiktok\\.com/@(${HANDLE_CHARS})`, 'gi')
 const MENTION_RE = new RegExp(`(^|[^A-Za-z0-9._@])@(${HANDLE_CHARS})`, 'g')
+const HANDLE_ONLY_RE = new RegExp(`^${HANDLE_CHARS}$`)
+const COMMON_HANDLE_LABELS = new Set([
+  'account',
+  'accounts',
+  'account_name',
+  'handle',
+  'username',
+  'user_name',
+  'tiktok',
+  '账号',
+  '账号名',
+  '用户名',
+  '用户名称'
+])
 
 export type CandidateConfidence = 'high' | 'low'
 
@@ -73,6 +87,41 @@ export function extractHandlesFromText(text: string): AccountCandidate[] {
     if (a.confidence !== b.confidence) return a.confidence === 'high' ? -1 : 1
     return b.hits - a.hits
   })
+}
+
+/** 识别表格或粘贴列表里没有 @ 前缀的独立账号单元格。 */
+export function extractBareHandlesFromText(text: string): AccountCandidate[] {
+  const found = new Map<string, AccountCandidate>()
+
+  text.split(/\r?\n/).forEach((line) => {
+    const cells = line
+      .split(/[\t,，;；|]/)
+      .map((cell) => cell.trim().replace(/^['"“”]+|['"“”]+$/g, ''))
+      .filter(Boolean)
+
+    cells.forEach((cell) => {
+      const value = cell.replace(/^@/, '')
+      const normalized = value.toLowerCase()
+      if (!HANDLE_ONLY_RE.test(value)) return
+      if (/^\d+$/.test(value) || COMMON_HANDLE_LABELS.has(normalized)) return
+      if (!/[\d._]/.test(value) && !(cells.length === 1 && value.length >= 6)) return
+
+      const existing = found.get(normalized)
+      if (existing) {
+        existing.hits++
+        return
+      }
+      found.set(normalized, {
+        handle: `@${value}`,
+        link: `https://www.tiktok.com/@${value}`,
+        confidence: 'low',
+        hits: 1,
+        context: line.replace(/\s+/g, ' ').trim()
+      })
+    })
+  })
+
+  return [...found.values()]
 }
 
 export interface ParsedDocument {
@@ -148,7 +197,8 @@ export async function extractAccountsFromFiles(files: File[]): Promise<ExtractRe
     const doc = await parseDocument(file)
     documents.push(doc)
     if (!doc.text) continue
-    extractHandlesFromText(doc.text).forEach((c) => {
+    const extracted = [...extractHandlesFromText(doc.text), ...extractBareHandlesFromText(doc.text)]
+    extracted.forEach((c) => {
       const key = c.handle.toLowerCase()
       const existing = merged.get(key)
       if (!existing) {

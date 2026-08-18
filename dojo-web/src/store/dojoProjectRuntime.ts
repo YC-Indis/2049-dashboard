@@ -30,7 +30,7 @@ export interface ProjectCurrent {
   exposure: number
 }
 
-export type TodoTaskStatus = '未开始' | '已安排' | '进行中'
+export type TodoTaskStatus = '未开始' | '已安排' | '进行中' | '已完成'
 
 /** 今日待办行上可手改的字段（数量默认由 KPI/现状推算） */
 export interface ProjectTodoMeta {
@@ -366,15 +366,19 @@ export function progressRows(p: ProjectRuntime, today: string = DOJO_TODAY): Run
       value: timeProgress(kpi, today),
       tip: `${kpi.cycleStart} → ${today} / ${kpi.cycleEnd}`
     },
-    { label: '账号数', value: pct(current.accounts, kpi.accounts), tip: `${current.accounts}/${kpi.accounts}` },
+    { label: '账号数', value: pct(current.accounts, kpi.accounts), tip: `账号矩阵 ${current.accounts}/${kpi.accounts}` },
     { label: '脚本完成', value: pct(current.scripts, scriptTarget), tip: `${current.scripts}/${scriptTarget}` },
     { label: '剪辑完成', value: pct(current.edited, kpi.videos), tip: `${current.edited}/${kpi.videos}` },
     { label: '过审完成', value: pct(current.approved, kpi.videos), tip: `${current.approved}/${kpi.videos}` },
-    { label: '分发量', value: pct(current.distributed, kpi.videos), tip: `${current.distributed}/${kpi.videos}` },
     {
-      label: '曝光量',
+      label: '已发视频',
+      value: pct(current.distributed, kpi.videos),
+      tip: `视频监控条数 ${current.distributed}/${kpi.videos}`
+    },
+    {
+      label: '播放量',
       value: pct(current.exposure, kpi.exposure),
-      tip: `${current.exposure.toLocaleString()}/${kpi.exposure.toLocaleString()}`
+      tip: `视频监控播放合计 ${current.exposure.toLocaleString()}/${kpi.exposure.toLocaleString()}`
     }
   ]
 }
@@ -385,7 +389,7 @@ export function kpiRows(p: ProjectRuntime): RuntimeRow[] {
   const scriptTarget = plannedScripts(kpi)
   return [
     { label: '周期', value: 0, tip: cycleLabel(kpi), text: cycleLabel(kpi) },
-    { label: '账号数', value: kpi.accounts, tip: '周期目标账号' },
+    { label: '账号数', value: kpi.accounts, tip: '目标：账号矩阵内活跃账号数' },
     {
       label: '脚本目标',
       value: scriptTarget,
@@ -396,8 +400,8 @@ export function kpiRows(p: ProjectRuntime): RuntimeRow[] {
     },
     { label: '成片目标', value: kpi.videos, tip: '剪辑成片目标' },
     { label: '过审目标', value: kpi.videos, tip: '客户过审目标' },
-    { label: '分发目标', value: kpi.videos, tip: '分发条数目标' },
-    { label: '曝光目标', value: kpi.exposure, tip: '曝光目标' }
+    { label: '视频目标', value: kpi.videos, tip: '应对齐视频监控中的已发条数' },
+    { label: '播放目标', value: kpi.exposure, tip: '应对齐视频监控播放量合计' }
   ]
 }
 
@@ -406,15 +410,19 @@ export function currentRows(p: ProjectRuntime, today: string = DOJO_TODAY): Runt
   const { current } = p
   return [
     { label: '当前日期', value: 0, tip: `${today} · ${cycleLabel(p.kpi)}`, text: formatMonthDay(today) },
-    { label: '账号数', value: current.accounts, tip: '来自账号导入（台账）' },
+    { label: '账号数', value: current.accounts, tip: '账号矩阵 · 本项目活跃账号' },
     { label: '脚本产出', value: current.scripts, tip: '可手填' },
     { label: '成片数', value: current.edited, tip: '可手填' },
     { label: '过审数', value: current.approved, tip: '可手填' },
-    { label: '分发量', value: current.distributed, tip: 'Rapid 已发视频条数' },
     {
-      label: '曝光量',
+      label: '已发视频',
+      value: current.distributed,
+      tip: '视频监控 · 本项目已同步视频条数'
+    },
+    {
+      label: '播放量',
       value: current.exposure,
-      tip: `Rapid 视频播放合计 · ${current.exposure.toLocaleString()}`
+      tip: `视频监控 · 播放合计 ${current.exposure.toLocaleString()}`
     }
   ]
 }

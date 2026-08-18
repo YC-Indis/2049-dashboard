@@ -138,7 +138,7 @@
             style="width: 100%"
           >
             <ElOption
-              v-for="p in dojoProjectStore.projects"
+              v-for="p in dojoProjectStore.projects.filter((project) => project.active !== false)"
               :key="p.id"
               :label="p.name"
               :value="p.id"
@@ -319,17 +319,26 @@
   .worklog-layout {
     display: grid;
     grid-template-columns: 200px minmax(0, 1fr);
-    gap: 14px;
+    gap: 0;
+    overflow: hidden;
+    background: var(--dojo-paper);
+    border: 1px solid var(--dojo-line);
+    border-radius: 14px;
+    box-shadow: 0 12px 32px rgb(31 35 40 / 7%);
 
-    @media (max-width: 900px) {
+    @media (width <= 900px) {
       grid-template-columns: 1fr;
     }
   }
 
   .date-rail {
-    padding: 12px;
     max-height: 70vh;
+    padding: 12px;
+    margin: 0;
     overflow: auto;
+    background: var(--dojo-paper-muted);
+    border-right: 1px solid var(--dojo-line);
+    border-radius: 0;
 
     &__title {
       margin-bottom: 8px;
@@ -339,25 +348,25 @@
 
     &__item {
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      justify-content: space-between;
       width: 100%;
-      margin-bottom: 4px;
       padding: 8px 10px;
+      margin-bottom: 4px;
+      color: inherit;
+      text-align: left;
+      cursor: pointer;
+      background: transparent;
       border: 0;
       border-radius: 8px;
-      background: transparent;
-      color: inherit;
-      cursor: pointer;
-      text-align: left;
 
       strong {
         font-size: 13px;
       }
 
       span {
-        color: var(--el-text-color-placeholder);
         font-size: 12px;
+        color: var(--el-text-color-placeholder);
       }
 
       &:hover {
@@ -365,8 +374,8 @@
       }
 
       &.active {
-        background: var(--el-color-primary-light-9);
         color: var(--el-color-primary);
+        background: var(--el-color-primary-light-9);
 
         span {
           color: var(--el-color-primary);
@@ -376,6 +385,12 @@
   }
 
   .worklog-main {
+    min-width: 0;
+    padding: 20px 24px;
+    margin: 0;
+    background: var(--dojo-paper);
+    border-radius: 0;
+
     &__head {
       display: flex;
       flex-wrap: wrap;
@@ -403,8 +418,8 @@
   }
 
   .event-list {
-    margin: 0;
     padding: 0;
+    margin: 0;
     list-style: none;
   }
 
@@ -416,25 +431,33 @@
     padding: 12px 0;
     border-bottom: 1px solid var(--el-border-color-extra-light);
 
+    &:hover {
+      background: var(--dojo-paper-muted);
+    }
+
     &__dot {
       width: 10px;
       height: 10px;
       margin-top: 6px;
-      border-radius: 50%;
       background: var(--el-text-color-placeholder);
+      border-radius: 50%;
 
       &.is-account_add {
         background: var(--el-color-success);
       }
+
       &.is-account_remove {
         background: var(--el-color-danger);
       }
+
       &.is-account_change {
         background: var(--el-color-warning);
       }
+
       &.is-metric {
         background: var(--el-color-primary);
       }
+
       &.is-manual {
         background: #8b5cf6;
       }
@@ -469,15 +492,15 @@
   }
 
   .muted {
-    color: var(--el-text-color-secondary);
     font-size: 13px;
+    color: var(--el-text-color-secondary);
   }
 
   .empty {
     margin: 28px 0;
-    text-align: center;
-    color: var(--el-text-color-secondary);
     font-size: 14px;
     line-height: 1.6;
+    color: var(--el-text-color-secondary);
+    text-align: center;
   }
 </style>

@@ -59,6 +59,58 @@ function normalize(handle: string) {
   return `@${stripHandle(handle).toLowerCase()}`
 }
 
+function canonicalHandle(handle: string) {
+  const clean = stripHandle(handle)
+  return /^[A-Za-z0-9._]{2,24}$/.test(clean) ? `@${clean}` : ''
+}
+
+function canonicalizeAccounts(rows: MatrixAccount[]) {
+  const map = new Map<string, MatrixAccount>()
+  rows.forEach((row) => {
+    const handle = canonicalHandle(row.handle || row.link)
+    if (!handle) return
+    const id = normalize(handle)
+    const canonical: MatrixAccount = {
+      ...row,
+      handle,
+      link: row.link?.includes('tiktok.com/@')
+        ? `https://www.tiktok.com/@${stripHandle(row.link)}`
+        : `https://www.tiktok.com/@${stripHandle(handle)}`
+    }
+    const existing = map.get(id)
+    if (!existing) {
+      map.set(id, canonical)
+      return
+    }
+    const incomingIsNewer = (canonical.lastSyncedAt || '') >= (existing.lastSyncedAt || '')
+    const older = incomingIsNewer ? existing : canonical
+    const newer = incomingIsNewer ? canonical : existing
+    map.set(id, {
+      ...older,
+      ...newer,
+      handle,
+      link: `https://www.tiktok.com/@${stripHandle(handle)}`,
+      projectId: newer.projectId || older.projectId,
+      segment: newer.segment || older.segment,
+      note: newer.note || older.note,
+      nickname: newer.nickname || older.nickname
+    })
+  })
+  return [...map.values()]
+}
+
+function canonicalizeVideos(records: Record<string, TikTokAccountVideo[]>) {
+  const next: Record<string, TikTokAccountVideo[]> = {}
+  Object.entries(records).forEach(([handle, videos]) => {
+    const id = normalize(handle)
+    next[id] = mergeVideoList(
+      next[id] || [],
+      videos.map((video) => ({ ...video, handle: id }))
+    )
+  })
+  return next
+}
+
 /**
  * 首次进入时用已有数据播种台账：内容规划表给出细分与链接，
  * 监看表和分发记录补上那些只在数据里出现过的账号。
@@ -109,10 +161,18 @@ function seedAccounts(): MatrixAccount[] {
 }
 
 const persisted = loadTable<MatrixAccount[]>(TABLE_ACCOUNTS)
+const persistedVideos = loadTable<Record<string, TikTokAccountVideo[]>>(TABLE_VIDEOS) || {}
+const initialAccounts = canonicalizeAccounts(
+  persisted && persisted.length ? persisted : seedAccounts()
+)
+const initialVideos = canonicalizeVideos(persistedVideos)
+
+if (persisted?.length) saveTable(TABLE_ACCOUNTS, initialAccounts)
+if (Object.keys(persistedVideos).length) saveTable(TABLE_VIDEOS, initialVideos)
 
 export const dojoAccountStore = reactive<AccountState>({
-  accounts: persisted && persisted.length ? persisted : seedAccounts(),
-  videos: loadTable<Record<string, TikTokAccountVideo[]>>(TABLE_VIDEOS) || {},
+  accounts: initialAccounts,
+  videos: initialVideos,
   syncing: [],
   revision: 0
 })
@@ -140,16 +200,25 @@ export function upsertAccount(
   input: Partial<MatrixAccount> & { handle: string },
   opts?: { silent?: boolean }
 ) {
-  const existing = findAccount(input.handle)
+  const handle = canonicalHandle(input.handle || input.link || '')
+  if (!handle) return false
+  const canonicalInput = {
+    ...input,
+    handle,
+    link: input.link?.includes('tiktok.com/@')
+      ? `https://www.tiktok.com/@${stripHandle(input.link)}`
+      : `https://www.tiktok.com/@${stripHandle(handle)}`
+  }
+  const existing = findAccount(handle)
   if (existing) {
-    Object.assign(existing, input, { handle: existing.handle })
+    Object.assign(existing, canonicalInput, { handle })
     persist()
     if (!opts?.silent) touchWorklog()
     return false
   }
   dojoAccountStore.accounts.push({
-    ...input,
-    handle: `@${stripHandle(input.handle)}`,
+    ...canonicalInput,
+    handle,
     projectId: input.projectId || '',
     segment: input.segment || '',
     status: input.status || 'active',
@@ -188,7 +257,19 @@ export function importAccounts(rows: Array<Partial<MatrixAccount> & { handle: st
   let added = 0
   let updated = 0
   const projectIds = new Set<string>()
+  const uniqueRows = new Map<string, Partial<MatrixAccount> & { handle: string }>()
   rows.forEach((row) => {
+    const handle = canonicalHandle(row.handle || row.link || '')
+    if (!handle) return
+    const id = normalize(handle)
+    uniqueRows.set(id, {
+      ...uniqueRows.get(id),
+      ...row,
+      handle
+    })
+  })
+
+  uniqueRows.forEach((row) => {
     if (upsertAccount(row, { silent: true })) added++
     else updated++
     if (row.projectId) projectIds.add(row.projectId)
@@ -344,8 +425,8 @@ export async function syncAccount(handle: string) {
   dojoAccountStore.syncing.push(id)
   try {
     const snapshot = await syncTikTokAccount(account.handle)
-    const result = await fetchAllAccountVideos(account.handle)
 
+    // 先落档案粉丝，避免后续作品拉取失败时粉丝不更新
     account.nickname = snapshot.nickname
     account.followers = snapshot.followers
     account.following = snapshot.following
@@ -355,14 +436,32 @@ export async function syncAccount(handle: string) {
     account.verified = snapshot.verified
     account.isPrivate = snapshot.isPrivate
     account.lastSyncedAt = snapshot.syncedAt
-    account.syncSource = result.source === 'rapidapi' ? 'rapidapi' : snapshot.source
-    account.syncError = undefined
-
-    // 与导入作品按 videoId 合并，避免 Rapid 同步冲掉手工导入的链接
-    if (result.videos.length) {
-      dojoAccountStore.videos[id] = mergeVideoList(dojoAccountStore.videos[id] || [], result.videos)
-    }
+    account.syncSource = snapshot.source
+    account.syncError =
+      snapshot.source === 'mock' ? '未拿到真实粉丝数据，已用本地估算（请检查 RapidAPI）' : undefined
     persist()
+
+    let videos: Awaited<ReturnType<typeof fetchAllAccountVideos>>['videos'] = []
+    try {
+      const result = await fetchAllAccountVideos(account.handle)
+      videos = result.videos
+      if (result.source === 'rapidapi') {
+        account.syncSource = 'rapidapi'
+        if (!account.syncError?.includes('估算')) account.syncError = undefined
+      }
+      // 与导入作品按 videoId 合并，避免 Rapid 同步冲掉手工导入的链接
+      if (result.videos.length) {
+        dojoAccountStore.videos[id] = mergeVideoList(dojoAccountStore.videos[id] || [], result.videos)
+      }
+      persist()
+    } catch (videoError) {
+      account.syncError =
+        videoError instanceof Error
+          ? `粉丝已更新，作品拉取失败：${videoError.message}`
+          : '粉丝已更新，作品拉取失败'
+      persist()
+    }
+
     // Rapid 作品 → 分发量 / 曝光量
     if (account.projectId) {
       void import('@/store/dojoProjectMetrics').then(({ syncProjectCurrentFromLedger }) => {
@@ -370,7 +469,7 @@ export async function syncAccount(handle: string) {
       })
     }
     touchWorklog()
-    return { snapshot, videos: result.videos }
+    return { snapshot, videos }
   } catch (e) {
     account.syncError = e instanceof Error ? e.message : '同步失败'
     persist()
