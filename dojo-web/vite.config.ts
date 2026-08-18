@@ -11,7 +11,6 @@ import AutoImport from 'unplugin-auto-import/vite'
 import ElementPlus from 'unplugin-element-plus/vite'
 import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 import tailwindcss from '@tailwindcss/vite'
-// import { visualizer } from 'rollup-plugin-visualizer'
 
 export default ({ mode }: { mode: string }) => {
   const root = process.cwd()
@@ -27,8 +26,7 @@ export default ({ mode }: { mode: string }) => {
     DEEPSEEK_API_KEY
   } = env
 
-  console.log(`🚀 API_URL = ${VITE_API_URL}`)
-  console.log(`🚀 VERSION = ${VITE_VERSION}`)
+  console.log(`API_URL = ${VITE_API_URL}  VERSION = ${VITE_VERSION}`)
 
   const dojoProxy = VITE_DOJO_PROXY_URL || 'http://127.0.0.1:8000'
   const artMockProxy = VITE_API_PROXY_URL || 'https://m1.apifoxmock.com/m1/6400575-6097373-default'
@@ -161,26 +159,12 @@ export default ({ mode }: { mode: string }) => {
       }),
       // Vue DevTools 浮标影响操作且拖慢开发页，Dojo 默认关闭
       ...(process.env.DOJO_VUE_DEVTOOLS === '1' ? [vueDevTools()] : [])
-      // 打包分析
-      // visualizer({
-      //   open: true,
-      //   gzipSize: true,
-      //   brotliSize: true,
-      //   filename: 'dist/stats.html' // 分析图生成的文件名及路径
-      // }),
     ],
-    // 依赖预构建：避免运行时重复请求与转换，提升首次加载速度
+    // 预构建这几个，省得 dev 首屏现场转换
     optimizeDeps: {
       include: [
-        'echarts/core',
-        'echarts/charts',
-        'echarts/components',
-        'echarts/renderers',
         'xlsx',
-        'xgplayer',
         'crypto-js',
-        'file-saver',
-        'vue-img-cutter',
         'element-plus/es',
         'element-plus/es/components/*/style/css',
         'element-plus/es/components/*/style/index'

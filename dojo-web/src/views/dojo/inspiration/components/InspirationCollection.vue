@@ -567,7 +567,7 @@
                 "
                 @click="handleRunCollection(source.id, source.defaultLimit)"
               >
-                <Icon icon="ph:radar" width="15" />
+                <Icon icon="ph:crosshair" width="15" />
                 {{ runningSourceId === source.id ? '采集中' : '批量获取' }}
               </button>
             </footer>

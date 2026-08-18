@@ -14,30 +14,6 @@
     "requestFailed": "Request failed",
     "requestConfigError": "Request configuration error"
   },
-  "topBar": {
-    "search": {
-      "title": "Search"
-    },
-    "user": {
-      "userCenter": "User center",
-      "docs": "Document",
-      "github": "Github",
-      "lockScreen": "Lock screen",
-      "logout": "Log out"
-    },
-    "guide": {
-      "title": "Click here to view",
-      "theme": "Theme style",
-      "menu": "Open top menu",
-      "description": "More configurations"
-    }
-  },
-  "common": {
-    "tips": "Prompt",
-    "cancel": "Cancel",
-    "confirm": "Confirm",
-    "logOutTips": "Do you want to log out?"
-  },
   "search": {
     "placeholder": "Search page",
     "historyTitle": "Search history",
@@ -46,27 +22,8 @@
     "exitKeydown": "Close"
   },
   "setting": {
-    "menuType": {
-      "title": "Menu Layout",
-      "list": ["Vertical", "Horizontal", "Mixed", "Dual"]
-    },
     "theme": {
-      "title": "Theme Style",
-      "list": ["Light", "Dark", "System"]
-    },
-    "menu": {
-      "title": "Menu Style"
-    },
-    "color": {
-      "title": "Theme Color"
-    },
-    "box": {
-      "title": "Box Style",
-      "list": ["Border", "Shadow"]
-    },
-    "container": {
-      "title": "Container Width",
-      "list": ["Full", "Boxed"]
+      "title": "Theme Style"
     },
     "basics": {
       "title": "Basic Config",
@@ -109,24 +66,6 @@
       "resetFailed": "Reset failed, please refresh the page and try again"
     }
   },
-  "notice": {
-    "title": "Notice",
-    "btnRead": "Mark as read",
-    "bar": ["Notice", "Message", "Todo"],
-    "text": ["No"],
-    "viewAll": "View all"
-  },
-  "worktab": {
-    "btn": {
-      "refresh": "Refresh",
-      "fixed": "Fixed",
-      "unfixed": "Unfixed",
-      "closeLeft": "Close left",
-      "closeRight": "Close right",
-      "closeOther": "Close other",
-      "closeAll": "Close all"
-    }
-  },
   "login": {
     "leftView": {
       "title": "Dojo · Overseas Project Control Hub",
@@ -136,16 +75,12 @@
     "subTitle": "Please enter your account and password to login",
     "roles": {
       "super": "Super Admin",
-      "admin": "Admin",
-      "user": "User"
+      "admin": "Admin"
     },
     "placeholder": {
       "username": "Please enter your account",
-      "password": "Please enter your password",
-      "slider": "Please slide to verify"
+      "password": "Please enter your password"
     },
-    "sliderText": "Please slide to verify",
-    "sliderSuccessText": "Verification successful",
     "rememberPwd": "Remember password",
     "forgetPwd": "Forgot password",
     "btnText": "Login",
@@ -196,29 +131,21 @@
       "backBtnText": "Back to login"
     }
   },
-  "greeting": {
-    "dawn": "Good morning!",
-    "morning": "Good morning!",
-    "afternoon": "Good afternoon!",
-    "evening": "Good evening!"
-  },
   "exceptionPage": {
-    "gohome": "Go Home",
     "403": "Sorry, you do not have permission to access this page",
     "404": "Sorry, the page you are trying to access does not exist",
-    "500": "Sorry, there was an error on the server"
+    "500": "Sorry, there was an error on the server",
+    "gohome": "Go Home"
   },
   "menus": {
     "dojo": {
       "today": "Time Planning",
       "inspirationCollection": "Inspiration Collection",
       "inspiration": "Inspiration Library",
-      "scriptWorkshop": "Script Workshop",
       "benchmarkLibrary": "Benchmark Library",
       "operations": "Operations",
       "creator": "Creator OS",
       "creatorToday": "Creator Hub",
-      "creatorFlow": "Content Flow",
       "creatorTimeline": "Production Timeline",
       "creatorCalendar": "Execution Calendar",
       "creatorReview": "Review Lab",
@@ -250,127 +177,13 @@
       "title": "Outside"
     },
     "dashboard": {
-      "title": "Dashboard",
-      "console": "Console",
-      "analysis": "Analysis",
-      "ecommerce": "Ecommerce"
-    },
-    "widgets": {
-      "title": "Components",
-      "icon": "Icon",
-      "imageCrop": "Image Crop",
-      "excel": "Excel Import Export",
-      "video": "Video Player",
-      "countTo": "Count To",
-      "wangEditor": "Wang Editor",
-      "watermark": "Watermark",
-      "contextMenu": "Context Menu",
-      "qrcode": "QR Code",
-      "drag": "Drag",
-      "textScroll": "Text Scroll",
-      "fireworks": "Fireworks",
-      "elementUI": "Component Overview"
-    },
-    "template": {
-      "title": "Template Center",
-      "chat": "Chat",
-      "cards": "Cards",
-      "banners": "Banners",
-      "charts": "Charts",
-      "map": "Map",
-      "calendar": "Calendar",
-      "pricing": "Pricing"
-    },
-    "article": {
-      "title": "Article",
-      "articleList": "Article List",
-      "articleDetail": "Article Detail",
-      "comment": "Comment",
-      "articlePublish": "Article Publish"
-    },
-    "result": {
-      "title": "Result Page",
-      "success": "Success",
-      "fail": "Fail"
+      "title": "Dashboard"
     },
     "exception": {
       "title": "Exception",
       "forbidden": "403",
       "notFound": "404",
       "serverError": "500"
-    },
-    "examples": {
-      "title": "Feature Examples",
-      "tabs": "Tabs",
-      "tablesBasic": "Basic Tables",
-      "tables": "Advanced Tables",
-      "tablesTree": "Tree Table Layout",
-      "forms": "Forms",
-      "searchBar": "Search Form",
-      "socketChat": "Socket Connection",
-      "permission": {
-        "title": "Frontend Permission",
-        "switchRole": "Toggle Auth",
-        "buttonAuth": "Button Authority",
-        "pageVisibility": "Super Admin Visibility"
-      }
-    },
-    "system": {
-      "title": "System Settings",
-      "user": "User Manage",
-      "role": "Role Manage",
-      "userCenter": "User Center",
-      "menu": "Menu Manage",
-      "nested": "Nested Menu",
-      "menu1": "Menu 1",
-      "menu2": "Menu 2",
-      "menu21": "Menu 2-1",
-      "menu3": "Menu 3",
-      "menu31": "Menu 3-1",
-      "menu32": "Menu 3-2",
-      "menu321": "Menu 3-2-1"
-    },
-    "safeguard": {
-      "title": "Safeguard",
-      "server": "Server"
-    },
-    "plan": {
-      "title": "Version Plan",
-      "log": "Change Log"
-    },
-    "help": {
-      "title": "Help Center",
-      "document": "Document",
-      "liteVersion": "Lite Version",
-      "oldVersion": "v2.6.1 Version"
     }
-  },
-  "table": {
-    "form": {
-      "reset": "Reset",
-      "submit": "Submit"
-    },
-    "searchBar": {
-      "reset": "Reset",
-      "search": "Search",
-      "expand": "Expand",
-      "collapse": "Collapse",
-      "searchInputPlaceholder": "Please enter",
-      "searchSelectPlaceholder": "Please select"
-    },
-    "selection": "Select",
-    "sizeOptions": {
-      "small": "Compact",
-      "default": "Default",
-      "large": "Loose"
-    },
-    "column": {
-      "selection": "Select",
-      "expand": "Expand",
-      "index": "Index"
-    },
-    "zebra": "Zebra",
-    "border": "Border",
-    "headerBackground": "Header BG"
   }
 }
