@@ -1,0 +1,34 @@
+:root {
+  color-scheme: light;
+  font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+  color: #24202b;
+  background: #f5f0ee;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+
+  --page-bg: #f5f0ee;
+  --surface: #fbf8f7;
+  --surface-strong: #fffdfc;
+  --surface-tint: #f2ecea;
+  --sidebar-bg: #211d39;
+  --sidebar-bg-soft: #2b2648;
+  --sidebar-active: #342e55;
+  --text-primary: #24202b;
+  --text-secondary: #716a72;
+  --text-muted: #9a9297;
+  --border: #e3dcdb;
+  --border-strong: #d7cecd;
+  --coral: #e8685e;
+  --coral-soft: #f3a08e;
+  --purple: #7860cc;
+  --purple-deep: #403666;
+  --green-soft: #78a69f;
+  --blue-soft: #7e8fcb;
+  --yellow-soft: #b49a61;
+  --shadow-soft: 0 8px 28px rgba(55, 42, 62, 0.045);
+  --radius-small: 12px;
+  --radius-medium: 18px;
+  --radius-large: 24px;
+  --sidebar-width: 288px;
+  --topbar-height: 88px;
+}

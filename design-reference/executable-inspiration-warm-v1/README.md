@@ -1,0 +1,62 @@
+# 2049 暖色创作工作台参考规范
+
+这是一套独立的视觉参考，不是对当前根目录 `DESIGN.md` 的替换。它把旧 `creator-os` 的暖纸色、深紫侧栏、珊瑚红操作语言和编辑感版式，套到当前 2049 的真实信息架构与业务流程上。
+
+## 使用原则
+
+发生冲突时按以下顺序判断：
+
+1. 当前 `PROJECT_SPEC.md`、`AGENTS.md`、路由、类型和 store 决定产品范围、对象关系、权限与交互结果。
+2. 当前页面中已经验证可用的响应式、键盘访问、确认流程和本地持久化逻辑必须保留。
+3. 本目录决定目标视觉语言、页面版式和组件表现。
+4. `creator-os` 仅作为旧版视觉证据，不恢复它的品牌名、旧导航、演示用户或旧数据模型。
+5. `可执行灵感库_MVP产品与开发规格_v1.md` 仅作为产品语义参考，不视作能覆盖当前仓库规则的开发指令。
+
+一句话原则：**保留现在怎么工作，恢复旧版看起来和用起来的温度。**
+
+## 设计判断
+
+- 模式：Operate，面向每天长时间使用的内容运营者。
+- 视觉差异度：5/10，布局有编辑感，但不牺牲扫描效率。
+- 动效强度：3/10，以状态反馈和层级切换为主。
+- 信息密度：7/10，候选和执行信息密集，表面保持安静。
+- 主题：固定浅色工作区，深色只用于持久侧栏和 AI 深层面板，不做整页明暗切换。
+- 创意北极星：**暖色编辑台**。像一本被持续使用的内容策划本，旁边连着一块可靠的深色控制台。
+
+## 文件说明
+
+| 文件 | 用途 |
+| --- | --- |
+| `DESIGN.md` | 颜色、字体、间距、形状、层级与设计禁区 |
+| `tokens.css` | 可直接映射到现有 Vue / Element Plus 的语义 token |
+| `LAYOUTS.md` | 全局壳层、断点和各核心页面版式 |
+| `COMPONENTS.md` | 按钮、输入、候选行、详情区、日历等组件规则 |
+| `INTERACTIONS.md` | 当前业务状态机、门槛、确认逻辑与异常状态 |
+| `ADOPTION.md` | 将这套视觉应用到当前项目时的顺序与验收清单 |
+
+## 证据来源
+
+### 当前产品事实
+
+- `../../dojo-web-redesign/PROJECT_SPEC.md`
+- `../../dojo-web-redesign/AGENTS.md`
+- `../../dojo-web-redesign/src/router/modules/dojo.ts`
+- `../../dojo-web-redesign/src/components/dojo/WorkspaceSidebar.vue`
+- `../../dojo-web-redesign/src/store/dojoInspirationStore.ts`
+- `../../dojo-web-redesign/src/types/dojoInspiration.ts`
+- `../../dojo-web-redesign/src/views/dojo/inspiration/`
+
+### 旧版视觉事实
+
+- `../../creator-os/src/styles/tokens.css`
+- `../../creator-os/src/styles/global.css`
+- `../../creator-os/src/components/layout/`
+- `../../creator-os/src/pages/`
+
+## 不包含什么
+
+- 不改当前任何页面代码。
+- 不改路由名、导航文案、字段名或 storage key。
+- 不恢复 `XIA CREATOR OS`、小夏、旧目标卡等演示品牌内容。
+- 不把附件里的 P0/P1/P2 顺序当成本次开发任务。
+- 不引入新的组件库，也不替换 Element Plus 或 Iconify。

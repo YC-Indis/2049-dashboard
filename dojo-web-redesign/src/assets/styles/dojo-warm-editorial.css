@@ -1,0 +1,120 @@
+/*
+ * 2049 warm editorial tokens.
+ * Visual layer only. Do not rename routes, fields, storage keys or data states.
+ */
+
+:root[data-dojo-theme='warm-editorial'] {
+  color-scheme: light;
+
+  --warm-canvas: #f5f0ee;
+  --warm-paper: #fbf8f7;
+  --warm-paper-strong: #fffdfc;
+  --warm-paper-tint: #f2ecea;
+  --warm-sidebar: #211d39;
+  --warm-sidebar-soft: #2b2648;
+  --warm-sidebar-active: #342e55;
+  --warm-ink: #24202b;
+  --warm-ink-secondary: #716a72;
+  --warm-ink-muted: #9a9297;
+  --warm-line: #e3dcdb;
+  --warm-line-strong: #d7cecd;
+  --warm-coral: #e8685e;
+  --warm-coral-soft: #f3a08e;
+  --warm-purple: #7860cc;
+  --warm-purple-deep: #403666;
+  --warm-green: #78a69f;
+  --warm-blue: #7e8fcb;
+  --warm-amber: #b49a61;
+  --warm-danger: #b84f5f;
+
+  --warm-radius-control: 10px;
+  --warm-radius-small: 12px;
+  --warm-radius-medium: 18px;
+  --warm-radius-large: 24px;
+  --warm-shadow-panel: 0 8px 28px rgb(55 42 62 / 4.5%);
+  --warm-shadow-lifted: 0 14px 36px rgb(55 42 62 / 10%);
+  --warm-focus-ring: 0 0 0 3px rgb(120 96 204 / 24%);
+  --warm-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --warm-duration-fast: 140ms;
+  --warm-duration-standard: 200ms;
+
+  --warm-sidebar-expanded: 240px;
+  --warm-sidebar-collapsed: 64px;
+  --warm-topbar-height: 0px;
+  --warm-content-max: 1620px;
+  --warm-control-height: 42px;
+  --warm-create-gradient: linear-gradient(135deg, #e8685e 0%, #c75f8c 52%, #7860cc 100%);
+
+  --dojo-serif: 'Noto Serif SC', 'Source Han Serif SC', 'Songti SC', serif;
+  --dojo-canvas: var(--warm-canvas);
+  --dojo-bg: var(--warm-canvas);
+  --dojo-sidebar: var(--warm-sidebar);
+  --dojo-paper: var(--warm-paper);
+  --dojo-paper-muted: var(--warm-paper-tint);
+  --dojo-ink: var(--warm-ink);
+  --dojo-muted-strong: var(--warm-ink-secondary);
+  --dojo-muted: var(--warm-ink-secondary);
+  --dojo-muted-light: var(--warm-ink-muted);
+  --dojo-line: var(--warm-line-strong);
+  --dojo-line-soft: var(--warm-line);
+  --dojo-accent: var(--warm-coral);
+  --dojo-accent-strong: #c95750;
+  --dojo-accent-soft: var(--warm-coral-soft);
+  --dojo-action: var(--warm-coral);
+  --dojo-action-strong: #c95750;
+  --dojo-action-soft: var(--warm-coral-soft);
+  --dojo-purple: var(--warm-purple);
+  --dojo-blue: var(--warm-blue);
+  --dojo-cyan: #6f9ea1;
+  --dojo-green: var(--warm-green);
+  --dojo-amber: var(--warm-amber);
+  --dojo-danger: var(--warm-danger);
+  --dojo-timecode: var(--warm-sidebar);
+  --dojo-radius-sm: var(--warm-radius-control);
+  --dojo-radius-md: var(--warm-radius-small);
+  --dojo-radius-lg: var(--warm-radius-medium);
+  --dojo-shadow-sm: var(--warm-shadow-panel);
+  --dojo-shadow-md: var(--warm-shadow-lifted);
+  --dojo-btn-height: var(--warm-control-height);
+  --dojo-fs-title: clamp(28px, 3vw, 40px);
+
+  --el-color-primary: var(--warm-coral);
+  --el-color-primary-light-3: #ed8c82;
+  --el-color-primary-light-5: #f3aaa2;
+  --el-color-primary-light-7: #f8cdc8;
+  --el-color-primary-light-8: #fae0dd;
+  --el-color-primary-light-9: #fdf0ee;
+  --el-color-primary-dark-2: #c95750;
+  --el-bg-color: var(--warm-paper);
+  --el-bg-color-page: var(--warm-canvas);
+  --el-fill-color-blank: var(--warm-paper-strong);
+  --el-fill-color-light: var(--warm-paper-tint);
+  --el-border-color: var(--warm-line-strong);
+  --el-border-color-light: var(--warm-line);
+  --el-text-color-primary: var(--warm-ink);
+  --el-text-color-regular: var(--warm-ink-secondary);
+  --el-text-color-secondary: var(--warm-ink-muted);
+  --el-text-color-placeholder: #aaa1a6;
+  --el-border-radius-base: var(--warm-radius-control);
+
+  --default-bg-color: var(--warm-canvas);
+  --default-box-color: var(--warm-paper);
+  --theme-color: var(--warm-coral);
+  --velix-blue: var(--warm-purple);
+  --velix-blue-soft: #efeaf8;
+  --velix-ink: var(--warm-ink);
+  --velix-muted: var(--warm-ink-secondary);
+  --velix-line: var(--warm-line-strong);
+  --color-primary: var(--warm-coral);
+  --color-text-primary: var(--warm-ink);
+  --color-text-secondary: var(--warm-ink-secondary);
+  --color-border: var(--warm-line-strong);
+  --color-bg-page: var(--warm-canvas);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root[data-dojo-theme='warm-editorial'] {
+    --warm-duration-fast: 0.01ms;
+    --warm-duration-standard: 0.01ms;
+  }
+}

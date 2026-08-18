@@ -32,5 +32,18 @@ docs/source/
 docs/current/
 
 # 自动生成
-dojo-web/.auto-import.json
-dojo-web/src/types/import/
+.auto-import.json
+src/types/import/
+dojo-web-redesign/.auto-import.json
+dojo-web-redesign/src/types/import/
+
+# 浏览器 QA 用的 Edge/Chrome 用户目录，一个就能到几百 MB
+.browser-profile
+.browser-profile-*
+artifacts/
+
+# pnpm 本地 store 与一次性分析脚本
+.pnpm-store/
+.codex-analysis/
+.codex-tmp/
+.impeccable/
