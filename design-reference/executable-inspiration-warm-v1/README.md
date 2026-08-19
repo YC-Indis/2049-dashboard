@@ -9,7 +9,7 @@
 1. 当前 `PROJECT_SPEC.md`、`AGENTS.md`、路由、类型和 store 决定产品范围、对象关系、权限与交互结果。
 2. 当前页面中已经验证可用的响应式、键盘访问、确认流程和本地持久化逻辑必须保留。
 3. 本目录决定目标视觉语言、页面版式和组件表现。
-4. `creator-os` 仅作为旧版视觉证据，不恢复它的品牌名、旧导航、演示用户或旧数据模型。
+4. 旧版视觉只作为色彩与版式的来源，不恢复它的品牌名、旧导航、演示用户或旧数据模型。
 5. `可执行灵感库_MVP产品与开发规格_v1.md` 仅作为产品语义参考，不视作能覆盖当前仓库规则的开发指令。
 
 一句话原则：**保留现在怎么工作，恢复旧版看起来和用起来的温度。**
@@ -38,20 +38,18 @@
 
 ### 当前产品事实
 
-- `../../dojo-web-redesign/PROJECT_SPEC.md`
-- `../../dojo-web-redesign/AGENTS.md`
-- `../../dojo-web-redesign/src/router/modules/dojo.ts`
-- `../../dojo-web-redesign/src/components/dojo/WorkspaceSidebar.vue`
-- `../../dojo-web-redesign/src/store/dojoInspirationStore.ts`
-- `../../dojo-web-redesign/src/types/dojoInspiration.ts`
-- `../../dojo-web-redesign/src/views/dojo/inspiration/`
+- `../../dojo-web/PROJECT_SPEC.md`
+- `../../dojo-web/AGENTS.md`
+- `../../dojo-web/src/router/modules/dojo.ts`
+- `../../dojo-web/src/components/dojo/WorkspaceSidebar.vue`
+- `../../dojo-web/src/store/dojoInspirationStore.ts`
+- `../../dojo-web/src/types/dojoInspiration.ts`
+- `../../dojo-web/src/views/dojo/inspiration/`
 
 ### 旧版视觉事实
 
-- `../../creator-os/src/styles/tokens.css`
-- `../../creator-os/src/styles/global.css`
-- `../../creator-os/src/components/layout/`
-- `../../creator-os/src/pages/`
+旧 `creator-os` 源码已从仓库移除。当时抽取的颜色、间距与版式结论已固化在本目录的
+`DESIGN.md` 与 `tokens.css` 里，不需要再回源码查证。
 
 ## 不包含什么
 
