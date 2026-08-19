@@ -54,14 +54,6 @@ export const globalComponentsConfig: GlobalComponentConfig[] = [
     enabled: false
   },
   {
-    name: '礼花效果',
-    key: 'fireworks-effect',
-    component: defineAsyncComponent(
-      () => import('@/components/core/layouts/art-fireworks-effect/index.vue')
-    ),
-    enabled: false
-  },
-  {
     name: '水印效果',
     key: 'watermark',
     component: defineAsyncComponent(
