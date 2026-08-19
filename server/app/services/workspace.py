@@ -222,9 +222,13 @@ def patch_runtime(db: Session, project_id: str, patch: RuntimePatch) -> ProjectR
             setattr(runtime, field, data[field])
 
     if patch.kpi is not None:
-        kpi = patch.kpi.model_dump(by_alias=True, exclude_none=True)
-        _check_cycle(kpi.get("cycleStart"), kpi.get("cycleEnd"))
-        runtime.kpi = {**(runtime.kpi or {}), **kpi}
+        # exclude_unset 是必须的：ProjectKpi 的数字字段默认 0，只想改周期的时候
+        # 用 exclude_none 导出会带上一串 0，把目标账号数/曝光量全抹平。
+        kpi = patch.kpi.model_dump(by_alias=True, exclude_unset=True, exclude_none=True)
+        merged = {**(runtime.kpi or {}), **kpi}
+        # 拿合并后的值校验，否则单独改结束日时没有开始日可比，能改到开始日之前
+        _check_cycle(merged.get("cycleStart"), merged.get("cycleEnd"))
+        runtime.kpi = merged
 
     if patch.current is not None:
         runtime.current = patch.current.model_dump(by_alias=True)

@@ -68,13 +68,18 @@ interface PersistedSettings {
   fontScale: number
 }
 
+/**
+ * 这里的 apiKey 一律留空。
+ *
+ * 早先为了本地调试方便，deepseek 那条会从 VITE_DEEPSEEK_API_KEY 预填。问题是
+ * VITE_ 前缀的东西 Vite 会直接内联进产物，等于把 key 挂在公网上给人抄。现在
+ * Agent 默认走 server 端，服务器自己拿密钥；用户想换成别家模型，就在设置里
+ * 自己填，那份 key 只留在本机 localStorage。
+ */
 function load(): PersistedSettings {
-  const envKey = (import.meta.env.VITE_DEEPSEEK_API_KEY as string | undefined)?.trim() || ''
   const defaults: PersistedSettings = {
     activeId: 'deepseek',
-    providers: BUILTIN.map((item) =>
-      item.id === 'deepseek' && envKey ? { ...item, apiKey: envKey } : { ...item }
-    ),
+    providers: BUILTIN.map((item) => ({ ...item })),
     fontScale: 1
   }
   try {
@@ -89,14 +94,11 @@ function load(): PersistedSettings {
         return hit
           ? {
               ...builtin,
-              apiKey: hit.apiKey || (builtin.id === 'deepseek' ? envKey : ''),
+              apiKey: hit.apiKey || '',
               model: normalizeProviderModel(builtin.id, hit.model || builtin.model),
               baseUrl: hit.baseUrl || builtin.baseUrl
             }
-          : {
-              ...builtin,
-              apiKey: builtin.id === 'deepseek' ? envKey : ''
-            }
+          : { ...builtin }
       }),
       ...saved.filter((item) => !BUILTIN.some((builtin) => builtin.id === item.id))
     ]

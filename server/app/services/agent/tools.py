@@ -182,12 +182,29 @@ WRITE_TOOLS: list[Tool] = [
     Tool(
         name="update_project",
         mode="write",
-        description="改项目本身的信息，比如改名、改投放地区。",
+        description=(
+            "改项目本身：名称、投放地区、周期起止、负责人、优先级，以及各项目标数。"
+            "「把周期延到 12 月底」「目标曝光改成 100 万」都走这个。"
+            "注意 target* 是目标值，不是已完成量——用户说「已经发了 40 条」那是 "
+            "update_progress，别用这个。只传用户提到的字段。"
+        ),
         parameters=_obj(
             {
                 "project": {**STR, "description": PROJECT_HINT},
                 "name": {**STR, "description": "新名称"},
                 "region": {**STR, "description": "新投放地区"},
+                "cycleStart": {**STR, "description": "新的周期开始日 YYYY-MM-DD"},
+                "cycleEnd": {**STR, "description": "新的周期结束日 YYYY-MM-DD"},
+                "owner": {**STR, "description": "负责人"},
+                "priority": {
+                    "type": "string",
+                    "enum": ["high", "medium", "low"],
+                    "description": "优先级",
+                },
+                "targetAccounts": {**INT, "description": "目标账号数"},
+                "targetVideos": {**INT, "description": "目标视频数"},
+                "targetExposure": {**INT, "description": "目标曝光量，「50万」要换算成 500000"},
+                "targetScripts": {**INT, "description": "脚本总目标数"},
             },
             [],
         ),

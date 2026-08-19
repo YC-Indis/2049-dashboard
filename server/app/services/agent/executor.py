@@ -16,6 +16,7 @@ from ...errors import RecordNotFound, ToolArgumentMissing, WriteRejected
 from ...models import Project, TableBlob
 from ...schemas.workspace import (
     ProjectCreate,
+    ProjectKpi,
     ProjectPatch,
     RuntimePatch,
     ScheduleBlockPatch,
@@ -272,13 +273,61 @@ def _write_reschedule(db: Session, args: dict) -> dict:
     return {"blockId": block.id, "title": block.title, "start": block.start, "end": block.end}
 
 
+# 工具参数名 -> ProjectKpi 字段名。target 前缀是给模型看的，免得跟「已完成量」混
+KPI_TARGET_FIELDS = {
+    "cycleStart": "cycle_start",
+    "cycleEnd": "cycle_end",
+    "targetAccounts": "accounts",
+    "targetVideos": "videos",
+    "targetExposure": "exposure",
+    "targetScripts": "scripts",
+}
+
+
 def _write_update_project(db: Session, args: dict) -> dict:
+    """项目信息落在两张表上，这里按字段归属拆开写。
+
+    projects 表管名称和地区，周期与目标数在 project_runtime.kpi 里。对用户来说
+    都是「改项目」，所以合成一个工具，拆分放在这层做。
+    """
     project = ws.resolve_write_target(db, text=args.get("project") or "")
-    patch = ProjectPatch(name=args.get("name"), region=args.get("region"))
-    if patch.name is None and patch.region is None:
-        raise ToolArgumentMissing("要改什么？名称还是投放地区", ["name", "region"])
-    updated = ws.update_project(db, project.id, patch)
-    return {"projectId": updated.id, "name": updated.name, "region": updated.region}
+    changed: dict = {}
+
+    base = {field: args[field] for field in ("name", "region") if args.get(field) is not None}
+    kpi = {
+        attr: args[key] for key, attr in KPI_TARGET_FIELDS.items() if args.get(key) is not None
+    }
+    runtime = {
+        field: args[field] for field in ("owner", "priority") if args.get(field) is not None
+    }
+
+    if not base and not kpi and not runtime:
+        raise ToolArgumentMissing(
+            "要改这个项目的什么？名称、投放地区、周期、负责人、优先级或者目标数",
+            ["name", "region", "cycleStart", "cycleEnd", "owner", "priority"],
+        )
+
+    for field in ("accounts", "videos", "exposure", "scripts"):
+        if field in kpi:
+            kpi[field] = int(kpi[field])
+            if kpi[field] < 0:
+                raise WriteRejected(f"目标{field}不能是负数")
+
+    if base:
+        updated = ws.update_project(db, project.id, ProjectPatch(**base))
+        changed.update({"name": updated.name, "region": updated.region})
+
+    if kpi or runtime:
+        patched = ws.patch_runtime(
+            db,
+            project.id,
+            RuntimePatch(kpi=ProjectKpi(**kpi) if kpi else None, **runtime),
+        )
+        if kpi:
+            changed["kpi"] = patched.kpi
+        changed.update(runtime)
+
+    return {"projectId": project.id, "name": project.name, "changed": changed}
 
 
 def _write_update_progress(db: Session, args: dict) -> dict:

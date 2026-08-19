@@ -61,6 +61,29 @@ def test_progress_patch_only_touches_given_fields(client):
     assert current["exposure"] == 90000
 
 
+def test_kpi_patch_keeps_untouched_targets(client):
+    pid = make_project(client).json()["id"]
+    res = client.patch(
+        f"{API}/projects/{pid}/runtime", json={"kpi": {"cycleEnd": "2026-12-31"}}
+    )
+    kpi = res.json()["kpi"]
+    assert kpi["cycleEnd"] == "2026-12-31"
+    # 只递了周期，目标数不能被 ProjectKpi 的默认 0 顶掉
+    assert kpi["accounts"] == 20
+    assert kpi["exposure"] == 500000
+    assert kpi["cycleStart"] == "2026-08-01"
+
+
+def test_kpi_patch_checks_cycle_against_stored_start(client):
+    pid = make_project(client).json()["id"]
+    # 单独改结束日时，得跟库里已有的开始日比，不能只看这次传了什么
+    res = client.patch(
+        f"{API}/projects/{pid}/runtime", json={"kpi": {"cycleEnd": "2026-07-01"}}
+    )
+    assert res.status_code == 422
+    assert res.json()["code"] == "write_rejected"
+
+
 def test_rename_project_refreshes_blocks(client):
     pid = make_project(client).json()["id"]
     client.put(
