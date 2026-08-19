@@ -1,9 +1,5 @@
 services:
-  # 后端尚未落地（server 目录随源码一并丢失），放进 profile 里，默认不启动，
-  # 这样 `docker compose up` 只跑 web 也能成功。补完后端后用
-  # `docker compose --profile api up` 一起拉起。
   api:
-    profiles: ['api']
     build: ./server
     image: dojo-api
     container_name: dojo-api
@@ -11,13 +7,13 @@ services:
       - '8000:8000'
     env_file:
       - ./server/.env
-    environment:
-      - UVICORN_RELOAD=0
     volumes:
       - dojo-data:/app/data
     restart: unless-stopped
 
   web:
+    depends_on:
+      - api
     build:
       context: .
       dockerfile: deploy/Dockerfile.dojo-web

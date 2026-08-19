@@ -34,8 +34,16 @@ docs/current/
 # 自动生成
 .auto-import.json
 src/types/import/
-dojo-web-redesign/.auto-import.json
-dojo-web-redesign/src/types/import/
+dojo-web/.auto-import.json
+dojo-web/src/types/import/
+
+# 后端：虚拟环境与 SQLite 数据文件不入库，.env 里有真实 Key
+server/.venv/
+server/data/
+server/.env
+__pycache__/
+*.py[cod]
+.pytest_cache/
 
 # 浏览器 QA 用的 Edge/Chrome 用户目录，一个就能到几百 MB
 .browser-profile
