@@ -263,6 +263,25 @@
   import { dojoScheduleStore } from '@/store/dojoScheduleStore'
   import { addDays, DOJO_TODAY, daysBetween } from '@/utils/dojoDates'
 
+  /**
+   * 项目排期甘特图。
+   *
+   * 几个当初定下来、后面一直沿用的取舍：
+   *
+   * 项目行和环节行共用一套 TimelineRow，靠 kind 区分。两级各写一套渲染试过，
+   * 结果是拖拽、吸附、逾期判定全要写两遍，改一处忘一处，合成一套之后这些逻辑
+   * 只存在一份。
+   *
+   * 三档缩放的像素密度是 36 / 16 / 6，不是等比缩小。Week 档特意留宽，因为这一
+   * 档是用来拖着改期的，格子窄了对不准；Quarter 档只用来看全年铺排，能认出色
+   * 块位置就够。
+   *
+   * 拖拽结果一律吸附到整天。工期本来就以天为单位，允许停在半天上只会让人反复
+   * 微调，还会拖出 3.5 天这种存不进库的值。
+   *
+   * 横向平移和拖拽各自用 rAF 合帧。这两件事都会在一次手势里触发几百个 mousemove，
+   * 直接改 scrollLeft 或 style 会掉帧。
+   */
   defineOptions({ name: 'DojoGanttBoard' })
 
   const props = defineProps<{ projectId?: string; projectIds?: string[] }>()
