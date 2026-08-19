@@ -1,6 +1,7 @@
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
-import { chatAgent } from '@/api/llm'
+import { chatAgent, confirmAgentAction, type PendingAction } from '@/api/llm'
+import { isBackendOnline } from '@/utils/dojoPersist'
 import {
   appendGlobalChatMessage,
   dojoChatStore,
@@ -87,6 +88,8 @@ type PendingWorkflow =
   | { kind: 'reschedule'; draft: RescheduleDraft }
   | { kind: 'confirm-delete'; target: DeleteTarget }
   | { kind: 'confirm-action'; action: ConfirmableAction }
+  /** 服务端模型提出的写操作，执行也在服务端 */
+  | { kind: 'server-action'; action: PendingAction }
   | { kind: 'clarify-create' }
 
 interface TaskDraft {
@@ -1135,7 +1138,22 @@ export function useDojoAgentChat() {
 
     if (isNegative(message) && pending.kind !== 'confirm-delete') {
       pendingWorkflow.value = null
+      if (pending.kind === 'server-action') {
+        // 让服务端也记一笔「提过但被否了」，否则审计里只看得到执行成功的
+        void confirmAgentAction(pending.action, false)
+      }
       assistant('好，已取消，没有改工作台。')
+      return true
+    }
+
+    if (pending.kind === 'server-action') {
+      if (isAffirmative(message)) {
+        pendingWorkflow.value = null
+        await executeServerAction(pending.action)
+        return true
+      }
+      // 服务端的动作参数由模型给出，改哪一项也交给模型重新理解，这里不做本地拼接
+      assistant('还没执行。回复「确认」开始，或者把要改的地方说一遍；「取消」则不做。', '等待确认后执行')
       return true
     }
 
@@ -1620,6 +1638,77 @@ export function useDojoAgentChat() {
     return true
   }
 
+  /**
+   * 执行服务端提出的写操作。
+   *
+   * 数据是服务端改的，本地 store 得重新拉一遍才能看到结果——各个 store 都是
+   * 模块加载时读的快照，不会自己感知服务端变化。
+   */
+  async function executeServerAction(action: PendingAction) {
+    dojoChatStore.loading = true
+    try {
+      const outcome = await confirmAgentAction(action)
+      if (!outcome.ok) {
+        assistant(outcome.message || '执行失败，工作台没有改动。', '执行失败')
+        return
+      }
+      assistant(`已${action.summary}。`, '已执行')
+      window.location.reload()
+    } catch (error) {
+      assistant(
+        error instanceof Error ? `执行失败：${error.message}` : '执行失败，工作台没有改动。',
+        '执行失败'
+      )
+    } finally {
+      dojoChatStore.loading = false
+    }
+  }
+
+  /**
+   * 服务端在线时由它全权处理这一轮：意图理解、查数据、提写操作都在那边。
+   * 返回 false 表示它没接上或没配 Key，调用方接着走本地那套。
+   */
+  async function trySendToBackend(
+    message: string,
+    history: Array<{ role: 'user' | 'assistant'; content: string }>
+  ) {
+    if (!isBackendOnline()) return false
+
+    dojoChatStore.loading = true
+    try {
+      const reply = await chatAgent(message, contextSnapshot.value, history)
+      if (!reply.servedByBackend) return false
+
+      if (reply.pending) {
+        pendingWorkflow.value = { kind: 'server-action', action: reply.pending }
+        appendGlobalChatMessage({
+          role: 'assistant',
+          content: reply.content || `我理解的是：${reply.pending.summary}。确认后我就执行。`,
+          memoryHint: '等待确认后执行'
+        })
+        return true
+      }
+
+      appendGlobalChatMessage({
+        role: 'assistant',
+        content: reply.content,
+        sources: reply.sources,
+        memoryHint: reply.memoryHint
+      })
+      return true
+    } catch {
+      return false
+    } finally {
+      dojoChatStore.loading = false
+    }
+  }
+
+  /**
+   * 一轮对话。
+   *
+   * 优先交给服务端，它用模型做意图识别，比这里的正则准得多。下面那一长串
+   * tryXxx 是服务端不可用时的离线模式——能力窄，但断网也能建项目改排期。
+   */
   async function send(message: string) {
     const history = messages.value
       .filter((item) => item.content)
@@ -1628,6 +1717,8 @@ export function useDojoAgentChat() {
 
     appendGlobalChatMessage({ role: 'user', content: message })
     if (await handlePendingWorkflow(message)) return
+    if (await trySendToBackend(message, history)) return
+
     if (tryAmbiguousWriteIntent(message)) return
     if (tryCreateProjectIntent(message)) return
     if (tryRescheduleIntent(message)) return

@@ -27,6 +27,21 @@ export interface LlmReply {
   memoryHint?: string
   /** AI 结构化结果（导入 / 梳理时用） */
   data?: unknown
+  /** 服务端提出的待确认写操作，要等用户点确认才执行 */
+  pending?: PendingAction | null
+  /** 这一轮服务端查了哪些数据 */
+  usedTools?: string[]
+  /**
+   * 这一轮是不是服务端完整处理的。
+   * false 表示服务端没接上或没配 Key，调用方该自己走本地那套意图识别。
+   */
+  servedByBackend?: boolean
+}
+
+export interface PendingAction {
+  tool: string
+  arguments: Record<string, unknown>
+  summary: string
 }
 
 /**
@@ -39,6 +54,11 @@ export async function chatAgent(
   context: Record<string, unknown> = {},
   history: ChatTurn[] = []
 ): Promise<LlmReply> {
+  // 服务端优先。它持有密钥、能调工具、写操作会走确认流程，能力比浏览器这边强，
+  // 只有在它没配 Key（返回 degraded）或压根没起的时候才退回前端直连。
+  const served = await callDojoAgent(message, context, history)
+  if (served && !served.degraded) return served.reply
+
   const system = buildSystemPrompt(context)
   const provider = activeLlmProvider.value
 
@@ -53,17 +73,13 @@ export async function chatAgent(
     }
   }
 
-  for (const [url, body] of [
-    [VELIX_LLM, { scene: 'agent', message, context, history }],
-    [`${DOJO_API}/agent/chat`, { message, context, history }]
-  ] as const) {
-    try {
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
-      })
-      if (!res.ok) continue
+  try {
+    const res = await fetch(VELIX_LLM, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ scene: 'agent', message, context, history })
+    })
+    if (res.ok) {
       const data = (await res.json()) as {
         content: string
         sources?: LlmSource[]
@@ -74,10 +90,13 @@ export async function chatAgent(
         sources: data.sources ?? [],
         memoryHint: data.memory_hint
       }
-    } catch {
-      /* try next */
     }
+  } catch {
+    /* fall through */
   }
+
+  // 服务端的降级回答里带着库里的真实数字，比纯前端兜底有用
+  if (served) return served.reply
 
   return {
     content: formatAiText(localAgentFallback(message, context)),
@@ -86,6 +105,63 @@ export async function chatAgent(
       ? `${provider.name} 暂不可用，已用本地规则兜底`
       : '未配置模型 API Key，请在 SixNine49 设置里填写'
   }
+}
+
+async function callDojoAgent(
+  message: string,
+  context: Record<string, unknown>,
+  history: ChatTurn[]
+): Promise<{ reply: LlmReply; degraded: boolean } | null> {
+  try {
+    const res = await fetch(`${DOJO_API}/agent/chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message, context, history })
+    })
+    if (!res.ok) return null
+    const data = (await res.json()) as {
+      content: string
+      sources?: LlmSource[]
+      memory_hint?: string
+      pending?: PendingAction | null
+      usedTools?: string[]
+      degraded?: boolean
+    }
+    return {
+      degraded: Boolean(data.degraded),
+      reply: {
+        content: formatAiText(data.content),
+        sources: data.sources ?? [],
+        memoryHint: data.memory_hint,
+        pending: data.pending ?? null,
+        usedTools: data.usedTools ?? [],
+        servedByBackend: !data.degraded
+      }
+    }
+  } catch {
+    return null
+  }
+}
+
+/** 用户点确认之后，让服务端真正执行那个写操作。 */
+export async function confirmAgentAction(
+  action: PendingAction,
+  confirmed = true
+): Promise<{ ok: boolean; executed: boolean; message?: string; result?: unknown }> {
+  const res = await fetch(`${DOJO_API}/agent/confirm`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ tool: action.tool, arguments: action.arguments, confirmed })
+  })
+  const data = await res.json().catch(() => null)
+  if (!res.ok) {
+    return {
+      ok: false,
+      executed: false,
+      message: (data as { message?: string })?.message || `执行失败（${res.status}）`
+    }
+  }
+  return data as { ok: boolean; executed: boolean; result?: unknown }
 }
 
 /** 让 AI 把脏文本 / 粘贴表格解析成结构化 JSON */

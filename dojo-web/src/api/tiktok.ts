@@ -10,7 +10,7 @@ export interface TikTokAccountSnapshot {
   bioLink?: string
   isPrivate?: boolean
   syncedAt: string
-  source: 'rapidapi' | 'mock'
+  source: 'rapidapi'
 }
 
 /** 账号名下的单条视频（RapidAPI /user/videos 返回，无需事先知道视频链接） */
@@ -35,7 +35,8 @@ export interface TikTokAccountVideosResult {
   videos: TikTokAccountVideo[]
   /** RapidAPI 翻页游标，为空表示已到底 */
   continuationToken?: string
-  source: 'rapidapi' | 'mock'
+  /** empty 表示接口通了但这个号没有作品，跟「没查成」是两回事 */
+  source: 'rapidapi' | 'empty'
 }
 
 export interface TikTokVideoMetrics {
@@ -47,54 +48,48 @@ export interface TikTokVideoMetrics {
   engagementRate?: number
   retention3s?: number
   syncedAt: string
-  source: 'rapidapi' | 'mock'
+  source: 'rapidapi'
 }
 
 const DOJO_API = import.meta.env.VITE_DOJO_API_BASE || '/api/dojo'
-const RAPID_KEY = import.meta.env.VITE_RAPIDAPI_KEY as string | undefined
-const RAPID_HOST = (import.meta.env.VITE_RAPIDAPI_HOST as string) || 'tiktok-api6.p.rapidapi.com'
+
+/**
+ * RapidAPI 一律走代理，浏览器里不再持有密钥。
+ *
+ * dev 由 vite 注入，生产由 nginx 注入（见 deploy/nginx-dojo.conf.template）。
+ * 之前是从 VITE_RAPIDAPI_KEY 读出来塞进请求头的，那个值会被打进产物，
+ * 任何人打开控制台就能拿走。
+ */
+const RAPID_PROXY = '/api/rapidapi'
 
 function nowStamp() {
   return new Date().toISOString().slice(0, 16).replace('T', ' ')
 }
 
-function hashCode(s: string) {
-  let h = 0
-  for (let i = 0; i < s.length; i++) h = (Math.imul(31, h) + s.charCodeAt(i)) | 0
-  return h
-}
-
-/** dev 走 vite 代理避开 CORS；生产直连，需带 key */
-function useProxy() {
-  return import.meta.env.DEV || import.meta.env.VITE_RAPIDAPI_PROXY === 'true'
-}
-
-function rapidUrl(path: string) {
-  return useProxy() ? `/api/rapidapi${path}` : `https://${RAPID_HOST}${path}`
-}
-
-function rapidHeaders(): Record<string, string> {
-  const headers: Record<string, string> = { 'Content-Type': 'application/json' }
-  if (RAPID_KEY) {
-    headers['x-rapidapi-host'] = RAPID_HOST
-    headers['x-rapidapi-key'] = RAPID_KEY
+/** 同步失败。上游有多种失败方式，调用方需要区分是没配好还是这个号本身有问题。 */
+export class TikTokSyncError extends Error {
+  constructor(
+    message: string,
+    readonly handle: string
+  ) {
+    super(message)
+    this.name = 'TikTokSyncError'
   }
-  return headers
 }
 
 async function rapidGet<T>(path: string): Promise<T | null> {
-  if (!useProxy() && !RAPID_KEY) return null
-  const res = await fetch(rapidUrl(path), { headers: rapidHeaders() })
+  const res = await fetch(`${RAPID_PROXY}${path}`, {
+    headers: { 'Content-Type': 'application/json' }
+  })
   if (!res.ok) return null
   return (await res.json()) as T
 }
 
 /** RapidAPI 通用搜索（程序侧查询入口） */
 export async function rapidSearch(query: string, cursor = 0) {
-  if (!useProxy() && !RAPID_KEY) return null
-  const res = await fetch(rapidUrl('/search/general/query'), {
+  const res = await fetch(`${RAPID_PROXY}/search/general/query`, {
     method: 'POST',
-    headers: rapidHeaders(),
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ query, cursor, sort_type: '0' })
   })
   if (!res.ok) return null
@@ -275,7 +270,7 @@ export async function fetchAccountVideos(
 
   const data = await rapidGet<RapidUserVideosResponse>(query)
   if (!data?.videos?.length) {
-    return { handle: `@${clean}`, videos: [], source: 'mock' }
+    return { handle: `@${clean}`, videos: [], source: 'empty' }
   }
 
   const videos = data.videos.map((v) => {
@@ -313,7 +308,7 @@ export async function fetchAccountVideos(
 export async function fetchAllAccountVideos(handle: string, maxPages = 10) {
   const all: TikTokAccountVideo[] = []
   let token: string | undefined
-  let source: 'rapidapi' | 'mock' = 'mock'
+  let source: 'rapidapi' | 'empty' = 'empty'
 
   for (let page = 0; page < maxPages; page++) {
     const res = await fetchAccountVideos(handle, token)
@@ -328,11 +323,16 @@ export async function fetchAllAccountVideos(handle: string, maxPages = 10) {
   return { handle: `@${stripHandle(handle)}`, videos: all, source }
 }
 
-/** RapidAPI TikTok 账号现状 */
+/**
+ * 拉账号现状。
+ *
+ * 拿不到就抛错，不返回估算值。老版本在这里用 handle 的 hash 拼过一个粉丝数，
+ * 界面上看不出真假，运营照着那个数判断过账号表现——这种兜底比直接报错有害得多。
+ */
 export async function syncTikTokAccount(handle: string): Promise<TikTokAccountSnapshot> {
   const clean = stripHandle(handle)
 
-  // 1) Dojo / Velix 后端代理（必须带有效粉丝数字才采信）
+  // 服务端优先：它持有密钥，也会把这次同步记进 sync_runs
   try {
     const res = await fetch(`${DOJO_API}/tiktok/account/sync`, {
       method: 'POST',
@@ -340,38 +340,28 @@ export async function syncTikTokAccount(handle: string): Promise<TikTokAccountSn
       body: JSON.stringify({ handle: clean })
     })
     if (res.ok) {
-      const data = await res.json()
-      const normalized = normalizeUserDetails(data, clean)
+      const normalized = normalizeUserDetails(await res.json(), clean)
       if (isValidSnapshot(normalized)) return normalized
     }
   } catch {
-    /* next */
+    /* 后端没起就退到代理直查 */
   }
 
-  // 2) RapidAPI /user/details：按用户名精确查，比搜索猜作者可靠
-  try {
-    const d = await rapidGet<RapidUserDetails | Record<string, unknown>>(
-      `/user/details?username=${encodeURIComponent(clean)}`
-    )
-    const normalized = normalizeUserDetails(d, clean)
-    if (isValidSnapshot(normalized)) return normalized
-  } catch {
-    /* mock */
-  }
+  // 按用户名精确查，比搜索里猜作者可靠
+  const detail = await rapidGet<RapidUserDetails | Record<string, unknown>>(
+    `/user/details?username=${encodeURIComponent(clean)}`
+  ).catch(() => null)
 
-  const base = (Math.abs(hashCode(handle)) % 50000) + 500
-  return {
-    handle: handle.startsWith('@') ? handle : `@${clean}`,
-    followers: base + Math.floor(Math.random() * 800),
-    following: 120 + (hashCode(handle) % 80),
-    likes: base * 12,
-    posts: 20 + (hashCode(handle) % 40),
-    syncedAt: nowStamp(),
-    source: 'mock'
-  }
+  const normalized = normalizeUserDetails(detail, clean)
+  if (isValidSnapshot(normalized)) return normalized
+
+  throw new TikTokSyncError(
+    `没拿到 @${clean} 的粉丝数，可能是私密号、已改名，或接口配额用完了`,
+    clean
+  )
 }
 
-/** RapidAPI 拉取单条视频播放/互动 */
+/** 拉单条视频的播放/互动。拿不到返回 null，调用方保留原值。 */
 export async function syncVideoMetrics(videoUrl: string): Promise<TikTokVideoMetrics | null> {
   if (!videoUrl) return null
 
@@ -381,25 +371,10 @@ export async function syncVideoMetrics(videoUrl: string): Promise<TikTokVideoMet
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ videoUrl })
     })
-    if (res.ok) {
-      const data = (await res.json()) as TikTokVideoMetrics
-      return { ...data, source: 'rapidapi' }
-    }
+    if (!res.ok) return null
+    const data = (await res.json()) as TikTokVideoMetrics
+    return { ...data, source: 'rapidapi' }
   } catch {
-    /* next */
-  }
-
-  const base = (Math.abs(hashCode(videoUrl)) % 80000) + 500
-  const likes = Math.floor(base * (0.02 + (hashCode(videoUrl) % 30) / 1000))
-  const comments = Math.floor(likes * 0.08)
-  return {
-    videoUrl,
-    views: base + Math.floor(Math.random() * 1200),
-    likes,
-    comments,
-    engagementRate: (likes + comments) / base,
-    retention3s: 0.08 + (hashCode(videoUrl) % 12) / 100,
-    syncedAt: nowStamp(),
-    source: 'mock'
+    return null
   }
 }
