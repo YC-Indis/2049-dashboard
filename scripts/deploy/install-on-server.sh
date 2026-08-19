@@ -114,7 +114,7 @@ IP=$(curl -s --max-time 3 ifconfig.me 2>/dev/null || hostname -I | awk '{print $
 echo ""
 echo "=========================================="
 echo " Dojo 已用最新包替换上线: http://${IP}/"
-echo " 登录 Super / 123456"
+echo " 登录口令见 /etc/dojo/secrets.env"
 echo " 静态目录: $WEB_ROOT"
 if [[ -f "$WEB_ROOT/VERSION.txt" ]]; then
   echo " 线上版本:"

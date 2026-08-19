@@ -85,7 +85,7 @@ $versionText = @(
   "built_at=$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
   "source=dojo-web-redesign"
   "main_js=$mainJs"
-  "host_hint=129.226.147.77"
+  "host_hint=$(if ($env:DOJO_SSH_HOST) { $env:DOJO_SSH_HOST } else { 'unset' })"
 ) -join "`n"
 Set-Content -LiteralPath (Join-Path $web 'dist\VERSION.txt') -Value $versionText -Encoding UTF8
 Copy-Item (Join-Path $web 'dist\VERSION.txt') (Join-Path $stage 'dist\VERSION.txt') -Force
@@ -94,7 +94,7 @@ Copy-Item (Join-Path $web 'dist\VERSION.txt') (Join-Path $stage 'dist\VERSION.tx
 $readme = @"
 # Dojo 2049 改版发布包
 
-目标服务器: 129.226.147.77
+目标服务器: 由环境变量 DOJO_SSH_HOST 指定
 
 ## 上传并安装
 
@@ -107,7 +107,7 @@ bash /tmp/dojo-web-release/install-on-server.sh
 \`\`\`
 
 3. 若 /etc/dojo/secrets.env 首次创建，按提示填密钥后，再跑一次 install-on-server.sh
-4. 打开 http://129.226.147.77/ ，登录 Super / 123456
+4. 打开服务器地址，登录口令见 /etc/dojo/secrets.env
 5. 业务种子: dist/dojo-seed.json（首访空浏览器会自动灌入）
 
 ## 可选：仅刷新种子

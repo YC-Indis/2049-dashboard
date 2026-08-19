@@ -210,7 +210,7 @@ pnpm import:history    # scripts/import-history-csv.mjs（需 Node ≥20）
 | `/calendar` | 节奏日历 | 月历 + 添加计划 |
 | `/scripts` | 脚本进度 | |
 | `/distribution` | 分发数据 | 无 3s 留存 |
-| `/accounts` | 总账号预览 | |
+| `/accounts/review` | 总账号预览 | 团队入口见 §7 |
 | `/ads` 等 | 投放检阅 / 视频监控 / 买量监看 | |
 | `/review` | 复盘总结 | |
 
@@ -246,7 +246,30 @@ pnpm import:history    # scripts/import-history-csv.mjs（需 Node ≥20）
 
 ---
 
-## 7. 本地开发备忘
+## 7. 生产环境（2026-08-08）
+
+| 项目 | 值 |
+|------|-----|
+| 团队入口 | http://dojo-vibing.duckdns.org/ |
+| 备用 IP | http://129.226.147.77/ |
+| 登录 | Super / 123456 |
+| 部署文档 | `docs/22_SERVER_DEPLOY.md` |
+
+域名通过 **DuckDNS**（免费）解析到轻量服务器；无需 Google SEO，把链接发给团队即可。
+
+### 阶段 E · 部署与数据展示
+
+| 需求 | 状态 | 说明 |
+|------|------|------|
+| Ubuntu + Nginx 静态部署 | ✅ | `pack-release.ps1` + `install-on-server.sh` |
+| 密钥 / Windows 换行问题 | ✅ | `secrets.env` Unix 格式 + `grep` 读取 |
+| 投放三页被筛空 | ✅ | `sync-store="false"`，未选项目 = 全部 |
+| 总账号预览空白 | ✅ | 移除多余 `<template>` 包裹；独立项目筛选 |
+| 团队域名（免费） | ✅ | `dojo-vibing.duckdns.org` → `129.226.147.77` |
+
+---
+
+## 8. 本地开发备忘
 
 ```powershell
 # 推荐（若已配置 tools 路径）
@@ -261,7 +284,7 @@ pnpm dev -- --port 5310 --strictPort
 
 ---
 
-## 8. 验收要点（时间规划）
+## 9. 验收要点（时间规划）
 
 1. 打开 `#/timeline`，按项目分组，**每一行右侧都有竖格轨道**（含 Dojo 里程碑与空轨道）。
 2. 默认「框选排期」，在任意轨道 **按住拖拽** → 出现紫色选框与日期 → 松手弹出添加任务对话框。
@@ -270,9 +293,10 @@ pnpm dev -- --port 5310 --strictPort
 
 ---
 
-## 9. 相关文档
+## 10. 相关文档
 
 - 产品总览：`docs/00_START_HERE.md`
+- **服务器部署**：`docs/22_SERVER_DEPLOY.md`
 - 页面映射：`docs/16_DOJO_UI_PAGE_MAPPING.md`
 - 历史 CSV 说明：`docs/HISTORY_IMPORT.md`
 - 项目导入报告：`docs/_excel_digest/project_import_report.json`
