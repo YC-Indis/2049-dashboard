@@ -1,38 +1,56 @@
-# Dojo
+# 2049 Dashboard
 
-TikTok 海外矩阵 AI 协作中控台 — **不是通用后台**，核心是给 PM 确认任务、执行填进度、看节奏与流转。
+TikTok 海外矩阵的内容运营中控台。不是通用后台模板——它按一条内容从「找选题」到
+「看数据」的实际流程组织页面：采集线索 → 灵感库 → 脚本 → 排期 → 分发 → 账号数据回流。
 
-## 侧栏（7 项）
+内置的 SixNine49 智能体挂在同一套数据上，可以直接问「这周哪些排期逾期了」，也可以
+让它建项目、改周期、同步账号——**改数据的操作一律先出确认卡片，用户点了才执行**。
 
-| 页面 | 作用 |
-|------|------|
-| 今日 | KPI + 三动作 + 任务表（对齐参考设计） |
-| 项目 | 目标进度与闭环说明 |
-| 节奏日历 | 左侧待排 → 拖到月历；看脚本/录制/剪辑/发布节点 |
-| 内容流转 | 看板 + **时间线**（每条内容的起始→结束） |
-| 待确认 | PM 预览确认后下发 |
-| 执行进度 | 执行成员回填 |
-| 账号矩阵 | RapidAPI 同步粉丝量 + 检阅 |
+## 结构
 
-## Agent（Velix 风格）
+```
+dojo-web/    前端 Vue 3.5 + TypeScript + Vite + Element Plus
+server/      后端 FastAPI + SQLite
+scripts/     打包与部署
+docs/        设计与部署文档
+```
 
-- **底部 ChatBar**（非抽屉）：pill 输入框 + 圆形发送钮
-- 切换页面 **session 保留** 对话
-- 优先调 Velix `/api/v1/llm/chat`（DeepSeek）；失败走本地兜底
-- 写入操作须预览确认；记忆规则候选在账号页展示
+数据有两层落点：核心的项目、排期、账号在服务端建了关系表，服务端负责校验和判重；
+其余长尾表走通用的整表读写接口。前端始终先写 localStorage 再异步推送，所以后端
+连不上时页面照常能用，只是不同步。
 
 ## 本地启动
 
-```powershell
-.\scripts\start-web.ps1
+后端：
+
+```bash
+cd server
+python -m venv .venv && .venv/Scripts/pip install -r requirements.txt
+cp .env.example .env        # 填 DOJO_LLM_API_KEY / RAPIDAPI_KEY / DOJO_AUTH_PASSWORD
+.venv/Scripts/python -m uvicorn app.main:app --port 8000
 ```
 
-当前 dev：http://localhost:5311（若 5310 被占用会自动换端口）
+前端：
 
-登录：选角色，密码 `123456`
+```bash
+cd dojo-web
+pnpm install
+pnpm dev:local              # http://127.0.0.1:5191
+```
 
-## 后端接入（下一步）
+Vite 已经把 `/api/dojo` 转发到本地 8000，不用额外配代理。
 
-- `server/` 从 Velix 迁入：`/api/dojo/agent/chat`、`/api/dojo/tiktok/account/sync`
-- RapidAPI TikTok 套餐配置 → 账号页「同步」走真实 API
-- DeepSeek + RAG + 记忆自进化写回 Velix 既有能力
+登录账号 `Super`（管理员用 `Admin`）。口令由服务端校验，取 `server/.env` 里的
+`DOJO_AUTH_PASSWORD`；该项留空时不启用服务端校验，前端退回本地模式，只适合本机。
+
+## 密钥
+
+模型和 RapidAPI 的密钥只放在 `server/.env`，浏览器侧任何时候都拿不到。前端的
+`.env.local` 里那两个不带 `VITE_` 前缀的变量只给 Vite 的 dev 代理用，不会进构建产物。
+
+## 验证
+
+```bash
+cd server && .venv/Scripts/python -m pytest -q     # 后端 35 项
+cd dojo-web && pnpm build                          # 前端类型检查 + 构建
+```

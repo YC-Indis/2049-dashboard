@@ -8,7 +8,7 @@ from fastapi.responses import JSONResponse
 from .config import get_settings
 from .db import init_db
 from .errors import DojoError
-from .routers import accounts, agent, health, projects, schedule, tables, tiktok
+from .routers import accounts, agent, auth, health, projects, schedule, tables, tiktok
 
 log = logging.getLogger("dojo")
 
@@ -51,6 +51,7 @@ def create_app() -> FastAPI:
 
     for router in (
         health.router,
+        auth.router,
         tables.router,
         projects.router,
         schedule.router,

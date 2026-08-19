@@ -3,7 +3,7 @@
 > **生产环境（2026-08-08 已上线）**  
 > **团队入口**：http://dojo-vibing.duckdns.org/  
 > **备用 IP**：http://129.226.147.77/  
-> **登录**：Super / 123456  
+> **登录**：Super 或 Admin，口令见服务器 `/etc/dojo/secrets.env` 的 `DOJO_AUTH_PASSWORD`  
 > **服务器**：腾讯云轻量 · Ubuntu · OrcaTerm `root@VM-4-12-ubuntu`
 
 ---
@@ -12,9 +12,12 @@
 
 ```text
 Dojo 中控台：http://dojo-vibing.duckdns.org/
-账号：Super
-密码：123456
+账号：Super（管理员用 Admin）
+密码：见服务器 /etc/dojo/secrets.env 里的 DOJO_AUTH_PASSWORD
 ```
+
+> 口令由服务端校验，不在前端代码里。换口令改 `secrets.env` 后重启 api 容器即可；
+> 若要让所有人立刻重新登录，同时换掉 `DOJO_AUTH_SECRET`。
 
 - 在浏览器**地址栏输入或点击链接**即可，**不需要 Google / 百度 SEO**。
 - DuckDNS 免费域名指向服务器 IP；IP 直连仍可用作备用。

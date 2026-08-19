@@ -14,6 +14,9 @@ _TMP = tempfile.mkdtemp(prefix="dojo-test-")
 os.environ["DOJO_DATA_DIR"] = _TMP
 os.environ["DOJO_LLM_API_KEY"] = ""
 os.environ["RAPIDAPI_KEY"] = ""
+# 同理，不设的话会读到 .env 里的真口令，测试断言就跟着环境走了
+os.environ["DOJO_AUTH_PASSWORD"] = "test-only-passphrase"
+os.environ["DOJO_AUTH_SECRET"] = "test-only-secret"
 
 from fastapi.testclient import TestClient  # noqa: E402
 

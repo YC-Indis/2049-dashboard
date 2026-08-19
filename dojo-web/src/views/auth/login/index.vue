@@ -106,23 +106,21 @@
     key: AccountKey
     label: string
     userName: string
-    password: string
     roles: string[]
   }
 
+  // 只预填用户名。口令曾经也写在这里，等于把它印在每一份构建产物上
   const accounts = computed<Account[]>(() => [
     {
       key: 'super',
       label: t('login.roles.super'),
       userName: 'Super',
-      password: '123456',
       roles: ['R_SUPER']
     },
     {
       key: 'admin',
       label: t('login.roles.admin'),
       userName: 'Admin',
-      password: '123456',
       roles: ['R_ADMIN']
     }
   ])
@@ -152,12 +150,12 @@
     setupAccount('super')
   })
 
-  // 设置账号
+  // 切换角色只换用户名，口令始终由使用者自己输入
   const setupAccount = (key: AccountKey) => {
     const selectedAccount = accounts.value.find((account: Account) => account.key === key)
     formData.account = key
     formData.username = selectedAccount?.userName ?? ''
-    formData.password = selectedAccount?.password ?? ''
+    formData.password = ''
   }
 
   // 登录

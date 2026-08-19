@@ -4,8 +4,9 @@
     CredentialMissing / UpstreamUnavailable -> 降级，走本地兜底并告诉用户原因
     ToolArgumentMissing / ProjectAmbiguous  -> 不降级，回头追问用户
     RecordNotFound / WriteRejected          -> 直接拒绝，前端提示
+    AuthFailed                              -> 踢回登录页
 
-Agent 编排里就是按这三组分支处理的，所以别再往里塞语义不明的通用异常。
+Agent 编排里就是按前三组分支处理的，所以别再往里塞语义不明的通用异常。
 """
 
 from typing import Any
@@ -79,3 +80,10 @@ class WriteRejected(DojoError):
 
     status_code = 422
     code = "write_rejected"
+
+
+class AuthFailed(DojoError):
+    """口令不对或令牌过期。前端收到 401 一律清 token 回登录页。"""
+
+    status_code = 401
+    code = "auth_failed"

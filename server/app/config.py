@@ -34,6 +34,12 @@ class Settings(BaseSettings):
     rapidapi_key: str = Field(default="", alias="RAPIDAPI_KEY")
     rapidapi_host: str = Field(default="tiktok-api6.p.rapidapi.com", alias="RAPIDAPI_HOST")
 
+    # 留空表示不启用服务端登录校验，前端沿用本地模式。公网部署必须填。
+    auth_password: str = Field(default="", alias="DOJO_AUTH_PASSWORD")
+    # 签发令牌用的签名盐。不填则每次启动随机生成，重启即失效，只适合本机。
+    auth_secret: str = Field(default="", alias="DOJO_AUTH_SECRET")
+    auth_ttl_hours: int = Field(default=72, alias="DOJO_AUTH_TTL_HOURS")
+
     @property
     def origin_list(self) -> list[str]:
         return [item.strip() for item in self.cors_origins.split(",") if item.strip()]
@@ -50,6 +56,10 @@ class Settings(BaseSettings):
     @property
     def rapidapi_ready(self) -> bool:
         return bool(self.rapidapi_key)
+
+    @property
+    def auth_enabled(self) -> bool:
+        return bool(self.auth_password)
 
 
 @lru_cache

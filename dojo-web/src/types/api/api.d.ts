@@ -24,7 +24,7 @@
  * ## 使用方式
  *
  * ```typescript
- * const params: Api.Auth.LoginParams = { userName: 'admin', password: '123456' }
+ * const params: Api.Auth.LoginParams = { userName: 'admin', password: '<用户输入>' }
  * const response: Api.Auth.UserInfo = await fetchUserInfo()
  * ```
  *
