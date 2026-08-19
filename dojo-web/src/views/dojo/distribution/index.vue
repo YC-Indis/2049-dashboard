@@ -391,9 +391,7 @@
       note: form.note,
       flowType: flow,
       status: /投放中|暂未开始投放/.test(form.adCompleteTime || form.note) ? '投放中' : '已完成',
-      syncSource: id
-        ? all.value.find((r) => r.id === id)?.syncSource ?? 'mock'
-        : 'mock'
+      syncSource: id ? (all.value.find((r) => r.id === id)?.syncSource ?? 'manual') : 'manual'
     }
   }
 
@@ -473,7 +471,7 @@
       note,
       flowType: flow,
       status: /投放中|暂未开始投放/.test(adCompleteTime || note) ? '投放中' : '已完成',
-      syncSource: 'mock'
+      syncSource: 'manual'
     }
   }
 

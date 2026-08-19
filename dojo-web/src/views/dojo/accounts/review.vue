@@ -749,12 +749,12 @@
     try {
       await syncAccounts(handles)
       recordFullAccountSyncCompleted()
-      const mockCount = dojoAccountStore.accounts.filter(
-        (account) => handles.includes(account.handle) && account.syncSource === 'mock'
+      const failedCount = dojoAccountStore.accounts.filter(
+        (account) => handles.includes(account.handle) && account.syncError
       ).length
-      if (mockCount) {
+      if (failedCount) {
         ElMessage.warning(
-          `已刷新 ${handles.length} 个账号，其中 ${mockCount} 个未拿到真实粉丝（请检查 RapidAPI）`
+          `${handles.length - failedCount} 个已刷新，${failedCount} 个同步失败，仍显示上次的数字`
         )
       } else {
         ElMessage.success(`已刷新 ${handles.length} 个账号的真实粉丝数据`)

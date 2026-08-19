@@ -40,7 +40,7 @@ export interface MatrixAccount {
   verified?: boolean
   isPrivate?: boolean
   lastSyncedAt?: string
-  syncSource?: 'rapidapi' | 'mock'
+  syncSource?: 'rapidapi'
   syncError?: string
 }
 
@@ -437,17 +437,16 @@ export async function syncAccount(handle: string) {
     account.isPrivate = snapshot.isPrivate
     account.lastSyncedAt = snapshot.syncedAt
     account.syncSource = snapshot.source
-    account.syncError =
-      snapshot.source === 'mock' ? '未拿到真实粉丝数据，已用本地估算（请检查 RapidAPI）' : undefined
+    account.syncError = undefined
     persist()
 
     let videos: Awaited<ReturnType<typeof fetchAllAccountVideos>>['videos'] = []
     try {
       const result = await fetchAllAccountVideos(account.handle)
       videos = result.videos
-      if (result.source === 'rapidapi') {
-        account.syncSource = 'rapidapi'
-        if (!account.syncError?.includes('估算')) account.syncError = undefined
+      if (result.source === 'empty') {
+        // 接口是通的，这个号确实一条作品都没有——跟拉取失败要分开说
+        account.syncError = '接口正常，但这个号没有公开作品'
       }
       // 与导入作品按 videoId 合并，避免 Rapid 同步冲掉手工导入的链接
       if (result.videos.length) {
@@ -471,6 +470,8 @@ export async function syncAccount(handle: string) {
     touchWorklog()
     return { snapshot, videos }
   } catch (e) {
+    // 粉丝数等字段保持上一次同步的值，界面上会显示「上次同步于…，本次失败」。
+    // 清成 0 或填个估算值都会让人误判这个号的表现。
     account.syncError = e instanceof Error ? e.message : '同步失败'
     persist()
     return null

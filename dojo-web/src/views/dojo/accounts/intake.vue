@@ -220,11 +220,11 @@
         <ElTableColumn label="同步状态" min-width="150">
           <template #default="{ row }">
             <ElTag v-if="isSyncing(row.handle)" size="small">同步中…</ElTag>
-            <span v-else-if="row.syncError" class="danger">{{ row.syncError }}</span>
-            <span v-else-if="row.lastSyncedAt">
-              {{ row.lastSyncedAt }}
-              <ElTag v-if="row.syncSource === 'mock'" size="small" type="warning">兜底数据</ElTag>
-            </span>
+            <template v-else-if="row.syncError">
+              <span class="danger">{{ row.syncError }}</span>
+              <span v-if="row.lastSyncedAt" class="muted">（数字仍是 {{ row.lastSyncedAt }} 那次的）</span>
+            </template>
+            <span v-else-if="row.lastSyncedAt">{{ row.lastSyncedAt }}</span>
             <span v-else class="muted">从未同步</span>
           </template>
         </ElTableColumn>
@@ -509,9 +509,11 @@
       await syncAccounts(handles, (done, total, handle) => {
         syncProgress.value = `${done} / ${total}（${handle}）`
       })
-      const mocked = handles.filter((h) => findAccount(h)?.syncSource === 'mock').length
-      if (mocked) {
-        ElMessage.warning(`${mocked} 个账号拿不到真实数据，已用兜底值，检查 RapidAPI 配置`)
+      const failed = handles.filter((h) => findAccount(h)?.syncError).length
+      if (failed) {
+        ElMessage.warning(
+          `${handles.length - failed} 个同步成功，${failed} 个失败。失败的账号仍显示上次的数字，具体原因看同步状态列`
+        )
       } else {
         ElMessage.success('同步完成')
       }

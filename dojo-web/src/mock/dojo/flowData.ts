@@ -38,7 +38,8 @@ export interface DistributionProgressRow {
   retention3s?: number | null
   flowType: string
   status: string
-  syncSource?: 'excel' | 'rapidapi' | 'mock'
+  /** manual 指人工录入、还没跟平台数据对过 */
+  syncSource?: 'excel' | 'rapidapi' | 'manual'
 }
 
 export interface ExecutionProgressRow {

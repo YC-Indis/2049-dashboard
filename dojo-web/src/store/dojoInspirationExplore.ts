@@ -378,8 +378,8 @@ export async function syncBenchmarkAccount(accountId: string) {
     account.videoCount = items.length
     account.lastSyncedAt = new Date().toISOString()
     account.message =
-      videos.source === 'mock'
-        ? '接口未回真实作品，当前是占位数据'
+      videos.source === 'empty'
+        ? '接口正常，但这个号没有公开作品'
         : `已同步 ${items.length} 条作品`
     persist()
     return items
